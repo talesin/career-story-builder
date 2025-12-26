@@ -5,25 +5,25 @@
 ## Quick Links by Task
 
 ### Functional Design Principles
-| Task | Reference |
-|------|-----------|
-| Immutability basics | `$REFERENCES/design/index.md#immutability` |
-| Persistent data structures | `$REFERENCES/design/index.md#persistent-data` |
-| Recursion patterns | `$REFERENCES/design/index.md#recursion-iteration` |
-| Lazy evaluation | `$REFERENCES/design/index.md#laziness` |
-| State management | `$REFERENCES/design/index.md#state-management` |
-| Data flow pipelines | `$REFERENCES/design/index.md#data-flow` |
-| SOLID in functional code | `$REFERENCES/design/index.md#solid` |
-| Testing patterns | `$REFERENCES/design/index.md#testing` |
+| Task                       | Reference                                         |
+| -------------------------- | ------------------------------------------------- |
+| Immutability basics        | `$REFERENCES/design/index.md#immutability`        |
+| Persistent data structures | `$REFERENCES/design/index.md#persistent-data`     |
+| Recursion patterns         | `$REFERENCES/design/index.md#recursion-iteration` |
+| Lazy evaluation            | `$REFERENCES/design/index.md#laziness`            |
+| State management           | `$REFERENCES/design/index.md#state-management`    |
+| Data flow pipelines        | `$REFERENCES/design/index.md#data-flow`           |
+| SOLID in functional code   | `$REFERENCES/design/index.md#solid`               |
+| Testing patterns           | `$REFERENCES/design/index.md#testing`             |
 
 ### Gang of Four (OO Patterns)
-| Task | Reference |
-|------|-----------|
-| Pattern overview | `$REFERENCES/design/index.md#gof-introduction` |
-| Creational patterns | `$REFERENCES/design/index.md#gof-creational` |
-| Structural patterns | `$REFERENCES/design/index.md#gof-structural` |
-| Behavioral patterns | `$REFERENCES/design/index.md#gof-behavioral` |
-| Patterns in FP | `$REFERENCES/design/index.md#patterns-review` |
+| Task                | Reference                                      |
+| ------------------- | ---------------------------------------------- |
+| Pattern overview    | `$REFERENCES/design/index.md#gof-introduction` |
+| Creational patterns | `$REFERENCES/design/index.md#gof-creational`   |
+| Structural patterns | `$REFERENCES/design/index.md#gof-structural`   |
+| Behavioral patterns | `$REFERENCES/design/index.md#gof-behavioral`   |
+| Patterns in FP      | `$REFERENCES/design/index.md#patterns-review`  |
 
 ## Key Patterns for Career Story Builder
 
@@ -283,12 +283,12 @@ let notifyUser = UserWorkflow.notifyUser deps
 
 **Decision guide**:
 
-| Scenario | Pattern |
-|----------|---------|
-| Few dependencies, shallow call graph | Explicit parameters |
-| Many dependencies, want simplicity | Record of functions |
-| Framework requires DI classes | Thin wrapper (see ASP.NET Guide) |
-| Deep dependency threading is noisy | Consider Reader style |
+| Scenario                             | Pattern                          |
+| ------------------------------------ | -------------------------------- |
+| Few dependencies, shallow call graph | Explicit parameters              |
+| Many dependencies, want simplicity   | Record of functions              |
+| Framework requires DI classes        | Thin wrapper (see ASP.NET Guide) |
+| Deep dependency threading is noisy   | Consider Reader style            |
 
 **Guidelines**:
 - Keep dependency parameters on the left, business inputs on the right
@@ -419,12 +419,12 @@ let undo (story: StoryDraft) (history: CommandHistory) =
 
 ## Pattern Selection Guide
 
-| Problem | Pattern | Reference |
-|---------|---------|-----------|
-| Validate input | Railway-Oriented Programming | Design-Chapter11 |
-| Transform data | Pipeline/Composition | Design-Chapter11 |
-| Manage state | State Machine | Design-Chapter05 |
-| Undo/redo | Command | DesignPatterns-Chapter05 |
-| Extend behavior | Strategy (functions) | DesignPatterns-Chapter05 |
-| Build complex objects | Builder | DesignPatterns-Chapter03 |
-| Notify changes | Observer (events) | DesignPatterns-Chapter05 |
+| Problem               | Pattern                      | Reference                |
+| --------------------- | ---------------------------- | ------------------------ |
+| Validate input        | Railway-Oriented Programming | Design-Chapter11         |
+| Transform data        | Pipeline/Composition         | Design-Chapter11         |
+| Manage state          | State Machine                | Design-Chapter05         |
+| Undo/redo             | Command                      | DesignPatterns-Chapter05 |
+| Extend behavior       | Strategy (functions)         | DesignPatterns-Chapter05 |
+| Build complex objects | Builder                      | DesignPatterns-Chapter03 |
+| Notify changes        | Observer (events)            | DesignPatterns-Chapter05 |

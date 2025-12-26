@@ -4,17 +4,17 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Understand Blazor basics | `$REFERENCES/blazor/index.md#introduction` |
-| Learn Razor syntax | `$REFERENCES/blazor/index.md#razor-syntax` |
-| Component lifecycle | `$REFERENCES/blazor/index.md#component-lifecycle` |
-| Component parameters | `$REFERENCES/blazor/index.md#components` |
-| Two-way binding | `$REFERENCES/blazor/index.md#two-way-binding` |
-| Forms and validation | `$REFERENCES/blazor/index.md#forms-validation` |
-| Dependency injection | `$REFERENCES/blazor/index.md#di-patterns` |
-| JavaScript interop | `$REFERENCES/blazor/index.md#js-interop` |
-| Authentication | `$REFERENCES/blazor/index.md#security` |
+| Task                     | Reference                                         |
+| ------------------------ | ------------------------------------------------- |
+| Understand Blazor basics | `$REFERENCES/blazor/index.md#introduction`        |
+| Learn Razor syntax       | `$REFERENCES/blazor/index.md#razor-syntax`        |
+| Component lifecycle      | `$REFERENCES/blazor/index.md#component-lifecycle` |
+| Component parameters     | `$REFERENCES/blazor/index.md#components`          |
+| Two-way binding          | `$REFERENCES/blazor/index.md#two-way-binding`     |
+| Forms and validation     | `$REFERENCES/blazor/index.md#forms-validation`    |
+| Dependency injection     | `$REFERENCES/blazor/index.md#di-patterns`         |
+| JavaScript interop       | `$REFERENCES/blazor/index.md#js-interop`          |
+| Authentication           | `$REFERENCES/blazor/index.md#security`            |
 
 ## Key Patterns for Career Story Builder
 
@@ -176,12 +176,12 @@ member this.GetRichTextContent(elementId: string) = task {
 
 ## Blazor Anti-Patterns to Avoid
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| Static state in Server mode | Shared across users | Use Scoped services |
-| Missing `StateHasChanged` | UI doesn't update | Call after async updates |
-| `firstRender` not checked | JS runs on every render | Check in `OnAfterRenderAsync` |
-| Singleton user state | Data leaks between users | Use Scoped for user data |
+| Anti-Pattern                | Problem                  | Solution                      |
+| --------------------------- | ------------------------ | ----------------------------- |
+| Static state in Server mode | Shared across users      | Use Scoped services           |
+| Missing `StateHasChanged`   | UI doesn't update        | Call after async updates      |
+| `firstRender` not checked   | JS runs on every render  | Check in `OnAfterRenderAsync` |
+| Singleton user state        | Data leaks between users | Use Scoped for user data      |
 
 See: `$REFERENCES/blazor/index.md#anti-patterns`
 
@@ -189,12 +189,12 @@ See: `$REFERENCES/blazor/index.md#anti-patterns`
 
 For Career Story Builder:
 
-| Consideration | Recommendation |
-|---------------|----------------|
-| SEO needed? | Server or Pre-render |
-| Offline support? | WebAssembly |
-| Real-time collab? | Server (SignalR) |
-| Simple deployment? | Server |
-| Client-side perf? | WebAssembly |
+| Consideration      | Recommendation       |
+| ------------------ | -------------------- |
+| SEO needed?        | Server or Pre-render |
+| Offline support?   | WebAssembly          |
+| Real-time collab?  | Server (SignalR)     |
+| Simple deployment? | Server               |
+| Client-side perf?  | WebAssembly          |
 
 See: `$REFERENCES/blazor/index.md#render-modes`

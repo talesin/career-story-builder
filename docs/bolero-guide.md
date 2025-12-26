@@ -4,17 +4,17 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Set up Bolero project | `$REFERENCES/bolero/index.md#getting-started` |
-| Write HTML with DSL | `$REFERENCES/bolero/index.md#html-dsl` |
+| Task                    | Reference                                      |
+| ----------------------- | ---------------------------------------------- |
+| Set up Bolero project   | `$REFERENCES/bolero/index.md#getting-started`  |
+| Write HTML with DSL     | `$REFERENCES/bolero/index.md#html-dsl`         |
 | Set up MVU architecture | `$REFERENCES/bolero/index.md#mvu-architecture` |
-| Define routes | `$REFERENCES/bolero/index.md#routing` |
-| Client-server remoting | `$REFERENCES/bolero/index.md#remoting` |
-| Use HTML templates | `$REFERENCES/bolero/index.md#templating` |
-| Create components | `$REFERENCES/bolero/index.md#components` |
-| Configure hosting | `$REFERENCES/bolero/index.md#server` |
-| Best practices | `$REFERENCES/bolero/index.md#patterns` |
+| Define routes           | `$REFERENCES/bolero/index.md#routing`          |
+| Client-server remoting  | `$REFERENCES/bolero/index.md#remoting`         |
+| Use HTML templates      | `$REFERENCES/bolero/index.md#templating`       |
+| Create components       | `$REFERENCES/bolero/index.md#components`       |
+| Configure hosting       | `$REFERENCES/bolero/index.md#server`           |
+| Best practices          | `$REFERENCES/bolero/index.md#patterns`         |
 
 ## Key Patterns for Career Story Builder
 

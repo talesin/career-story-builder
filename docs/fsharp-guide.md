@@ -4,18 +4,18 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Define domain types | `$REFERENCES/fsharp/index.md#domain-modeling-records` |
-| Use discriminated unions | `$REFERENCES/fsharp/index.md#discriminated-unions` |
-| Pattern matching | `$REFERENCES/fsharp/index.md#pattern-matching` |
-| Handle errors with Result | `$REFERENCES/fsharp/index.md#rich-domains` |
-| Railway-oriented programming | `$REFERENCES/fsharp/index.md#railway-oriented` |
-| Async programming | `$REFERENCES/fsharp/index.md#async-programming` |
-| Collections (List, Array, Seq) | `$REFERENCES/fsharp/index.md#collections` |
-| Computation expressions | `$REFERENCES/fsharp/index.md#computation-expressions` |
-| Testing with Expecto | `$REFERENCES/fsharp/index.md#testing-expecto` |
-| Code style | `$REFERENCES/fsharp/index.md#style-guide` |
+| Task                           | Reference                                             |
+| ------------------------------ | ----------------------------------------------------- |
+| Define domain types            | `$REFERENCES/fsharp/index.md#domain-modeling-records` |
+| Use discriminated unions       | `$REFERENCES/fsharp/index.md#discriminated-unions`    |
+| Pattern matching               | `$REFERENCES/fsharp/index.md#pattern-matching`        |
+| Handle errors with Result      | `$REFERENCES/fsharp/index.md#rich-domains`            |
+| Railway-oriented programming   | `$REFERENCES/fsharp/index.md#railway-oriented`        |
+| Async programming              | `$REFERENCES/fsharp/index.md#async-programming`       |
+| Collections (List, Array, Seq) | `$REFERENCES/fsharp/index.md#collections`             |
+| Computation expressions        | `$REFERENCES/fsharp/index.md#computation-expressions` |
+| Testing with Expecto           | `$REFERENCES/fsharp/index.md#testing-expecto`         |
+| Code style                     | `$REFERENCES/fsharp/index.md#style-guide`             |
 
 ## Key Patterns for Career Story Builder
 

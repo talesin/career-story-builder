@@ -7,22 +7,22 @@
 ## Quick Links by Task
 
 ### bUnit (Component Testing)
-| Task | Reference |
-|------|-----------|
-| Getting started | `$REFERENCES/bunit/index.md#getting-started` |
-| Passing parameters | `$REFERENCES/bunit/index.md#passing-parameters` |
-| Injecting services | `$REFERENCES/bunit/index.md#injecting-services` |
+| Task               | Reference                                            |
+| ------------------ | ---------------------------------------------------- |
+| Getting started    | `$REFERENCES/bunit/index.md#getting-started`         |
+| Passing parameters | `$REFERENCES/bunit/index.md#passing-parameters`      |
+| Injecting services | `$REFERENCES/bunit/index.md#injecting-services`      |
 | Mocking components | `$REFERENCES/bunit/index.md#substituting-components` |
-| Triggering events | `$REFERENCES/bunit/index.md#triggering-events` |
-| Async testing | `$REFERENCES/bunit/index.md#async-state` |
-| Verifying output | `$REFERENCES/bunit/index.md#verifying-output` |
-| Test doubles | `$REFERENCES/bunit/index.md#test-doubles` |
+| Triggering events  | `$REFERENCES/bunit/index.md#triggering-events`       |
+| Async testing      | `$REFERENCES/bunit/index.md#async-state`             |
+| Verifying output   | `$REFERENCES/bunit/index.md#verifying-output`        |
+| Test doubles       | `$REFERENCES/bunit/index.md#test-doubles`            |
 
 ### F# Testing
-| Task | Reference |
-|------|-----------|
-| Types over tests | `$REFERENCES/fsharp/index.md#testing-expecto` |
-| Expecto framework | `$REFERENCES/fsharp/index.md#testing-expecto` |
+| Task                   | Reference                                     |
+| ---------------------- | --------------------------------------------- |
+| Types over tests       | `$REFERENCES/fsharp/index.md#testing-expecto` |
+| Expecto framework      | `$REFERENCES/fsharp/index.md#testing-expecto` |
 | Property-based testing | `$REFERENCES/fsharp/index.md#testing-expecto` |
 
 ## Key Patterns for Career Story Builder

@@ -7,26 +7,26 @@
 ## Quick Links by Task
 
 ### Dapper.FSharp (Primary)
-| Task | Reference |
-|------|-----------|
-| Setup and configuration | `$REFERENCES/dapper-fsharp/index.md#setup` |
-| Table mapping | `$REFERENCES/dapper-fsharp/index.md#table-mapping` |
-| SELECT queries | `$REFERENCES/dapper-fsharp/index.md#select-queries` |
-| INSERT operations | `$REFERENCES/dapper-fsharp/index.md#insert-operations` |
-| UPDATE operations | `$REFERENCES/dapper-fsharp/index.md#update-operations` |
-| DELETE operations | `$REFERENCES/dapper-fsharp/index.md#delete-operations` |
-| JOINs | `$REFERENCES/dapper-fsharp/index.md#joins` |
-| Aggregations | `$REFERENCES/dapper-fsharp/index.md#aggregations` |
-| Transactions | `$REFERENCES/dapper-fsharp/index.md#patterns` |
+| Task                    | Reference                                              |
+| ----------------------- | ------------------------------------------------------ |
+| Setup and configuration | `$REFERENCES/dapper-fsharp/index.md#setup`             |
+| Table mapping           | `$REFERENCES/dapper-fsharp/index.md#table-mapping`     |
+| SELECT queries          | `$REFERENCES/dapper-fsharp/index.md#select-queries`    |
+| INSERT operations       | `$REFERENCES/dapper-fsharp/index.md#insert-operations` |
+| UPDATE operations       | `$REFERENCES/dapper-fsharp/index.md#update-operations` |
+| DELETE operations       | `$REFERENCES/dapper-fsharp/index.md#delete-operations` |
+| JOINs                   | `$REFERENCES/dapper-fsharp/index.md#joins`             |
+| Aggregations            | `$REFERENCES/dapper-fsharp/index.md#aggregations`      |
+| Transactions            | `$REFERENCES/dapper-fsharp/index.md#patterns`          |
 
 ### Plain Dapper (Fallback)
-| Task | Reference |
-|------|-----------|
-| Core operations | `$REFERENCES/dapper/index.md#core-operations` |
-| Parameters | `$REFERENCES/dapper/index.md#parameters` |
-| Multi-mapping (joins) | `$REFERENCES/dapper/index.md#multi-mapping` |
-| Async operations | `$REFERENCES/dapper/index.md#async-operations` |
-| Type handlers | `$REFERENCES/dapper/index.md#type-handlers` |
+| Task                  | Reference                                      |
+| --------------------- | ---------------------------------------------- |
+| Core operations       | `$REFERENCES/dapper/index.md#core-operations`  |
+| Parameters            | `$REFERENCES/dapper/index.md#parameters`       |
+| Multi-mapping (joins) | `$REFERENCES/dapper/index.md#multi-mapping`    |
+| Async operations      | `$REFERENCES/dapper/index.md#async-operations` |
+| Type handlers         | `$REFERENCES/dapper/index.md#type-handlers`    |
 
 ## Key Patterns for Career Story Builder
 
@@ -322,12 +322,12 @@ SqlMapper.AddTypeHandler(StoryIdHandler())
 
 ## When to Use Which
 
-| Scenario | Use |
-|----------|-----|
-| Simple CRUD | Dapper.FSharp |
-| Type-safe queries | Dapper.FSharp |
+| Scenario                      | Use           |
+| ----------------------------- | ------------- |
+| Simple CRUD                   | Dapper.FSharp |
+| Type-safe queries             | Dapper.FSharp |
 | Simple joins (up to 5 tables) | Dapper.FSharp |
-| Full-text search | Plain Dapper |
-| Window functions | Plain Dapper |
-| CTEs | Plain Dapper |
-| Database-specific features | Plain Dapper |
+| Full-text search              | Plain Dapper  |
+| Window functions              | Plain Dapper  |
+| CTEs                          | Plain Dapper  |
+| Database-specific features    | Plain Dapper  |

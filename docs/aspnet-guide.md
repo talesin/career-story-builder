@@ -4,17 +4,17 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Configure DI | `$REFERENCES/aspnet/index.md#dependency-injection` |
-| Load configuration | `$REFERENCES/aspnet/index.md#configuration` |
-| Set up middleware | `$REFERENCES/aspnet/index.md#middleware` |
-| Define routes | `$REFERENCES/aspnet/index.md#routing` |
-| Create minimal APIs | `$REFERENCES/aspnet/index.md#minimal-apis` |
-| Add authentication | `$REFERENCES/aspnet/index.md#authentication` |
-| Add authorization | `$REFERENCES/aspnet/index.md#authorization` |
-| Optimize performance | `$REFERENCES/aspnet/index.md#performance` |
-| Write tests | `$REFERENCES/aspnet/index.md#testing` |
+| Task                 | Reference                                          |
+| -------------------- | -------------------------------------------------- |
+| Configure DI         | `$REFERENCES/aspnet/index.md#dependency-injection` |
+| Load configuration   | `$REFERENCES/aspnet/index.md#configuration`        |
+| Set up middleware    | `$REFERENCES/aspnet/index.md#middleware`           |
+| Define routes        | `$REFERENCES/aspnet/index.md#routing`              |
+| Create minimal APIs  | `$REFERENCES/aspnet/index.md#minimal-apis`         |
+| Add authentication   | `$REFERENCES/aspnet/index.md#authentication`       |
+| Add authorization    | `$REFERENCES/aspnet/index.md#authorization`        |
+| Optimize performance | `$REFERENCES/aspnet/index.md#performance`          |
+| Write tests          | `$REFERENCES/aspnet/index.md#testing`              |
 
 ## Key Patterns for Career Story Builder
 

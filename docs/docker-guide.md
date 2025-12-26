@@ -4,18 +4,18 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Docker concepts | `$REFERENCES/docker/index.md#introduction` |
-| Install Docker | `$REFERENCES/docker/index.md#installing` |
-| Write Dockerfiles | `$REFERENCES/docker/index.md#images` |
-| Multi-stage builds | `$REFERENCES/docker/index.md#multi-stage` |
-| Run containers | `$REFERENCES/docker/index.md#containers` |
-| View logs | `$REFERENCES/docker/index.md#exploring` |
-| Debug containers | `$REFERENCES/docker/index.md#debugging` |
-| Docker Compose | `$REFERENCES/docker/index.md#compose` |
-| Production deployment | `$REFERENCES/docker/index.md#production` |
-| Security | `$REFERENCES/docker/index.md#advanced` |
+| Task                  | Reference                                  |
+| --------------------- | ------------------------------------------ |
+| Docker concepts       | `$REFERENCES/docker/index.md#introduction` |
+| Install Docker        | `$REFERENCES/docker/index.md#installing`   |
+| Write Dockerfiles     | `$REFERENCES/docker/index.md#images`       |
+| Multi-stage builds    | `$REFERENCES/docker/index.md#multi-stage`  |
+| Run containers        | `$REFERENCES/docker/index.md#containers`   |
+| View logs             | `$REFERENCES/docker/index.md#exploring`    |
+| Debug containers      | `$REFERENCES/docker/index.md#debugging`    |
+| Docker Compose        | `$REFERENCES/docker/index.md#compose`      |
+| Production deployment | `$REFERENCES/docker/index.md#production`   |
+| Security              | `$REFERENCES/docker/index.md#advanced`     |
 
 ## Key Patterns for Career Story Builder
 
@@ -320,11 +320,11 @@ From `$REFERENCES/docker/index.md#production`:
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| `latest` tag | Unpredictable deployments | Use specific version tags |
-| Root user | Security vulnerability | Use `USER` directive |
-| No resource limits | Runaway containers | Set `--memory` and `--cpus` |
-| Secrets in images | Security risk | Use env vars or secrets |
-| No health checks | Silent failures | Add `HEALTHCHECK` |
-| Single massive layer | Slow rebuilds | Order for layer caching |
+| Anti-Pattern         | Problem                   | Solution                    |
+| -------------------- | ------------------------- | --------------------------- |
+| `latest` tag         | Unpredictable deployments | Use specific version tags   |
+| Root user            | Security vulnerability    | Use `USER` directive        |
+| No resource limits   | Runaway containers        | Set `--memory` and `--cpus` |
+| Secrets in images    | Security risk             | Use env vars or secrets     |
+| No health checks     | Silent failures           | Add `HEALTHCHECK`           |
+| Single massive layer | Slow rebuilds             | Order for layer caching     |

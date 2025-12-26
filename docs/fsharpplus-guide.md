@@ -4,16 +4,16 @@
 
 ## Quick Links by Task
 
-| Task | Reference |
-|------|-----------|
-| Getting started | `$REFERENCES/fsharpplus/index.md#getting-started` |
-| Generic operators | `$REFERENCES/fsharpplus/index.md#operators` |
-| Abstractions (Functor, Monad) | `$REFERENCES/fsharpplus/index.md#abstractions` |
-| Computation expressions | `$REFERENCES/fsharpplus/index.md#computation-expressions` |
-| Validation (error accumulation) | `$REFERENCES/fsharpplus/index.md#validation` |
-| Reader monad (DI) | `$REFERENCES/fsharpplus/index.md#reader-monad` |
-| Lenses for nested updates | `$REFERENCES/fsharpplus/index.md#lens` |
-| Monad transformers | `$REFERENCES/fsharpplus/index.md#monad-transformers` |
+| Task                            | Reference                                                 |
+| ------------------------------- | --------------------------------------------------------- |
+| Getting started                 | `$REFERENCES/fsharpplus/index.md#getting-started`         |
+| Generic operators               | `$REFERENCES/fsharpplus/index.md#operators`               |
+| Abstractions (Functor, Monad)   | `$REFERENCES/fsharpplus/index.md#abstractions`            |
+| Computation expressions         | `$REFERENCES/fsharpplus/index.md#computation-expressions` |
+| Validation (error accumulation) | `$REFERENCES/fsharpplus/index.md#validation`              |
+| Reader monad (DI)               | `$REFERENCES/fsharpplus/index.md#reader-monad`            |
+| Lenses for nested updates       | `$REFERENCES/fsharpplus/index.md#lens`                    |
+| Monad transformers              | `$REFERENCES/fsharpplus/index.md#monad-transformers`      |
 
 ## Key Patterns for Career Story Builder
 
@@ -300,12 +300,12 @@ let validatedStory = applicative {
 
 ## Pattern Comparison
 
-| Need | Result | Validation | When to Use |
-|------|--------|------------|-------------|
-| Fail on first error | Yes | No | Parse, IO operations |
-| Collect all errors | No | Yes | Form validation, user input |
-| Performance | Better | Slightly slower | Most cases: Result |
-| User feedback | Shows one error | Shows all errors | Forms: Validation |
+| Need                | Result          | Validation       | When to Use                 |
+| ------------------- | --------------- | ---------------- | --------------------------- |
+| Fail on first error | Yes             | No               | Parse, IO operations        |
+| Collect all errors  | No              | Yes              | Form validation, user input |
+| Performance         | Better          | Slightly slower  | Most cases: Result          |
+| User feedback       | Shows one error | Shows all errors | Forms: Validation           |
 
 ## Quick Setup
 
