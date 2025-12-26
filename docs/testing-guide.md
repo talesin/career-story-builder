@@ -280,6 +280,79 @@ type StoryListTests() =
         )
 ```
 
+### F# Idiomatic Mocking Patterns
+
+In F#, prefer fakes and stubs over dynamic mocking frameworks. This approach is simpler and more aligned with functional programming principles.
+
+**Fake functions with mutable capture**:
+
+```fsharp
+module UserEmailTests =
+
+    let test_sendWelcomeEmail_includes_time () =
+        // Deterministic time
+        let fixed = DateTime(2025, 12, 26, 0, 0, 0, DateTimeKind.Utc)
+        let clock () = fixed
+
+        // Capture side effects
+        let mutable captured : (string * string) option = None
+        let sendEmail toAddr body = captured <- Some(toAddr, body)
+
+        // Execute
+        sendWelcomeEmail clock sendEmail "a@b.com"
+
+        // Assert
+        match captured with
+        | Some(toAddr, body) ->
+            Expect.equal toAddr "a@b.com" "Recipient should match"
+            Expect.isTrue (body.Contains("2025-12-26")) "Should include date"
+        | None ->
+            failwith "Expected email to be sent"
+```
+
+**Inject deterministic time, randomness, and GUIDs**:
+
+Never call `DateTime.UtcNow`, `Guid.NewGuid()`, or random generators directly in core logic. Instead, inject them as function parameters:
+
+```fsharp
+// Define capability types
+type Clock = unit -> DateTime
+type NewGuid = unit -> Guid
+type NextInt = int -> int
+
+// Production implementations
+let realClock () = DateTime.UtcNow
+let realGuid () = Guid.NewGuid()
+
+// Test implementations
+let fixedClock dt = fun () -> dt
+let fixedGuid g = fun () -> g
+```
+
+**Test with record of functions**:
+
+```fsharp
+type UserDeps =
+    { Clock: unit -> DateTime
+      SendEmail: string -> string -> unit
+      LoadUser: int -> string option }
+
+let test_notifyUser_sends_email () =
+    let fixed = DateTime(2025, 12, 26, 0, 0, 0, DateTimeKind.Utc)
+    let mutable sent = []
+
+    let deps =
+        { Clock = fun () -> fixed
+          SendEmail = fun toAddr body -> sent <- (toAddr, body) :: sent
+          LoadUser = fun _ -> Some "a@b.com" }
+
+    UserWorkflow.notifyUser deps 123
+
+    Expect.isNonEmpty sent "Should have sent email"
+```
+
+See: `$REFERENCES/fsharp/index.md#pure-functional` for dependency injection patterns.
+
 ### Integration Tests
 
 ```fsharp

@@ -124,6 +124,44 @@ let configureServices (services: IServiceCollection) (config: IConfiguration) =
     services
 ```
 
+### Wrapping Functional Code for Framework DI
+
+When ASP.NET Core requires constructor injection (controllers, hosted services), wrap functional core in thin classes at the interop boundary.
+
+```fsharp
+// Functional core remains pure
+module Billing =
+    type BillingDeps =
+        { ChargeCard: string -> decimal -> unit
+          Log: string -> unit }
+
+    let charge (deps: BillingDeps) (customerId: string) (amount: decimal) =
+        deps.Log $"Charging {customerId} amount {amount}"
+        deps.ChargeCard customerId amount
+
+// Thin wrapper for framework DI
+type BillingService(deps: Billing.BillingDeps) =
+    member _.Charge(customerId: string, amount: decimal) =
+        Billing.charge deps customerId amount
+
+// Register in composition root
+let configureBillingServices (services: IServiceCollection) =
+    services.AddSingleton<Billing.BillingDeps>(fun _ ->
+        { ChargeCard = PaymentGateway.charge
+          Log = fun msg -> printfn "%s" msg }
+    ) |> ignore
+    services.AddScoped<BillingService>() |> ignore
+    services
+```
+
+**Guidelines**:
+- Only add wrappers at the edges (controllers, hosted services)
+- Never embed core business logic in the wrapper
+- Wrapper methods should be one-liners that delegate to functional code
+- Keep the functional core testable without the wrapper
+
+See: [Design Patterns Guide](design-patterns-guide.md#functional-dependency-injection) for DI pattern details.
+
 ### Authentication Setup
 
 ```fsharp

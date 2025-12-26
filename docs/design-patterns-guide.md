@@ -227,6 +227,75 @@ type StoryService(repo: IStoryRepository, validator: Story -> Result<Story, Vali
     }
 ```
 
+### Functional Dependency Injection
+
+In F#, dependency injection is primarily about passing values. Choose the pattern based on complexity.
+
+See: `$REFERENCES/fsharp/index.md#pure-functional`
+
+**Pattern 1: Pass dependencies as parameters**
+
+Use when the dependency list is short and call graph is shallow.
+
+```fsharp
+module UserEmail =
+    type Clock = unit -> DateTime
+    type SendEmail = string -> string -> unit
+
+    let sendWelcomeEmail (clock: Clock) (sendEmail: SendEmail) (toAddr: string) =
+        let now = clock()
+        sendEmail toAddr $"Welcome! Time: {now:O}"
+
+// Composition root binds dependencies once
+module CompositionRoot =
+    let clock () = DateTime.UtcNow
+    let sendEmail toAddr body = printfn "To=%s Body=%s" toAddr body
+
+    let sendWelcomeEmailBound = UserEmail.sendWelcomeEmail clock sendEmail
+```
+
+**Pattern 2: Record of functions (capabilities bundle)**
+
+Use when you have many dependencies or want to avoid long parameter lists.
+
+```fsharp
+type UserDeps =
+    { Clock: unit -> DateTime
+      SendEmail: string -> string -> unit
+      LoadUser: int -> string option }
+
+module UserWorkflow =
+    let notifyUser (deps: UserDeps) (userId: int) =
+        match deps.LoadUser userId with
+        | None -> ()
+        | Some email ->
+            let now = deps.Clock()
+            deps.SendEmail email $"Hello. Time: {now:O}"
+
+// Composition root
+let deps : UserDeps =
+    { Clock = fun () -> DateTime.UtcNow
+      SendEmail = fun toAddr body -> printfn "To=%s Body=%s" toAddr body
+      LoadUser = fun userId -> if userId = 1 then Some "a@b.com" else None }
+
+let notifyUser = UserWorkflow.notifyUser deps
+```
+
+**Decision guide**:
+
+| Scenario | Pattern |
+|----------|---------|
+| Few dependencies, shallow call graph | Explicit parameters |
+| Many dependencies, want simplicity | Record of functions |
+| Framework requires DI classes | Thin wrapper (see ASP.NET Guide) |
+| Deep dependency threading is noisy | Consider Reader style |
+
+**Guidelines**:
+- Keep dependency parameters on the left, business inputs on the right
+- Bind dependencies once in the composition root using partial application
+- Keep dependency records small per module; avoid one mega-record for the whole app
+- Prefer "capabilities" naming over "Service" naming
+
 ### State Machine Pattern
 
 ```fsharp
