@@ -11,6 +11,16 @@ This application helps professionals write career stories using the STAR format:
 - **A**ction - Steps taken to address the task
 - **R**esult - Outcomes and impact
 
+## Architecture Overview
+
+The application uses **asynchronous communication** between the frontend and backend:
+
+- **Responsive UI** - The frontend remains interactive during data operations, with loading states and optimistic updates where appropriate
+- **Non-blocking data access** - All API calls and database operations are async, preventing UI freezes
+- **Event-driven updates** - The UI reacts to data changes without requiring full page refreshes
+
+This async-first approach ensures a smooth user experience even during longer operations like AI-assisted story generation.
+
 ## Documentation
 
 - [User Stories](docs/user-stories.md) - Feature requirements organized by domain

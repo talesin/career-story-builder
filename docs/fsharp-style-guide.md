@@ -1220,19 +1220,19 @@ match tryFindUser id with
 
 ## Quick Reference
 
-| Pattern              | Prefer                               | Avoid                      |                              |
-| -------------------- | ------------------------------------ | -------------------------- | ---------------------------- |
-| Property access      | `_.Name`                             | `(fun x -> x.Name)`        |                              |
-| Default value        | `Option.defaultValue "N/A"`          | `match ... None -> "N/A"`  |                              |
-| Default with effect  | `Option.defaultWith (fun () -> ...)` | `match ... None -> ...`    |                              |
-| Equality check       | `Option.contains target`             | `Option.map ((=) target) \ | > Option.defaultValue false` |
-| Side effect on Some  | `Option.iter`                        | `match ... Some -> ... \   | None -> ()`                  |
-| Negation             | `not (expr)`                         | `not <\                    | expr`                        |
-| String interpolation | `$"Hello {name}"`                    | `sprintf "Hello %s" name`  |                              |
-| Result-returning fn  | `tryDoSomething`                     | `doSomething`              |                              |
-| Empty check          | `String.IsNullOrWhiteSpace`          | Manual length/null checks  |                              |
-| Concurrent tasks     | `let! a = x() and! b = y()`          | Sequential `let!` bindings |                              |
-| Struct optionals     | `[<Struct>] ?param`                  | `?param` in hot paths      |                              |
-| Accumulation         | `List.fold`, `List.sumBy`            | `mutable` with `for` loops |                              |
-| Iteration            | `List.tryFind`, recursion            | `while` with mutable state |                              |
-| Record updates       | `{ record with Field = value }`      | Mutable record fields      |                              |
+| Pattern              | Prefer                               | Avoid                                                    |
+| -------------------- | ------------------------------------ | -------------------------------------------------------- |
+| Property access      | `_.Name`                             | `(fun x -> x.Name)`                                      |
+| Default value        | `Option.defaultValue "N/A"`          | `match ... None -> "N/A"`                                |
+| Default with effect  | `Option.defaultWith (fun () -> ...)` | `match ... None -> ...`                                  |
+| Equality check       | `Option.contains target`             | `Option.map ((=) target) \| > Option.defaultValue false` |
+| Side effect on Some  | `Option.iter`                        | `match ... Some -> ... \| None -> ()`                    |
+| Negation             | `not (expr)`                         | `not <\| expr`                                           |
+| String interpolation | `$"Hello {name}"`                    | `sprintf "Hello %s" name`                                |
+| Result-returning fn  | `tryDoSomething`                     | `doSomething`                                            |
+| Empty check          | `String.IsNullOrWhiteSpace`          | Manual length/null checks                                |
+| Concurrent tasks     | `let! a = x() and! b = y()`          | Sequential `let!` bindings                               |
+| Struct optionals     | `[<Struct>] ?param`                  | `?param` in hot paths                                    |
+| Accumulation         | `List.fold`, `List.sumBy`            | `mutable` with `for` loops                               |
+| Iteration            | `List.tryFind`, recursion            | `while` with mutable state                               |
+| Record updates       | `{ record with Field = value }`      | Mutable record fields                                    |

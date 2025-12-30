@@ -126,6 +126,9 @@ We will use docker and containers for both local development (running a local se
 - bUnit
   Component testing framework for Blazor UI.
 
+- Playwright for .NET
+  User journeys, navigation, form flows, accessibility-aware testing
+
 ### Operational considerations
 
 - Payload size
