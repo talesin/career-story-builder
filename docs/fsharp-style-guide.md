@@ -21,6 +21,7 @@ This guide establishes consistent coding patterns for F# compiled applications. 
 15. [Formatting and Indentation](#15-formatting-and-indentation)
 16. [Naming Conventions](#16-naming-conventions)
 17. [Anti-Patterns to Avoid](#17-anti-patterns-to-avoid)
+18. [Addendum: Notes on Style Variations](#addendum-notes-on-style-variations)
 
 ---
 
@@ -232,6 +233,67 @@ let validatePerson name email age =
     <!> validateName name
     <*> validateEmail email
     <*> validateAge age
+```
+
+### Avoid deeply nested Result types
+
+While ROP is valuable for validation pipelines, avoid creating deeply nested Result types or using string-based error discrimination. These patterns become difficult to maintain and indicate the error model needs restructuring.
+
+```fsharp
+// Avoid - nested Results are hard to work with
+type BadResult = Result<Result<User, string>, string list>
+
+// Avoid - "stringly typed" error handling is fragile
+let handleError result =
+    match result with
+    | Error e when e.Contains "not found" -> // brittle string matching
+        handleNotFound()
+    | Error e when e.Contains "invalid" ->
+        handleInvalid()
+    | _ -> handleOther()
+```
+
+**Flatten nested Results** by defining a unified error type:
+
+```fsharp
+// Define a flattened error type
+type OrderError =
+    | ValidationFailed of ValidationError list
+    | PaymentDeclined of reason: string
+    | InventoryUnavailable of ProductId
+    | ShippingError of ShippingError
+
+// Each step returns the same error type
+let validateOrder: Order -> Result<ValidatedOrder, OrderError> = ...
+let processPayment: ValidatedOrder -> Result<PaidOrder, OrderError> = ...
+let shipOrder: PaidOrder -> Result<ShippedOrder, OrderError> = ...
+
+// Clean pipeline with flat Result type
+let processOrder order =
+    order
+    |> validateOrder
+    |> Result.bind processPayment
+    |> Result.bind shipOrder
+
+// Pattern match on structured errors, not strings
+let handleOrderError = function
+    | ValidationFailed errors -> showValidationErrors errors
+    | PaymentDeclined reason -> showPaymentError reason
+    | InventoryUnavailable productId -> showOutOfStock productId
+    | ShippingError err -> showShippingError err
+```
+
+**When combining Results from different domains**, map to a common error type at the boundary:
+
+```fsharp
+// Map domain-specific errors to a common type
+let placeOrder order =
+    order
+    |> validateOrder                                    // Result<_, ValidationError>
+    |> Result.mapError OrderError.ValidationFailed      // lift to OrderError
+    |> Result.bind (fun valid ->
+        processPayment valid
+        |> Result.mapError OrderError.PaymentFailed)    // lift PaymentError to OrderError
 ```
 
 ---
@@ -643,6 +705,51 @@ let getArrayElement index array =
     then invalidArg "index" "Index out of bounds"
     else array.[index]
 ```
+
+### Prefer specific exception functions
+
+When raising exceptions, use the specific argument and operation functions rather than the generic `failwith` or `failwithf`. These raise more specific exception types that are easier to catch and debug.
+
+```fsharp
+// Prefer - specific exception types (in order of preference)
+let processInput input =
+    if isNull input then
+        nullArg (nameof input)                    // ArgumentNullException
+    elif String.IsNullOrWhiteSpace input then
+        invalidArg (nameof input) "Cannot be empty" // ArgumentException
+    else
+        input.Trim()
+
+let withdraw amount balance =
+    if amount <= 0m then
+        invalidArg (nameof amount) "Amount must be positive"
+    elif amount > balance then
+        invalidOp "Insufficient funds"            // InvalidOperationException
+    else
+        balance - amount
+
+// Avoid - raises base Exception type, harder to catch specifically
+let processInputBad input =
+    if String.IsNullOrWhiteSpace input then
+        failwith "Input cannot be empty"          // Don't use
+    else
+        input.Trim()
+
+let withdrawBad amount balance =
+    if amount > balance then
+        failwithf "Cannot withdraw %M from %M" amount balance  // Don't use
+    else
+        balance - amount
+```
+
+**Exception function reference:**
+
+| Function | Exception Type | Use Case |
+|----------|---------------|----------|
+| `nullArg "paramName"` | `ArgumentNullException` | Null argument received |
+| `invalidArg "paramName" "message"` | `ArgumentException` | Invalid argument value |
+| `invalidOp "message"` | `InvalidOperationException` | Invalid state for operation |
+| `raise (SpecificException(...))` | Custom type | Domain-specific exceptions |
 
 ### Fail fast vs error accumulation
 
@@ -1236,3 +1343,29 @@ match tryFindUser id with
 | Accumulation         | `List.fold`, `List.sumBy`            | `mutable` with `for` loops                               |
 | Iteration            | `List.tryFind`, recursion            | `while` with mutable state                               |
 | Record updates       | `{ record with Field = value }`      | Mutable record fields                                    |
+
+---
+
+## Addendum: Notes on Style Variations
+
+The following points represent areas where this guide either differs from or extends the official Microsoft F# style guide. These are noted for awareness rather than as recommendations to change.
+
+### `try` prefix convention
+
+This guide uses the `try` prefix for functions returning `Result<'T, 'Error>` (e.g., `tryGetPerson` returns `Result<Person option, DatabaseError>`). The Microsoft convention uses `try` for functions that catch exceptions and return `Option<'T>` (e.g., `tryReadAllTextIfPresent` returns `Option<string>`). Both conventions are valid; this codebase follows the Result-based convention consistently.
+
+### Namespace vs module organization
+
+Microsoft recommends namespaces over top-level modules for publicly consumable code, as modules compile to static classes. This guide does not prescribe a preference—use namespaces for libraries intended for external consumption.
+
+### Generic type syntax
+
+Microsoft recommends postfix syntax for built-in types only (`int list`, `int option`, `int array`, `int seq`) and prefix syntax for all others (`Dictionary<string, int>`, `Set<string>`). This guide does not explicitly address this convention.
+
+### Pattern match spacing
+
+Microsoft specifies no space before parentheses in patterns: `Some(y)` rather than `Some (y)`. This guide's examples typically use the unparenthesized form `Some y` which is also valid.
+
+### Point-free style in public APIs
+
+Microsoft warns against point-free composition (`>>`) in public APIs because tooling cannot display parameter names, making the API harder to discover. This guide recommends `>>` for simple pipelines but does not explicitly address the public API consideration.
