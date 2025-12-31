@@ -744,12 +744,12 @@ let withdrawBad amount balance =
 
 **Exception function reference:**
 
-| Function | Exception Type | Use Case |
-|----------|---------------|----------|
-| `nullArg "paramName"` | `ArgumentNullException` | Null argument received |
-| `invalidArg "paramName" "message"` | `ArgumentException` | Invalid argument value |
-| `invalidOp "message"` | `InvalidOperationException` | Invalid state for operation |
-| `raise (SpecificException(...))` | Custom type | Domain-specific exceptions |
+| Function                           | Exception Type              | Use Case                    |
+| ---------------------------------- | --------------------------- | --------------------------- |
+| `nullArg "paramName"`              | `ArgumentNullException`     | Null argument received      |
+| `invalidArg "paramName" "message"` | `ArgumentException`         | Invalid argument value      |
+| `invalidOp "message"`              | `InvalidOperationException` | Invalid state for operation |
+| `raise (SpecificException(...))`   | Custom type                 | Domain-specific exceptions  |
 
 ### Fail fast vs error accumulation
 
