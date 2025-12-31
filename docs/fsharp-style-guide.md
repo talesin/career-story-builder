@@ -184,19 +184,20 @@ let tryInsertRecord ...    // Returns Result<int, Error>
 let tryValidateEmail ...   // Returns Result<EmailAddress, ValidationError>
 ```
 
-### Define a `Result.ofOption` helper
+### Use `Option.toResultWith` from FSharpPlus
+
+Convert Option values to Result using FSharpPlus:
 
 ```fsharp
-module Result =
-    let ofOption errorValue = function
-        | Some x -> Ok x
-        | None -> Error errorValue
+open FSharpPlus
 
 // Usage
 conn.Query<Person>(sql, params)
 |> Seq.tryHead
-|> Result.ofOption (NotFound "Person not found")
+|> Option.toResultWith (fun () -> NotFound "Person not found")
 ```
+
+The error factory is a `unit -> 'Error` function, allowing lazy error construction.
 
 ### Match is appropriate for complex Result flows
 
@@ -218,15 +219,23 @@ match tryGetPerson conn id with
 ### Use Railway-Oriented Programming for validation pipelines
 
 ```fsharp
-// Chain validations with bind
+// Chain validations with bind (fail-fast)
 let validateOrder order =
     order
     |> validateCustomerId
     |> Result.bind validateShippingAddress
     |> Result.bind validateLineItems
     |> Result.bind validatePaymentInfo
+```
 
-// Use applicative style for error accumulation
+### Use applicative style for error accumulation (FSharpPlus)
+
+> *Note: The `<!>` (map) and `<*>` (apply) operators require [FSharpPlus](fsharpplus-guide.md). These enable applicative validation which accumulates all errors rather than failing on the first.*
+
+```fsharp
+open FSharpPlus
+
+// Applicative style - collects ALL validation errors
 let validatePerson name email age =
     let createPerson n e a = { Name = n; Email = e; Age = a }
     createPerson
@@ -295,6 +304,10 @@ let placeOrder order =
         processPayment valid
         |> Result.mapError OrderError.PaymentFailed)    // lift PaymentError to OrderError
 ```
+
+### See Also
+
+For **error accumulation** (collecting all validation errors rather than failing on the first), see the [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation) which covers the `Validation` type and applicative patterns.
 
 ---
 
@@ -759,11 +772,20 @@ let processOrder order =
     validateOrder order
     |> Result.bind processPayment
     |> Result.bind shipOrder
+```
 
-// Error accumulation - use applicative
-let validatePerson name email age =
-    (validateName name, validateEmail email, validateAge age)
-    |||> Result.map3 (fun n e a -> { Name = n; Email = e; Age = a })
+For **error accumulation** (showing all errors at once), use FSharpPlus:
+
+```fsharp
+open FSharpPlus
+
+// Error accumulation - use applicative CE (FSharpPlus)
+let validatePerson name email age = applicative {
+    let! n = validateName name
+    and! e = validateEmail email
+    and! a = validateAge age
+    return { Name = n; Email = e; Age = a }
+}
 ```
 
 ---

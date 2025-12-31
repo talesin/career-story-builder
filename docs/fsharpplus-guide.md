@@ -15,6 +15,22 @@
 | Lenses for nested updates       | `$REFERENCES/fsharpplus/index.md#lens`                    |
 | Monad transformers              | `$REFERENCES/fsharpplus/index.md#monad-transformers`      |
 
+## When to Use FSharpPlus
+
+This project uses FSharpPlus for advanced functional patterns. Consider FSharpPlus when you need:
+
+| Need                             | FSharpPlus Solution       | Alternative              |
+| -------------------------------- | ------------------------- | ------------------------ |
+| Accumulate all validation errors | `Validation<'Errors, 'T>` | Roll your own error list |
+| Convert Option to Result         | `Option.toResultWith`     | N/A in standard F#       |
+| Generic map/bind across types    | `map`, `bind` operators   | Type-specific functions  |
+| Deeply nested record updates     | Lenses (`^.`, `.->`)      | Manual copy-and-update   |
+| Dependency injection pattern     | Reader monad              | Function parameters      |
+
+**Default to FSharpPlus** for utilities like `Option.toResultWith` rather than defining custom helpers. This maintains consistency and leverages a well-tested library.
+
+**For simple cases**, standard F# `Result` with `result { }` CE is sufficient when you only need fail-fast behavior.
+
 ## Key Patterns for Career Story Builder
 
 FSharpPlus provides advanced functional patterns:

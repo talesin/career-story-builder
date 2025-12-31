@@ -120,6 +120,39 @@ module StoryValidation =
                               UpdatedAt = DateTimeOffset.UtcNow })))))
 ```
 
+### Alternative: Using result Computation Expression
+
+The same validation logic can be written more clearly using FSharpPlus:
+
+```fsharp
+open FSharpPlus
+
+let validate (story: StoryDraft) : Result<Story, ValidationError> =
+    result {
+        let! title = validateTitle story.Title
+        let! situation = validateSituation story.Situation
+        let! task = validateTask story.Task
+        let! actions = validateActions story.Actions
+        let! storyResult = validateResult story.Result
+        return { Id = StoryId (Guid.NewGuid())
+                 Title = title
+                 Situation = situation
+                 Task = task
+                 Actions = actions
+                 Result = storyResult
+                 Tags = story.Tags
+                 CreatedAt = DateTimeOffset.UtcNow
+                 UpdatedAt = DateTimeOffset.UtcNow }
+    }
+```
+
+**Trade-offs**:
+- Nested `bind` chains make the railroad tracks explicit
+- Computation expressions are more readable but hide the mechanics
+- Both fail on first error; use `Validation` type for error accumulation
+
+> *Note: For form validation where you want to show all errors at once, use FSharpPlus `Validation` type instead of `Result`. See [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).*
+
 ### Data Transformation Pipeline
 
 ```fsharp
