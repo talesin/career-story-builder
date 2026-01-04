@@ -1,20 +1,18 @@
 # Blazor Component Patterns Guide
 
-> References: `$REFERENCES/blazor/`
-
 ## Quick Links by Task
 
-| Task                     | Reference                                         |
-| ------------------------ | ------------------------------------------------- |
-| Understand Blazor basics | `$REFERENCES/blazor/index.md#introduction`        |
-| Learn Razor syntax       | `$REFERENCES/blazor/index.md#razor-syntax`        |
-| Component lifecycle      | `$REFERENCES/blazor/index.md#component-lifecycle` |
-| Component parameters     | `$REFERENCES/blazor/index.md#components`          |
-| Two-way binding          | `$REFERENCES/blazor/index.md#two-way-binding`     |
-| Forms and validation     | `$REFERENCES/blazor/index.md#forms-validation`    |
-| Dependency injection     | `$REFERENCES/blazor/index.md#di-patterns`         |
-| JavaScript interop       | `$REFERENCES/blazor/index.md#js-interop`          |
-| Authentication           | `$REFERENCES/blazor/index.md#security`            |
+| Task                     | Topic                       |
+| ------------------------ | --------------------------- |
+| Understand Blazor basics | blazor#introduction         |
+| Learn Razor syntax       | blazor#razor-syntax         |
+| Component lifecycle      | blazor#component-lifecycle  |
+| Component parameters     | blazor#components           |
+| Two-way binding          | blazor#two-way-binding      |
+| Forms and validation     | blazor#forms-validation     |
+| Dependency injection     | blazor#di-patterns          |
+| JavaScript interop       | blazor#js-interop           |
+| Authentication           | blazor#security             |
 
 ## Key Patterns for Career Story Builder
 
@@ -27,19 +25,19 @@ While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns h
 ## Primary References
 
 ### Component Lifecycle
-- **Lifecycle Methods**: `$REFERENCES/blazor/index.md#component-lifecycle`
+- **Lifecycle Methods**: `blazor#component-lifecycle`
   - `OnInitialized` / `OnInitializedAsync`
   - `OnParametersSet` / `OnParametersSetAsync`
   - `OnAfterRender` / `OnAfterRenderAsync`
 
 ### Forms and Validation
-- **EditForm**: `$REFERENCES/blazor/index.md#forms-validation`
+- **EditForm**: `blazor#forms-validation`
   - Input components
   - DataAnnotations validation
   - Custom validation
 
 ### Render Modes
-- **Choosing Modes**: `$REFERENCES/blazor/index.md#render-modes`
+- **Choosing Modes**: `blazor#render-modes`
   - Server-side (SignalR)
   - WebAssembly (client-side)
   - Auto mode
@@ -183,7 +181,7 @@ member this.GetRichTextContent(elementId: string) = task {
 | `firstRender` not checked   | JS runs on every render  | Check in `OnAfterRenderAsync` |
 | Singleton user state        | Data leaks between users | Use Scoped for user data      |
 
-See: `$REFERENCES/blazor/index.md#anti-patterns`
+See: `blazor#anti-patterns`
 
 ## Render Mode Decision
 
@@ -197,4 +195,4 @@ For Career Story Builder:
 | Simple deployment? | Server               |
 | Client-side perf?  | WebAssembly          |
 
-See: `$REFERENCES/blazor/index.md#render-modes`
+See: `blazor#render-modes`

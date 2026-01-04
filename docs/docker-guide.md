@@ -1,21 +1,19 @@
 # Docker Container Development Guide
 
-> References: `$REFERENCES/docker/`
-
 ## Quick Links by Task
 
-| Task                  | Reference                                  |
-| --------------------- | ------------------------------------------ |
-| Docker concepts       | `$REFERENCES/docker/index.md#introduction` |
-| Install Docker        | `$REFERENCES/docker/index.md#installing`   |
-| Write Dockerfiles     | `$REFERENCES/docker/index.md#images`       |
-| Multi-stage builds    | `$REFERENCES/docker/index.md#multi-stage`  |
-| Run containers        | `$REFERENCES/docker/index.md#containers`   |
-| View logs             | `$REFERENCES/docker/index.md#exploring`    |
-| Debug containers      | `$REFERENCES/docker/index.md#debugging`    |
-| Docker Compose        | `$REFERENCES/docker/index.md#compose`      |
-| Production deployment | `$REFERENCES/docker/index.md#production`   |
-| Security              | `$REFERENCES/docker/index.md#advanced`     |
+| Task                  | Topic               |
+| --------------------- | ------------------- |
+| Docker concepts       | docker#introduction |
+| Install Docker        | docker#installing   |
+| Write Dockerfiles     | docker#images       |
+| Multi-stage builds    | docker#multi-stage  |
+| Run containers        | docker#containers   |
+| View logs             | docker#exploring    |
+| Debug containers      | docker#debugging    |
+| Docker Compose        | docker#compose      |
+| Production deployment | docker#production   |
+| Security              | docker#advanced     |
 
 ## Key Patterns for Career Story Builder
 
@@ -27,12 +25,12 @@ Docker provides:
 ## Primary References
 
 ### Dockerfile Best Practices
-- **Multi-Stage Builds**: `$REFERENCES/docker/index.md#images`
+- **Multi-Stage Builds**: `docker#images`
   - Build stage with SDK
   - Production stage with runtime only
 
 ### Docker Compose
-- **Service Configuration**: `$REFERENCES/docker/index.md#compose`
+- **Service Configuration**: `docker#compose`
   - Service definitions
   - Networks and volumes
   - Environment variables
@@ -307,7 +305,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ## Production Checklist
 
-From `$REFERENCES/docker/index.md#production`:
+From `docker#production`:
 
 - [ ] Resource limits configured (memory, CPU)
 - [ ] Log rotation enabled (`max-size`, `max-file`)

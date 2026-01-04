@@ -1,29 +1,27 @@
 # Design Patterns Guide (Functional)
 
-> References: `$REFERENCES/design/`
-
 ## Quick Links by Task
 
 ### Functional Design Principles
-| Task                       | Reference                                         |
-| -------------------------- | ------------------------------------------------- |
-| Immutability basics        | `$REFERENCES/design/index.md#immutability`        |
-| Persistent data structures | `$REFERENCES/design/index.md#persistent-data`     |
-| Recursion patterns         | `$REFERENCES/design/index.md#recursion-iteration` |
-| Lazy evaluation            | `$REFERENCES/design/index.md#laziness`            |
-| State management           | `$REFERENCES/design/index.md#state-management`    |
-| Data flow pipelines        | `$REFERENCES/design/index.md#data-flow`           |
-| SOLID in functional code   | `$REFERENCES/design/index.md#solid`               |
-| Testing patterns           | `$REFERENCES/design/index.md#testing`             |
+| Task                       | Topic                       |
+| -------------------------- | --------------------------- |
+| Immutability basics        | design#immutability         |
+| Persistent data structures | design#persistent-data      |
+| Recursion patterns         | design#recursion-iteration  |
+| Lazy evaluation            | design#laziness             |
+| State management           | design#state-management     |
+| Data flow pipelines        | design#data-flow            |
+| SOLID in functional code   | design#solid                |
+| Testing patterns           | design#testing              |
 
 ### Gang of Four (OO Patterns)
-| Task                | Reference                                      |
-| ------------------- | ---------------------------------------------- |
-| Pattern overview    | `$REFERENCES/design/index.md#gof-introduction` |
-| Creational patterns | `$REFERENCES/design/index.md#gof-creational`   |
-| Structural patterns | `$REFERENCES/design/index.md#gof-structural`   |
-| Behavioral patterns | `$REFERENCES/design/index.md#gof-behavioral`   |
-| Patterns in FP      | `$REFERENCES/design/index.md#patterns-review`  |
+| Task                | Topic                  |
+| ------------------- | ---------------------- |
+| Pattern overview    | design#gof-introduction |
+| Creational patterns | design#gof-creational  |
+| Structural patterns | design#gof-structural  |
+| Behavioral patterns | design#gof-behavioral  |
+| Patterns in FP      | design#patterns-review |
 
 ## Key Patterns for Career Story Builder
 
@@ -36,13 +34,13 @@ Functional design principles guide the architecture:
 ## Primary References
 
 ### Railway-Oriented Programming
-- **Error Handling**: `$REFERENCES/design/index.md#data-flow`
+- **Error Handling**: `design#data-flow`
   - Result type for validation
   - Bind/map for chaining
   - Error accumulation
 
 ### SOLID in F#
-- **Functional SOLID**: `$REFERENCES/design/index.md#solid`
+- **Functional SOLID**: `design#solid`
   - SRP: Small focused functions
   - OCP: Extend via composition
   - DIP: Depend on abstractions (interfaces/functions)
@@ -53,7 +51,7 @@ Functional design principles guide the architecture:
 
 ```fsharp
 // Railway-Oriented Programming for story validation
-// See: $REFERENCES/design/Design-Chapter11-DataFlow.md
+// See: design#data-flow (external reference)
 
 module StoryValidation =
     type ValidationError =
@@ -157,7 +155,7 @@ let validate (story: StoryDraft) : Result<Story, ValidationError> =
 
 ```fsharp
 // Functional pipelines for data processing
-// See: $REFERENCES/design/Design-Chapter11-DataFlow.md
+// See: design#data-flow (external reference)
 
 module StoryProcessing =
 
@@ -264,7 +262,7 @@ type StoryService(repo: IStoryRepository, validator: Story -> Result<Story, Vali
 
 In F#, dependency injection is primarily about passing values. Choose the pattern based on complexity.
 
-See: `$REFERENCES/fsharp/index.md#pure-functional`
+See: `fsharp#pure-functional`
 
 **Pattern 1: Pass dependencies as parameters**
 
@@ -333,7 +331,7 @@ let notifyUser = UserWorkflow.notifyUser deps
 
 ```fsharp
 // State machine for story editing workflow
-// See: $REFERENCES/design/Design-Chapter05-Statefulness.md
+// See: design#state-management (external reference)
 
 type EditingState =
     | Idle
@@ -405,7 +403,7 @@ let transition state event =
 
 ```fsharp
 // Command pattern for undo/redo
-// See: $REFERENCES/design/DesignPatterns-Chapter05-BehavioralPatterns.md#command
+// See: design#gof-behavioral (external reference)
 
 type StoryCommand =
     | SetTitle of string

@@ -1,20 +1,18 @@
 # ASP.NET Core Backend Guide
 
-> References: `$REFERENCES/aspnet/`
-
 ## Quick Links by Task
 
-| Task                 | Reference                                          |
-| -------------------- | -------------------------------------------------- |
-| Configure DI         | `$REFERENCES/aspnet/index.md#dependency-injection` |
-| Load configuration   | `$REFERENCES/aspnet/index.md#configuration`        |
-| Set up middleware    | `$REFERENCES/aspnet/index.md#middleware`           |
-| Define routes        | `$REFERENCES/aspnet/index.md#routing`              |
-| Create minimal APIs  | `$REFERENCES/aspnet/index.md#minimal-apis`         |
-| Add authentication   | `$REFERENCES/aspnet/index.md#authentication`       |
-| Add authorization    | `$REFERENCES/aspnet/index.md#authorization`        |
-| Optimize performance | `$REFERENCES/aspnet/index.md#performance`          |
-| Write tests          | `$REFERENCES/aspnet/index.md#testing`              |
+| Task                 | Topic                       |
+| -------------------- | --------------------------- |
+| Configure DI         | aspnet#dependency-injection |
+| Load configuration   | aspnet#configuration        |
+| Set up middleware    | aspnet#middleware           |
+| Define routes        | aspnet#routing              |
+| Create minimal APIs  | aspnet#minimal-apis         |
+| Add authentication   | aspnet#authentication       |
+| Add authorization    | aspnet#authorization        |
+| Optimize performance | aspnet#performance          |
+| Write tests          | aspnet#testing              |
 
 ## Key Patterns for Career Story Builder
 
@@ -27,18 +25,18 @@ ASP.NET Core hosts the Bolero application and provides:
 ## Primary References
 
 ### Minimal APIs
-- **Route Handlers**: `$REFERENCES/aspnet/index.md#minimal-apis`
+- **Route Handlers**: `aspnet#minimal-apis`
   - Parameter binding
   - Response types
   - Route groups
 
 ### Dependency Injection
-- **Service Lifetimes**: `$REFERENCES/aspnet/index.md#dependency-injection`
+- **Service Lifetimes**: `aspnet#dependency-injection`
   - Singleton, Scoped, Transient
   - Keyed services
 
 ### Security
-- **Authentication/Authorization**: `$REFERENCES/aspnet/index.md#security`
+- **Authentication/Authorization**: `aspnet#security`
   - JWT Bearer tokens
   - Cookie authentication
   - Policy-based authorization
@@ -282,7 +280,7 @@ type StoryService(
 
 ## Middleware Order Reference
 
-See: `$REFERENCES/aspnet/index.md#middleware`
+See: `aspnet#middleware`
 
 ```
 1. Exception handling (first)

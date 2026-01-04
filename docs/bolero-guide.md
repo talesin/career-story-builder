@@ -1,20 +1,18 @@
 # Bolero MVU Development Guide
 
-> References: `$REFERENCES/bolero/`
-
 ## Quick Links by Task
 
-| Task                    | Reference                                      |
-| ----------------------- | ---------------------------------------------- |
-| Set up Bolero project   | `$REFERENCES/bolero/index.md#getting-started`  |
-| Write HTML with DSL     | `$REFERENCES/bolero/index.md#html-dsl`         |
-| Set up MVU architecture | `$REFERENCES/bolero/index.md#mvu-architecture` |
-| Define routes           | `$REFERENCES/bolero/index.md#routing`          |
-| Client-server remoting  | `$REFERENCES/bolero/index.md#remoting`         |
-| Use HTML templates      | `$REFERENCES/bolero/index.md#templating`       |
-| Create components       | `$REFERENCES/bolero/index.md#components`       |
-| Configure hosting       | `$REFERENCES/bolero/index.md#server`           |
-| Best practices          | `$REFERENCES/bolero/index.md#patterns`         |
+| Task                    | Topic                     |
+| ----------------------- | ------------------------- |
+| Set up Bolero project   | bolero#getting-started    |
+| Write HTML with DSL     | bolero#html-dsl           |
+| Set up MVU architecture | bolero#mvu-architecture   |
+| Define routes           | bolero#routing            |
+| Client-server remoting  | bolero#remoting           |
+| Use HTML templates      | bolero#templating         |
+| Create components       | bolero#components         |
+| Configure hosting       | bolero#server             |
+| Best practices          | bolero#patterns           |
 
 ## Key Patterns for Career Story Builder
 
@@ -26,14 +24,14 @@ Bolero provides an F#-first approach to Blazor using the MVU (Model-View-Update)
 ## Primary References
 
 ### MVU Architecture
-- **Elmish Integration**: `$REFERENCES/bolero/index.md#mvu-architecture`
+- **Elmish Integration**: `bolero#mvu-architecture`
   - ProgramComponent base class
   - Model and Messages definition
   - Update function patterns
   - Commands for side effects
 
 ### HTML DSL
-- **Writing Views**: `$REFERENCES/bolero/index.md#html-dsl`
+- **Writing Views**: `bolero#html-dsl`
   - Element builders (`div { }`, `button { }`)
   - Attributes (`attr.*`)
   - Event handlers (`on.*`)
@@ -41,7 +39,7 @@ Bolero provides an F#-first approach to Blazor using the MVU (Model-View-Update)
   - Lists (`forEach`)
 
 ### Routing
-- **Page Navigation**: `$REFERENCES/bolero/index.md#routing`
+- **Page Navigation**: `bolero#routing`
   - Route definitions with DUs
   - Path and query parameters
   - Navigation links

@@ -1,21 +1,19 @@
 # F# Language Quick Reference
 
-> References: `$REFERENCES/fsharp/`
-
 ## Quick Links by Task
 
-| Task                           | Reference                                             |
-| ------------------------------ | ----------------------------------------------------- |
-| Define domain types            | `$REFERENCES/fsharp/index.md#domain-modeling-records` |
-| Use discriminated unions       | `$REFERENCES/fsharp/index.md#discriminated-unions`    |
-| Pattern matching               | `$REFERENCES/fsharp/index.md#pattern-matching`        |
-| Handle errors with Result      | `$REFERENCES/fsharp/index.md#rich-domains`            |
-| Railway-oriented programming   | `$REFERENCES/fsharp/index.md#railway-oriented`        |
-| Async programming              | `$REFERENCES/fsharp/index.md#async-programming`       |
-| Collections (List, Array, Seq) | `$REFERENCES/fsharp/index.md#collections`             |
-| Computation expressions        | `$REFERENCES/fsharp/index.md#computation-expressions` |
-| Testing with Expecto           | `$REFERENCES/fsharp/index.md#testing-expecto`         |
-| Code style                     | `$REFERENCES/fsharp/index.md#style-guide`             |
+| Task                           | Topic                             |
+| ------------------------------ | --------------------------------- |
+| Define domain types            | fsharp#domain-modeling-records    |
+| Use discriminated unions       | fsharp#discriminated-unions       |
+| Pattern matching               | fsharp#pattern-matching           |
+| Handle errors with Result      | fsharp#rich-domains               |
+| Railway-oriented programming   | fsharp#railway-oriented           |
+| Async programming              | fsharp#async-programming          |
+| Collections (List, Array, Seq) | fsharp#collections                |
+| Computation expressions        | fsharp#computation-expressions    |
+| Testing with Expecto           | fsharp#testing-expecto            |
+| Code style                     | fsharp#style-guide                |
 
 ## Key Patterns for Career Story Builder
 
@@ -28,24 +26,24 @@ F# is the primary language for this project. The STAR story domain benefits from
 ## Primary References
 
 ### Domain Modeling
-- **Records and DUs**: `$REFERENCES/fsharp/index.md#records-unions-lang`
+- **Records and DUs**: `fsharp#records-unions`
   - Record syntax and copy-and-update
   - Anonymous records
   - Single-case discriminated unions for type safety
 
-- **Rich Domain Building**: `$REFERENCES/fsharp/index.md#rich-domains`
+- **Rich Domain Building**: `fsharp#rich-domains`
   - Option type for optional fields
   - Result type for validation
   - Making illegal states unrepresentable
 
 ### Error Handling
-- **Railway-Oriented Programming**: `$REFERENCES/fsharp/index.md#railway-oriented`
+- **Railway-Oriented Programming**: `fsharp#railway-oriented`
   - bind, map, and composition
   - Error track handling
   - Validation pipelines
 
 ### Async and I/O
-- **Task-based Async**: `$REFERENCES/fsharp/index.md#async-programming`
+- **Task-based Async**: `fsharp#async-programming`
   - `task { }` computation expressions
   - Parallel vs sequential execution
 
@@ -171,7 +169,7 @@ let saveStory (story: Story) : Task<Result<Story, ValidationError list>> = task 
 
 ## Code Style
 
-Follow the F# style guide: `$REFERENCES/fsharp/index.md#style-guide`
+Follow the F# style guide: `fsharp#style-guide`
 
 Key conventions:
 - Use `camelCase` for values and functions

@@ -1,19 +1,17 @@
 # FSharpPlus Advanced Patterns Guide
 
-> References: `$REFERENCES/fsharpplus/`
-
 ## Quick Links by Task
 
-| Task                            | Reference                                                 |
-| ------------------------------- | --------------------------------------------------------- |
-| Getting started                 | `$REFERENCES/fsharpplus/index.md#getting-started`         |
-| Generic operators               | `$REFERENCES/fsharpplus/index.md#operators`               |
-| Abstractions (Functor, Monad)   | `$REFERENCES/fsharpplus/index.md#abstractions`            |
-| Computation expressions         | `$REFERENCES/fsharpplus/index.md#computation-expressions` |
-| Validation (error accumulation) | `$REFERENCES/fsharpplus/index.md#validation`              |
-| Reader monad (DI)               | `$REFERENCES/fsharpplus/index.md#reader-monad`            |
-| Lenses for nested updates       | `$REFERENCES/fsharpplus/index.md#lens`                    |
-| Monad transformers              | `$REFERENCES/fsharpplus/index.md#monad-transformers`      |
+| Task                            | Topic                              |
+| ------------------------------- | ---------------------------------- |
+| Getting started                 | fsharpplus#getting-started         |
+| Generic operators               | fsharpplus#operators               |
+| Abstractions (Functor, Monad)   | fsharpplus#abstractions            |
+| Computation expressions         | fsharpplus#computation-expressions |
+| Validation (error accumulation) | fsharpplus#validation              |
+| Reader monad (DI)               | fsharpplus#reader-monad            |
+| Lenses for nested updates       | fsharpplus#lens                    |
+| Monad transformers              | fsharpplus#monad-transformers      |
 
 ## When to Use FSharpPlus
 
@@ -42,20 +40,20 @@ FSharpPlus provides advanced functional patterns:
 ## Primary References
 
 ### Validation
-- **Error Accumulation**: `$REFERENCES/fsharpplus/index.md#data-types`
+- **Error Accumulation**: `fsharpplus#data-types`
   - `Validation<'Error, 'T>` vs `Result<'T, 'Error>`
   - `Success` and `Failure` cases
   - Applicative style with `<!>` and `<*>`
 
 ### Operators
-- **Generic Functions**: `$REFERENCES/fsharpplus/index.md#operators`
+- **Generic Functions**: `fsharpplus#operators`
   - `map` (`<!>`, `<<|`, `|>>`)
   - `apply` (`<*>`)
   - `bind` (`>>=`, `=<<`)
   - Kleisli composition (`>=>`, `<=<`)
 
 ### Lenses
-- **Optics**: `$REFERENCES/fsharpplus/index.md#lens`
+- **Optics**: `fsharpplus#lens`
   - View with `^.`
   - Set with `.->`
   - Update with `%->`

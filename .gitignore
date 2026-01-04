@@ -117,3 +117,6 @@ dist/
 
 # IDE
 *.code-workspace
+
+# External references configuration (machine-specific)
+.references.md

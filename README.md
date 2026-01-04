@@ -23,41 +23,8 @@ This async-first approach ensures a smooth user experience even during longer op
 
 ## Documentation
 
-- [User Stories](docs/user-stories.md) - Feature requirements organized by domain
-- [Delivery Plan](docs/delivery-plan.md) - Phased implementation roadmap
-- [Technology](docs/technology.md) - Technical architecture and stack decisions
+See [docs/index.md](docs/index.md) for the full documentation index including:
 
-## Reference Guides
-
-| Layer        | Technology             | Guide                                                  |
-| ------------ | ---------------------- | ------------------------------------------------------ |
-| Language     | F#                     | [F# Guide](docs/fsharp-guide.md)                       |
-| Language     | F#                     | [F# Style Guide](docs/fsharp-style-guide.md)           |
-| Frontend     | Bolero (F# for Blazor) | [Bolero Guide](docs/bolero-guide.md)                   |
-| UI Framework | Blazor                 | [Blazor Guide](docs/blazor-guide.md)                   |
-| Backend      | ASP.NET Core           | [ASP.NET Guide](docs/aspnet-guide.md)                  |
-| Data Access  | Dapper + Dapper.FSharp | [Data Access Guide](docs/data-access-guide.md)         |
-| Testing      | bUnit + Expecto        | [Testing Guide](docs/testing-guide.md)                 |
-| Containers   | Docker                 | [Docker Guide](docs/docker-guide.md)                   |
-| Design       | Functional Patterns    | [Design Patterns Guide](docs/design-patterns-guide.md) |
-| Advanced F#  | FSharpPlus             | [FSharpPlus Guide](docs/fsharpplus-guide.md)           |
-
-## Quick Start by Task
-
-| Task                      | Guide(s)                                                                   |
-| ------------------------- | -------------------------------------------------------------------------- |
-| Define STAR domain types  | [F# Guide](docs/fsharp-guide.md#domain-modeling)                           |
-| Create story editor UI    | [Bolero Guide](docs/bolero-guide.md), [Blazor Guide](docs/blazor-guide.md) |
-| Build API endpoints       | [ASP.NET Guide](docs/aspnet-guide.md)                                      |
-| Store stories in database | [Data Access Guide](docs/data-access-guide.md)                             |
-| Validate story input      | [FSharpPlus Guide](docs/fsharpplus-guide.md#validation)                    |
-| Test components           | [Testing Guide](docs/testing-guide.md)                                     |
-| Containerize application  | [Docker Guide](docs/docker-guide.md)                                       |
-
-## Reference Location
-
-All guides reference materials in the `$REFERENCES` environment variable:
-
-```
-$REFERENCES = ~/Documents/Code/_references/
-```
+- Project documentation (user stories, delivery plan, technology decisions)
+- Reference guides for each technology layer
+- Quick start guide by task

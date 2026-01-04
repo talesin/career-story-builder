@@ -1,32 +1,28 @@
 # Data Access Guide (Dapper + Dapper.FSharp)
 
-> References:
-> - `$REFERENCES/dapper-fsharp/` (type-safe F# queries)
-> - `$REFERENCES/dapper/` (plain Dapper for complex queries)
-
 ## Quick Links by Task
 
 ### Dapper.FSharp (Primary)
-| Task                    | Reference                                              |
-| ----------------------- | ------------------------------------------------------ |
-| Setup and configuration | `$REFERENCES/dapper-fsharp/index.md#setup`             |
-| Table mapping           | `$REFERENCES/dapper-fsharp/index.md#table-mapping`     |
-| SELECT queries          | `$REFERENCES/dapper-fsharp/index.md#select-queries`    |
-| INSERT operations       | `$REFERENCES/dapper-fsharp/index.md#insert-operations` |
-| UPDATE operations       | `$REFERENCES/dapper-fsharp/index.md#update-operations` |
-| DELETE operations       | `$REFERENCES/dapper-fsharp/index.md#delete-operations` |
-| JOINs                   | `$REFERENCES/dapper-fsharp/index.md#joins`             |
-| Aggregations            | `$REFERENCES/dapper-fsharp/index.md#aggregations`      |
-| Transactions            | `$REFERENCES/dapper-fsharp/index.md#patterns`          |
+| Task                    | Topic                            |
+| ----------------------- | -------------------------------- |
+| Setup and configuration | dapper-fsharp#setup              |
+| Table mapping           | dapper-fsharp#table-mapping      |
+| SELECT queries          | dapper-fsharp#select-queries     |
+| INSERT operations       | dapper-fsharp#insert-operations  |
+| UPDATE operations       | dapper-fsharp#update-operations  |
+| DELETE operations       | dapper-fsharp#delete-operations  |
+| JOINs                   | dapper-fsharp#joins              |
+| Aggregations            | dapper-fsharp#aggregations       |
+| Transactions            | dapper-fsharp#patterns           |
 
 ### Plain Dapper (Fallback)
-| Task                  | Reference                                      |
-| --------------------- | ---------------------------------------------- |
-| Core operations       | `$REFERENCES/dapper/index.md#core-operations`  |
-| Parameters            | `$REFERENCES/dapper/index.md#parameters`       |
-| Multi-mapping (joins) | `$REFERENCES/dapper/index.md#multi-mapping`    |
-| Async operations      | `$REFERENCES/dapper/index.md#async-operations` |
-| Type handlers         | `$REFERENCES/dapper/index.md#type-handlers`    |
+| Task                  | Topic                    |
+| --------------------- | ------------------------ |
+| Core operations       | dapper#core-operations   |
+| Parameters            | dapper#parameters        |
+| Multi-mapping (joins) | dapper#multi-mapping     |
+| Async operations      | dapper#async-operations  |
+| Type handlers         | dapper#type-handlers     |
 
 ## Key Patterns for Career Story Builder
 
@@ -43,12 +39,12 @@ Use **plain Dapper** for:
 ## Primary References
 
 ### Setup
-- **Option Types**: `$REFERENCES/dapper-fsharp/index.md#setup`
-- **Table Definition**: `$REFERENCES/dapper-fsharp/index.md#table-mapping`
+- **Option Types**: `dapper-fsharp#setup`
+- **Table Definition**: `dapper-fsharp#table-mapping`
 
 ### Query Building
-- **Computation Expressions**: `$REFERENCES/dapper-fsharp/index.md#select-queries`
-- **WHERE conditions**: `$REFERENCES/dapper-fsharp/index.md#where-conditions`
+- **Computation Expressions**: `dapper-fsharp#select-queries`
+- **WHERE conditions**: `dapper-fsharp#where-conditions`
 
 ## Domain Examples
 
