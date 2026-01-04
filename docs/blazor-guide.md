@@ -2,21 +2,22 @@
 
 ## Quick Links by Task
 
-| Task                     | Topic                       |
-| ------------------------ | --------------------------- |
-| Understand Blazor basics | blazor#introduction         |
-| Learn Razor syntax       | blazor#razor-syntax         |
-| Component lifecycle      | blazor#component-lifecycle  |
-| Component parameters     | blazor#components           |
-| Two-way binding          | blazor#two-way-binding      |
-| Forms and validation     | blazor#forms-validation     |
-| Dependency injection     | blazor#di-patterns          |
-| JavaScript interop       | blazor#js-interop           |
-| Authentication           | blazor#security             |
+| Task                 | Topic                      |
+| -------------------- | -------------------------- |
+| Blazor intro         | blazor#introduction        |
+| Razor syntax         | blazor#razor-syntax        |
+| Component lifecycle  | blazor#component-lifecycle |
+| Component parameters | blazor#components          |
+| Two-way binding      | blazor#two-way-binding     |
+| Forms and validation | blazor#forms-validation    |
+| Dependency injection | blazor#di-patterns         |
+| JavaScript interop   | blazor#js-interop          |
+| Authentication       | blazor#security            |
 
 ## Key Patterns for Career Story Builder
 
 While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns helps when:
+
 - Working with component lifecycle methods
 - Understanding render modes (Server vs WebAssembly)
 - Integrating with Blazor component libraries
@@ -25,18 +26,21 @@ While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns h
 ## Primary References
 
 ### Component Lifecycle
+
 - **Lifecycle Methods**: `blazor#component-lifecycle`
   - `OnInitialized` / `OnInitializedAsync`
   - `OnParametersSet` / `OnParametersSetAsync`
   - `OnAfterRender` / `OnAfterRenderAsync`
 
 ### Forms and Validation
+
 - **EditForm**: `blazor#forms-validation`
   - Input components
   - DataAnnotations validation
   - Custom validation
 
 ### Render Modes
+
 - **Choosing Modes**: `blazor#render-modes`
   - Server-side (SignalR)
   - WebAssembly (client-side)

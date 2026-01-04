@@ -3,35 +3,39 @@
 ## Quick Links by Task
 
 ### Dapper.FSharp (Primary)
-| Task                    | Topic                            |
-| ----------------------- | -------------------------------- |
-| Setup and configuration | dapper-fsharp#setup              |
-| Table mapping           | dapper-fsharp#table-mapping      |
-| SELECT queries          | dapper-fsharp#select-queries     |
-| INSERT operations       | dapper-fsharp#insert-operations  |
-| UPDATE operations       | dapper-fsharp#update-operations  |
-| DELETE operations       | dapper-fsharp#delete-operations  |
-| JOINs                   | dapper-fsharp#joins              |
-| Aggregations            | dapper-fsharp#aggregations       |
-| Transactions            | dapper-fsharp#patterns           |
+
+| Task                    | Topic                           |
+| ----------------------- | ------------------------------- |
+| Setup and configuration | dapper-fsharp#setup             |
+| Table mapping           | dapper-fsharp#table-mapping     |
+| SELECT queries          | dapper-fsharp#select-queries    |
+| INSERT operations       | dapper-fsharp#insert-operations |
+| UPDATE operations       | dapper-fsharp#update-operations |
+| DELETE operations       | dapper-fsharp#delete-operations |
+| JOINs                   | dapper-fsharp#joins             |
+| Aggregations            | dapper-fsharp#aggregations      |
+| Transactions            | dapper-fsharp#patterns          |
 
 ### Plain Dapper (Fallback)
-| Task                  | Topic                    |
-| --------------------- | ------------------------ |
-| Core operations       | dapper#core-operations   |
-| Parameters            | dapper#parameters        |
-| Multi-mapping (joins) | dapper#multi-mapping     |
-| Async operations      | dapper#async-operations  |
-| Type handlers         | dapper#type-handlers     |
+
+| Task                  | Topic                   |
+| --------------------- | ----------------------- |
+| Core operations       | dapper#core-operations  |
+| Parameters            | dapper#parameters       |
+| Multi-mapping (joins) | dapper#multi-mapping    |
+| Async operations      | dapper#async-operations |
+| Type handlers         | dapper#type-handlers    |
 
 ## Key Patterns for Career Story Builder
 
 Use **Dapper.FSharp** for:
+
 - Type-safe CRUD operations on story entities
 - Simple joins between stories and related tables
 - Aggregations (story counts by tag, etc.)
 
 Use **plain Dapper** for:
+
 - Complex queries that Dapper.FSharp can't express
 - Raw SQL when performance is critical
 - Custom type handling
@@ -39,10 +43,12 @@ Use **plain Dapper** for:
 ## Primary References
 
 ### Setup
+
 - **Option Types**: `dapper-fsharp#setup`
 - **Table Definition**: `dapper-fsharp#table-mapping`
 
 ### Query Building
+
 - **Computation Expressions**: `dapper-fsharp#select-queries`
 - **WHERE conditions**: `dapper-fsharp#where-conditions`
 

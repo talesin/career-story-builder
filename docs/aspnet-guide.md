@@ -17,6 +17,7 @@
 ## Key Patterns for Career Story Builder
 
 ASP.NET Core hosts the Bolero application and provides:
+
 - API endpoints for story CRUD operations
 - Authentication and user management
 - Configuration and dependency injection
@@ -25,17 +26,20 @@ ASP.NET Core hosts the Bolero application and provides:
 ## Primary References
 
 ### Minimal APIs
+
 - **Route Handlers**: `aspnet#minimal-apis`
   - Parameter binding
   - Response types
   - Route groups
 
 ### Dependency Injection
+
 - **Service Lifetimes**: `aspnet#dependency-injection`
   - Singleton, Scoped, Transient
   - Keyed services
 
 ### Security
+
 - **Authentication/Authorization**: `aspnet#security`
   - JWT Bearer tokens
   - Cookie authentication
@@ -153,6 +157,7 @@ let configureBillingServices (services: IServiceCollection) =
 ```
 
 **Guidelines**:
+
 - Only add wrappers at the edges (controllers, hosted services)
 - Never embed core business logic in the wrapper
 - Wrapper methods should be one-liners that delegate to functional code
@@ -282,7 +287,7 @@ type StoryService(
 
 See: `aspnet#middleware`
 
-```
+```text
 1. Exception handling (first)
 2. HTTPS redirection
 3. Static files

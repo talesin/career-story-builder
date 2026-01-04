@@ -2,18 +2,18 @@
 
 ## Quick Links by Task
 
-| Task                           | Topic                             |
-| ------------------------------ | --------------------------------- |
-| Define domain types            | fsharp#domain-modeling-records    |
-| Use discriminated unions       | fsharp#discriminated-unions       |
-| Pattern matching               | fsharp#pattern-matching           |
-| Handle errors with Result      | fsharp#rich-domains               |
-| Railway-oriented programming   | fsharp#railway-oriented           |
-| Async programming              | fsharp#async-programming          |
-| Collections (List, Array, Seq) | fsharp#collections                |
-| Computation expressions        | fsharp#computation-expressions    |
-| Testing with Expecto           | fsharp#testing-expecto            |
-| Code style                     | fsharp#style-guide                |
+| Task                           | Topic                          |
+| ------------------------------ | ------------------------------ |
+| Define domain types            | fsharp#domain-modeling-records |
+| Use discriminated unions       | fsharp#discriminated-unions    |
+| Pattern matching               | fsharp#pattern-matching        |
+| Handle errors with Result      | fsharp#rich-domains            |
+| Railway-oriented programming   | fsharp#railway-oriented        |
+| Async programming              | fsharp#async-programming       |
+| Collections (List, Array, Seq) | fsharp#collections             |
+| Computation expressions        | fsharp#computation-expressions |
+| Testing with Expecto           | fsharp#testing-expecto         |
+| Code style                     | fsharp#style-guide             |
 
 ## Key Patterns for Career Story Builder
 

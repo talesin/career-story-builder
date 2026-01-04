@@ -5,7 +5,8 @@
       "WebFetch(domain:github.com)",
       "Bash(grep:*)",
       "Bash(xargs:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

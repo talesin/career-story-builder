@@ -3,27 +3,30 @@
 ## Quick Links by Task
 
 ### bUnit (Component Testing)
-| Task               | Topic                          |
-| ------------------ | ------------------------------ |
-| Getting started    | bunit#getting-started          |
-| Passing parameters | bunit#passing-parameters       |
-| Injecting services | bunit#injecting-services       |
-| Mocking components | bunit#substituting-components  |
-| Triggering events  | bunit#triggering-events        |
-| Async testing      | bunit#async-state              |
-| Verifying output   | bunit#verifying-output         |
-| Test doubles       | bunit#test-doubles             |
+
+| Task               | Topic                         |
+| ------------------ | ----------------------------- |
+| Getting started    | bunit#getting-started         |
+| Passing parameters | bunit#passing-parameters      |
+| Injecting services | bunit#injecting-services      |
+| Mocking components | bunit#substituting-components |
+| Triggering events  | bunit#triggering-events       |
+| Async testing      | bunit#async-state             |
+| Verifying output   | bunit#verifying-output        |
+| Test doubles       | bunit#test-doubles            |
 
 ### F# Testing
-| Task                   | Topic                   |
-| ---------------------- | ----------------------- |
-| Types over tests       | fsharp#testing-expecto  |
-| Expecto framework      | fsharp#testing-expecto  |
-| Property-based testing | fsharp#testing-expecto  |
+
+| Task                   | Topic                  |
+| ---------------------- | ---------------------- |
+| Types over tests       | fsharp#testing-expecto |
+| Expecto framework      | fsharp#testing-expecto |
+| Property-based testing | fsharp#testing-expecto |
 
 ## Key Patterns for Career Story Builder
 
 Testing strategy:
+
 1. **Domain logic**: Unit tests with Expecto, property-based tests with FsCheck
 2. **Components**: bUnit tests for Bolero/Blazor components
 3. **Integration**: Test API endpoints and database operations
@@ -32,11 +35,13 @@ Testing strategy:
 ## Primary References
 
 ### F# Testing Philosophy
+
 - **Types Over Tests**: `fsharp#testing-expecto`
   - Use the type system to make illegal states unrepresentable
   - Test business logic, not type-enforced constraints
 
 ### Component Testing
+
 - **bUnit Patterns**: `bunit#getting-started`
   - Render components
   - Find elements
@@ -383,7 +388,7 @@ type StoryApiTests(factory: WebApplicationFactory<Program>) =
 
 ## Test Organization
 
-```
+```text
 tests/
 ├── CareerStoryBuilder.Domain.Tests/
 │   ├── ValidationTests.fs

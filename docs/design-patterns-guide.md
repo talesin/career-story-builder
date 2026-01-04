@@ -3,29 +3,32 @@
 ## Quick Links by Task
 
 ### Functional Design Principles
-| Task                       | Topic                       |
-| -------------------------- | --------------------------- |
-| Immutability basics        | design#immutability         |
-| Persistent data structures | design#persistent-data      |
-| Recursion patterns         | design#recursion-iteration  |
-| Lazy evaluation            | design#laziness             |
-| State management           | design#state-management     |
-| Data flow pipelines        | design#data-flow            |
-| SOLID in functional code   | design#solid                |
-| Testing patterns           | design#testing              |
+
+| Task                       | Topic                      |
+| -------------------------- | -------------------------- |
+| Immutability basics        | design#immutability        |
+| Persistent data structures | design#persistent-data     |
+| Recursion patterns         | design#recursion-iteration |
+| Lazy evaluation            | design#laziness            |
+| State management           | design#state-management    |
+| Data flow pipelines        | design#data-flow           |
+| SOLID in functional code   | design#solid               |
+| Testing patterns           | design#testing             |
 
 ### Gang of Four (OO Patterns)
-| Task                | Topic                  |
-| ------------------- | ---------------------- |
+
+| Task                | Topic                   |
+| ------------------- | ----------------------- |
 | Pattern overview    | design#gof-introduction |
-| Creational patterns | design#gof-creational  |
-| Structural patterns | design#gof-structural  |
-| Behavioral patterns | design#gof-behavioral  |
-| Patterns in FP      | design#patterns-review |
+| Creational patterns | design#gof-creational   |
+| Structural patterns | design#gof-structural   |
+| Behavioral patterns | design#gof-behavioral   |
+| Patterns in FP      | design#patterns-review  |
 
 ## Key Patterns for Career Story Builder
 
 Functional design principles guide the architecture:
+
 - **Immutability**: All domain types are immutable records
 - **Railway-Oriented Programming**: Validation with Result type
 - **Data transformation pipelines**: Processing story data
@@ -34,12 +37,14 @@ Functional design principles guide the architecture:
 ## Primary References
 
 ### Railway-Oriented Programming
+
 - **Error Handling**: `design#data-flow`
   - Result type for validation
   - Bind/map for chaining
   - Error accumulation
 
-### SOLID in F#
+### SOLID in F\#
+
 - **Functional SOLID**: `design#solid`
   - SRP: Small focused functions
   - OCP: Extend via composition
@@ -145,6 +150,7 @@ let validate (story: StoryDraft) : Result<Story, ValidationError> =
 ```
 
 **Trade-offs**:
+
 - Nested `bind` chains make the railroad tracks explicit
 - Computation expressions are more readable but hide the mechanics
 - Both fail on first error; use `Validation` type for error accumulation
@@ -202,7 +208,7 @@ module StoryProcessing =
         >> List.map toDisplayModel
 ```
 
-### SOLID in Functional F#
+### SOLID in Functional F\#
 
 ```fsharp
 // Single Responsibility Principle
@@ -264,7 +270,7 @@ In F#, dependency injection is primarily about passing values. Choose the patter
 
 See: `fsharp#pure-functional`
 
-**Pattern 1: Pass dependencies as parameters**
+#### Pattern 1: Pass dependencies as parameters
 
 Use when the dependency list is short and call graph is shallow.
 
@@ -285,7 +291,7 @@ module CompositionRoot =
     let sendWelcomeEmailBound = UserEmail.sendWelcomeEmail clock sendEmail
 ```
 
-**Pattern 2: Record of functions (capabilities bundle)**
+#### Pattern 2: Record of functions (capabilities bundle)
 
 Use when you have many dependencies or want to avoid long parameter lists.
 
@@ -322,6 +328,7 @@ let notifyUser = UserWorkflow.notifyUser deps
 | Deep dependency threading is noisy   | Consider Reader style            |
 
 **Guidelines**:
+
 - Keep dependency parameters on the left, business inputs on the right
 - Bind dependencies once in the composition root using partial application
 - Keep dependency records small per module; avoid one mega-record for the whole app
