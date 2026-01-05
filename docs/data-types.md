@@ -2,28 +2,37 @@
 
 Minimal F# types for the Phase 1 prototype. These will evolve as features are added in later phases.
 
-## STAR Components
+> **Namespacing**: Star component types are wrapped in `module Star` to avoid collisions with `System.Threading.Tasks.Task` and F#'s `Result<'T,'E>` type. Access via `Star.Task`, `Star.Result`, etc.
+
+## Star Components
 
 Simple string wrappers for type safety:
 
 ```fsharp
-type Situation = Situation of string
-type StoryTask = StoryTask of string
-type Action = Action of string
-type Result = Result of string
-```
+module Star =
+    type Situation = Situation of string
+    type Task = Task of string
+    type Action = Action of string
+    type Result = Result of string
 
-## Story
-
-Minimal record for a complete STAR story:
-
-```fsharp
 type Story = {
     Title: string
-    Situation: Situation
-    Task: StoryTask
-    Action: Action
-    Result: Result
+    Situation: Star.Situation
+    Task: Star.Task
+    Action: Star.Action
+    Result: Star.Result
+}
+```
+
+Usage:
+
+```fsharp
+let story : Story = {
+    Title = "Led migration project"
+    Situation = Star.Situation "Legacy system needed modernization"
+    Task = Star.Task "Migrate 500k records to new platform"
+    Action = Star.Action "Designed migration strategy with rollback plan"
+    Result = Star.Result "Zero downtime, 40% performance improvement"
 }
 ```
 

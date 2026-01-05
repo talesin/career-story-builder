@@ -56,7 +56,6 @@ Functional design principles guide the architecture:
 
 ```fsharp
 // Railway-Oriented Programming: chain validations, fail on first error
-// See: design#data-flow (external reference)
 
 type ValidationError = FieldEmpty of string | TooLong of string * int
 
@@ -89,19 +88,24 @@ let validateUser name email =
     }
 ```
 
+**Fail-fast vs Error Accumulation**:
+
+The examples above use `Result.bind` which **fails on first error**. This is appropriate for:
+
+- API validation (stop processing on first problem)
+- Database operations (rollback on first failure)
+
+For **form validation** where you want to show all errors at once, use FSharpPlus `Validation` type instead. See [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).
+
 **Trade-offs**:
 
 - Nested `bind` chains make the railroad tracks explicit
 - Computation expressions are more readable but hide the mechanics
-- Both fail on first error; use `Validation` type for error accumulation
-
-> *Note: For form validation where you want to show all errors at once, use FSharpPlus `Validation` type instead of `Result`. See [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).*
 
 ### Data Transformation Pipeline
 
 ```fsharp
 // Functional pipelines for data processing
-// See: design#data-flow (external reference)
 
 let filterByStatus status = List.filter (fun x -> x.Status = status)
 let sortByDate = List.sortByDescending (fun x -> x.CreatedAt)
@@ -204,12 +208,12 @@ let notifyUser = UserWorkflow.notifyUser deps
 
 **Decision guide**:
 
-| Scenario                             | Pattern                          |
-| ------------------------------------ | -------------------------------- |
-| Few dependencies, shallow call graph | Explicit parameters              |
-| Many dependencies, want simplicity   | Record of functions              |
-| Framework requires DI classes        | Thin wrapper (see ASP.NET Guide) |
-| Deep dependency threading is noisy   | Consider Reader style            |
+| Scenario                             | Pattern                                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Few dependencies, shallow call graph | Explicit parameters                                                                              |
+| Many dependencies, want simplicity   | Record of functions                                                                              |
+| Framework requires DI classes        | Thin wrapper (see ASP.NET Guide)                                                                 |
+| Deep dependency threading            | Reader monad (see [FSharpPlus Guide](fsharpplus-guide.md#reader-monad-for-dependency-injection)) |
 
 **Guidelines**:
 
@@ -218,11 +222,12 @@ let notifyUser = UserWorkflow.notifyUser deps
 - Keep dependency records small per module; avoid one mega-record for the whole app
 - Prefer "capabilities" naming over "Service" naming
 
+> *For advanced functional DI using the Reader monad pattern, see [FSharpPlus Guide](fsharpplus-guide.md#reader-monad-for-dependency-injection).*
+
 ### State Machine Pattern
 
 ```fsharp
 // State machine for form workflow
-// See: design#state-management (external reference)
 
 type FormState =
     | Empty
@@ -253,7 +258,6 @@ let transition state event =
 
 ```fsharp
 // Command pattern for undo/redo
-// See: design#gof-behavioral (external reference)
 
 type Command =
     | SetName of string
@@ -283,10 +287,10 @@ let undo user history =
 
 | Problem               | Pattern                      | Reference                |
 | --------------------- | ---------------------------- | ------------------------ |
-| Validate input        | Railway-Oriented Programming | Design-Chapter11         |
-| Transform data        | Pipeline/Composition         | Design-Chapter11         |
-| Manage state          | State Machine                | Design-Chapter05         |
-| Undo/redo             | Command                      | DesignPatterns-Chapter05 |
-| Extend behavior       | Strategy (functions)         | DesignPatterns-Chapter05 |
-| Build complex objects | Builder                      | DesignPatterns-Chapter03 |
-| Notify changes        | Observer (events)            | DesignPatterns-Chapter05 |
+| Validate input        | Railway-Oriented Programming | design#data-flow         |
+| Transform data        | Pipeline/Composition         | design#data-flow         |
+| Manage state          | State Machine                | design#state-management  |
+| Undo/redo             | Command                      | design#gof-behavioral    |
+| Extend behavior       | Strategy (functions)         | design#gof-behavioral    |
+| Build complex objects | Builder                      | design#gof-creational    |
+| Notify changes        | Observer (events)            | design#gof-behavioral    |

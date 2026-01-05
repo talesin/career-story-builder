@@ -39,6 +39,7 @@ Testing strategy:
 - **Types Over Tests**: `fsharp#testing-expecto`
   - Use the type system to make illegal states unrepresentable
   - Test business logic, not type-enforced constraints
+  - See also: [F# Style Guide](fsharp-style-guide.md) for domain modeling patterns that reduce test surface
 
 ### Component Testing
 

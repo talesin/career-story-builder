@@ -17,7 +17,7 @@
 
 ## Key Patterns for Career Story Builder
 
-F# is the primary language for this project. The STAR story domain benefits from:
+F# is the primary language for this project. The Star story domain benefits from:
 - **Discriminated unions** for modeling story components
 - **Records** for immutable data structures
 - **Result type** for validation and error handling
@@ -49,46 +49,33 @@ F# is the primary language for this project. The STAR story domain benefits from
 
 ## Domain Examples
 
-### STAR Story Domain Types
+### Star Story Domain Types
 
 ```fsharp
 // Core domain types for career stories
-type StoryId = StoryId of Guid
+// Wrapped in Star module to avoid collisions with System.Task and F# Result type
 
-type Situation = {
-    Context: string
-    When: DateOnly option
-    Where: string option
-}
-
-type Task = {
-    Challenge: string
-    Responsibility: string
-    Stakeholders: string list
-}
-
-type Action = {
-    Step: int
-    Description: string
-    Skills: string list
-}
-
-type Result = {
-    Outcome: string
-    Impact: string option
-    Metrics: string option
-}
+module Star =
+    type Situation = Situation of string
+    type Task = Task of string
+    type Action = Action of string
+    type Result = Result of string
 
 type Story = {
-    Id: StoryId
     Title: string
-    Situation: Situation
-    Task: Task
-    Actions: Action list
-    Result: Result
-    Tags: string list
-    CreatedAt: DateTimeOffset
-    UpdatedAt: DateTimeOffset
+    Situation: Star.Situation
+    Task: Star.Task
+    Action: Star.Action
+    Result: Star.Result
+}
+
+// Usage
+let story : Story = {
+    Title = "Led migration project"
+    Situation = Star.Situation "Legacy system needed modernization"
+    Task = Star.Task "Migrate 500k records to new platform"
+    Action = Star.Action "Designed migration strategy with rollback plan"
+    Result = Star.Result "Zero downtime, 40% performance improvement"
 }
 ```
 
@@ -98,22 +85,14 @@ type Story = {
 // Story editing workflow states
 type StoryDraft =
     | Empty
-    | HasSituation of Situation
-    | HasTask of Situation * Task
-    | HasActions of Situation * Task * Action list
+    | HasSituation of Star.Situation
+    | HasTask of Star.Situation * Star.Task
+    | HasAction of Star.Situation * Star.Task * Star.Action
     | Complete of Story
 
-// Story validation result
-type StoryValidation =
-    | Valid of Story
-    | Invalid of ValidationError list
-
-and ValidationError =
-    | MissingSituation
-    | MissingTask
-    | NoActions
-    | MissingResult
-    | TitleTooShort of minLength: int
+// Validation errors
+type ValidationError =
+    | FieldEmpty of field: string
     | TitleTooLong of maxLength: int
 ```
 
@@ -122,20 +101,20 @@ and ValidationError =
 ```fsharp
 // Railway-oriented validation (fail-fast)
 let validateTitle title =
-    if String.IsNullOrWhiteSpace title then Error (TitleTooShort 1)
+    if String.IsNullOrWhiteSpace title then Error (FieldEmpty "title")
     elif title.Length > 200 then Error (TitleTooLong 200)
     else Ok title
 
-let validateSituation situation =
-    if String.IsNullOrWhiteSpace situation.Context then Error MissingSituation
-    else Ok situation
+let validateSituation (Star.Situation s) =
+    if String.IsNullOrWhiteSpace s then Error (FieldEmpty "situation")
+    else Ok (Star.Situation s)
 
 // Compose validations using Result.bind
 let validateStory title situation =
     validateTitle title
     |> Result.bind (fun t ->
         validateSituation situation
-        |> Result.map (fun s -> { Title = t; Situation = s }))
+        |> Result.map (fun s -> t, s))
 ```
 
 For error accumulation (collecting all errors), see [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).
