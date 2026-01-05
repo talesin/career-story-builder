@@ -55,97 +55,37 @@ Functional design principles guide the architecture:
 ### Railway-Oriented Validation Pipeline
 
 ```fsharp
-// Railway-Oriented Programming for story validation
+// Railway-Oriented Programming: chain validations, fail on first error
 // See: design#data-flow (external reference)
 
-module StoryValidation =
-    type ValidationError =
-        | TitleEmpty
-        | TitleTooLong of max: int
-        | SituationEmpty
-        | TaskEmpty
-        | NoActions
-        | ResultEmpty
+type ValidationError = FieldEmpty of string | TooLong of string * int
 
-    // Individual validators return Result
-    let validateTitle (title: string) : Result<string, ValidationError> =
-        if String.IsNullOrWhiteSpace title then
-            Error TitleEmpty
-        elif title.Length > 200 then
-            Error (TitleTooLong 200)
-        else
-            Ok title
+let validateName name =
+    if String.IsNullOrWhiteSpace name then Error (FieldEmpty "name")
+    else Ok name
 
-    let validateSituation (situation: Situation) : Result<Situation, ValidationError> =
-        if String.IsNullOrWhiteSpace situation.Context then
-            Error SituationEmpty
-        else
-            Ok situation
+let validateEmail email =
+    if String.IsNullOrWhiteSpace email then Error (FieldEmpty "email")
+    elif not (email.Contains "@") then Error (FieldEmpty "email")
+    else Ok email
 
-    let validateTask (task: Task) : Result<Task, ValidationError> =
-        if String.IsNullOrWhiteSpace task.Challenge then
-            Error TaskEmpty
-        else
-            Ok task
-
-    let validateActions (actions: Action list) : Result<Action list, ValidationError> =
-        if List.isEmpty actions then
-            Error NoActions
-        else
-            Ok actions
-
-    let validateResult (result: Result) : Result<Result, ValidationError> =
-        if String.IsNullOrWhiteSpace result.Outcome then
-            Error ResultEmpty
-        else
-            Ok result
-
-    // Compose validators using Result.bind (the "railway")
-    let validate (story: StoryDraft) : Result<Story, ValidationError> =
-        validateTitle story.Title
-        |> Result.bind (fun title ->
-            validateSituation story.Situation
-            |> Result.bind (fun situation ->
-                validateTask story.Task
-                |> Result.bind (fun task ->
-                    validateActions story.Actions
-                    |> Result.bind (fun actions ->
-                        validateResult story.Result
-                        |> Result.map (fun result ->
-                            { Id = StoryId (Guid.NewGuid())
-                              Title = title
-                              Situation = situation
-                              Task = task
-                              Actions = actions
-                              Result = result
-                              Tags = story.Tags
-                              CreatedAt = DateTimeOffset.UtcNow
-                              UpdatedAt = DateTimeOffset.UtcNow })))))
+// Compose validators using Result.bind (the "railway")
+let validateUser name email =
+    validateName name
+    |> Result.bind (fun n ->
+        validateEmail email
+        |> Result.map (fun e -> { Name = n; Email = e }))
 ```
 
 ### Alternative: Using result Computation Expression
 
-The same validation logic can be written more clearly using FSharpPlus:
-
 ```fsharp
-open FSharpPlus
-
-let validate (story: StoryDraft) : Result<Story, ValidationError> =
+// FSharpPlus result CE - same logic, cleaner syntax
+let validateUser name email =
     result {
-        let! title = validateTitle story.Title
-        let! situation = validateSituation story.Situation
-        let! task = validateTask story.Task
-        let! actions = validateActions story.Actions
-        let! storyResult = validateResult story.Result
-        return { Id = StoryId (Guid.NewGuid())
-                 Title = title
-                 Situation = situation
-                 Task = task
-                 Actions = actions
-                 Result = storyResult
-                 Tags = story.Tags
-                 CreatedAt = DateTimeOffset.UtcNow
-                 UpdatedAt = DateTimeOffset.UtcNow }
+        let! n = validateName name
+        let! e = validateEmail email
+        return { Name = n; Email = e }
     }
 ```
 
@@ -163,105 +103,49 @@ let validate (story: StoryDraft) : Result<Story, ValidationError> =
 // Functional pipelines for data processing
 // See: design#data-flow (external reference)
 
-module StoryProcessing =
+let filterByStatus status = List.filter (fun x -> x.Status = status)
+let sortByDate = List.sortByDescending (fun x -> x.CreatedAt)
+let take n = List.truncate n
 
-    // Transform story for display
-    let toDisplayModel (story: Story) : StoryDisplayModel =
-        { Title = story.Title
-          Summary = generateSummary story
-          ActionCount = List.length story.Actions
-          Tags = story.Tags
-          LastUpdated = story.UpdatedAt.ToString("MMM dd, yyyy") }
+// Pipeline composition with |>
+let getRecentActive count items =
+    items
+    |> filterByStatus Active
+    |> sortByDate
+    |> take count
 
-    // Generate summary from STAR components
-    let generateSummary (story: Story) =
-        [ story.Situation.Context
-          story.Task.Challenge
-          story.Result.Outcome ]
-        |> List.filter (not << String.IsNullOrWhiteSpace)
-        |> List.map (fun s -> if s.Length > 100 then s.Substring(0, 97) + "..." else s)
-        |> String.concat " | "
-
-    // Filter and sort stories
-    let filterByTag tag =
-        List.filter (fun s -> List.contains tag s.Tags)
-
-    let sortByRecent =
-        List.sortByDescending (fun s -> s.UpdatedAt)
-
-    let take n =
-        List.truncate n
-
-    // Pipeline composition
-    let getRecentStoriesWithTag tag count stories =
-        stories
-        |> filterByTag tag
-        |> sortByRecent
-        |> take count
-        |> List.map toDisplayModel
-
-    // Alternative: using |> with partial application
-    let getRecentStoriesWithTag' tag count =
-        filterByTag tag
-        >> sortByRecent
-        >> take count
-        >> List.map toDisplayModel
+// Alternative: function composition with >>
+let getRecentActive' count =
+    filterByStatus Active >> sortByDate >> take count
 ```
 
 ### SOLID in Functional F\#
 
 ```fsharp
-// Single Responsibility Principle
-// Each module has one reason to change
+// Single Responsibility Principle - each module has one job
+module Validation = let validate x = ...
+module Persistence = let save x = ...
+module Formatting = let toJson x = ...
 
-module StoryPersistence =
-    let save (repo: IStoryRepository) story = repo.Save story
-    let load (repo: IStoryRepository) id = repo.GetById id
+// Open-Closed Principle - extend via new functions, not modification
+type Formatter<'T> = 'T -> string
 
-module StoryValidation =
-    let validate story = ...
+let jsonFormatter: Formatter<User> = JsonSerializer.Serialize
+let csvFormatter: Formatter<User> = fun u -> $"{u.Name},{u.Email}"
 
-module StoryFormatting =
-    let toMarkdown story = ...
-    let toHtml story = ...
+// Add new formatters without changing existing code
+let format (formatter: Formatter<'T>) item = formatter item
 
-// Open-Closed Principle
-// Extend behavior without modifying existing code
+// Dependency Inversion Principle - depend on abstractions
+type IRepository<'T> =
+    abstract GetById: Guid -> Task<'T option>
+    abstract Save: 'T -> Task<unit>
 
-type StoryExporter = Story -> string
-
-let markdownExporter: StoryExporter = fun story ->
-    sprintf "# %s\n\n## Situation\n%s\n..." story.Title story.Situation.Context
-
-let htmlExporter: StoryExporter = fun story ->
-    sprintf "<h1>%s</h1><h2>Situation</h2><p>%s</p>..." story.Title story.Situation.Context
-
-let jsonExporter: StoryExporter = fun story ->
-    JsonSerializer.Serialize(story)
-
-// Add new exporters without changing existing code
-let exportStory (exporter: StoryExporter) story =
-    exporter story
-
-// Dependency Inversion Principle
-// Depend on abstractions
-
-type IStoryRepository =
-    abstract GetById: StoryId -> Task<Story option>
-    abstract GetAll: unit -> Task<Story list>
-    abstract Save: Story -> Task<unit>
-    abstract Delete: StoryId -> Task<unit>
-
-// High-level module depends on abstraction
-type StoryService(repo: IStoryRepository, validator: Story -> Result<Story, ValidationError list>) =
-    member _.Create(draft: StoryDraft) = task {
-        match validator (toStory draft) with
-        | Ok story ->
-            do! repo.Save story
-            return Ok story
-        | Error errors ->
-            return Error errors
-    }
+// High-level code depends on abstraction, not concrete implementation
+let saveIfValid (repo: IRepository<_>) validate item =
+    match validate item with
+    | Ok valid -> repo.Save valid
+    | Error _ -> Task.FromResult ()
 ```
 
 ### Functional Dependency Injection
@@ -337,73 +221,32 @@ let notifyUser = UserWorkflow.notifyUser deps
 ### State Machine Pattern
 
 ```fsharp
-// State machine for story editing workflow
+// State machine for form workflow
 // See: design#state-management (external reference)
 
-type EditingState =
-    | Idle
-    | EditingSituation of StoryDraft
-    | EditingTask of StoryDraft
-    | EditingActions of StoryDraft
-    | EditingResult of StoryDraft
-    | Previewing of Story
-    | Saving of Story
-    | Saved of Story
-    | Error of StoryDraft * ValidationError list
+type FormState =
+    | Empty
+    | Editing of data: string
+    | Submitting of data: string
+    | Complete of result: string
+    | Failed of error: string
 
-type EditingEvent =
-    | StartNew
-    | LoadExisting of Story
-    | UpdateSituation of Situation
-    | UpdateTask of Task
-    | AddAction of Action
-    | RemoveAction of int
-    | UpdateResult of Result
-    | Preview
-    | Save
-    | SaveSucceeded of Story
-    | SaveFailed of ValidationError list
-    | Cancel
+type FormEvent =
+    | Start
+    | Update of string
+    | Submit
+    | Succeed of string
+    | Fail of string
 
 let transition state event =
     match state, event with
-    | Idle, StartNew ->
-        EditingSituation { empty with Id = StoryId (Guid.NewGuid()) }
-
-    | Idle, LoadExisting story ->
-        EditingSituation (toDraft story)
-
-    | EditingSituation draft, UpdateSituation situation ->
-        EditingTask { draft with Situation = situation }
-
-    | EditingTask draft, UpdateTask task ->
-        EditingActions { draft with Task = task }
-
-    | EditingActions draft, AddAction action ->
-        EditingActions { draft with Actions = draft.Actions @ [action] }
-
-    | EditingActions draft, UpdateResult result ->
-        EditingResult { draft with Result = result }
-
-    | EditingResult draft, Preview ->
-        match validate draft with
-        | Ok story -> Previewing story
-        | Error errors -> Error (draft, errors)
-
-    | Previewing story, Save ->
-        Saving story
-
-    | Saving story, SaveSucceeded saved ->
-        Saved saved
-
-    | Saving story, SaveFailed errors ->
-        Error (toDraft story, errors)
-
-    | _, Cancel ->
-        Idle
-
-    | state, _ ->
-        state  // Invalid transition, stay in current state
+    | Empty, Start -> Editing ""
+    | Editing _, Update data -> Editing data
+    | Editing data, Submit -> Submitting data
+    | Submitting _, Succeed result -> Complete result
+    | Submitting data, Fail error -> Failed error
+    | Failed _, Start -> Empty  // Retry
+    | state, _ -> state  // Invalid transition, stay put
 ```
 
 ### Command Pattern for Operations
@@ -412,47 +255,28 @@ let transition state event =
 // Command pattern for undo/redo
 // See: design#gof-behavioral (external reference)
 
-type StoryCommand =
-    | SetTitle of string
-    | SetSituation of Situation
-    | SetTask of Task
-    | AddAction of Action
-    | RemoveAction of int
-    | SetResult of Result
-    | AddTag of string
-    | RemoveTag of string
+type Command =
+    | SetName of string
+    | SetEmail of string
+    | SetAge of int
 
-type CommandHistory = {
-    Past: StoryCommand list
-    Future: StoryCommand list
-}
+type History = { Past: Command list; Future: Command list }
 
-let applyCommand (story: StoryDraft) (command: StoryCommand) =
-    match command with
-    | SetTitle title -> { story with Title = title }
-    | SetSituation situation -> { story with Situation = situation }
-    | SetTask task -> { story with Task = task }
-    | AddAction action -> { story with Actions = story.Actions @ [action] }
-    | RemoveAction step -> { story with Actions = story.Actions |> List.filter (fun a -> a.Step <> step) }
-    | SetResult result -> { story with Result = result }
-    | AddTag tag -> { story with Tags = tag :: story.Tags }
-    | RemoveTag tag -> { story with Tags = story.Tags |> List.filter ((<>) tag) }
+let apply user cmd =
+    match cmd with
+    | SetName n -> { user with Name = n }
+    | SetEmail e -> { user with Email = e }
+    | SetAge a -> { user with Age = a }
 
-let executeWithHistory (story: StoryDraft) (history: CommandHistory) (command: StoryCommand) =
-    let newStory = applyCommand story command
-    let newHistory = { Past = command :: history.Past; Future = [] }
-    newStory, newHistory
+let execute user history cmd =
+    apply user cmd, { Past = cmd :: history.Past; Future = [] }
 
-let undo (story: StoryDraft) (history: CommandHistory) =
+let undo user history =
     match history.Past with
-    | [] -> story, history
+    | [] -> user, history
     | cmd :: rest ->
-        let original = // reconstruct from empty + all commands except last
-            history.Past
-            |> List.rev
-            |> List.tail
-            |> List.fold applyCommand emptyDraft
-        original, { Past = rest; Future = cmd :: history.Future }
+        let restored = rest |> List.rev |> List.fold apply emptyUser
+        restored, { Past = rest; Future = cmd :: history.Future }
 ```
 
 ## Pattern Selection Guide

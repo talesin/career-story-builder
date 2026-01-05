@@ -68,90 +68,24 @@ open FSharpPlus.Data
 
 // Validation accumulates ALL errors, unlike Result which short-circuits
 
-type StoryError =
-    | TitleEmpty
-    | TitleTooLong of max: int
-    | SituationEmpty
-    | TaskEmpty
-    | NoActions
-    | ResultEmpty
-    | InvalidTag of string
+let validateName name : Validation<string list, string> =
+    if String.IsNullOrWhiteSpace name then Failure ["Name required"]
+    else Success name
 
-type StoryErrors = StoryError list
+let validateEmail email : Validation<string list, string> =
+    if String.IsNullOrWhiteSpace email then Failure ["Email required"]
+    elif not (email.Contains "@") then Failure ["Invalid email"]
+    else Success email
 
-// Individual validators return Validation
-let validateTitle (title: string) : Validation<StoryErrors, string> =
-    if String.IsNullOrWhiteSpace title then
-        Failure [TitleEmpty]
-    elif title.Length > 200 then
-        Failure [TitleTooLong 200]
-    else
-        Success title
-
-let validateSituation (situation: Situation) : Validation<StoryErrors, Situation> =
-    if String.IsNullOrWhiteSpace situation.Context then
-        Failure [SituationEmpty]
-    else
-        Success situation
-
-let validateTask (task: Task) : Validation<StoryErrors, Task> =
-    if String.IsNullOrWhiteSpace task.Challenge then
-        Failure [TaskEmpty]
-    else
-        Success task
-
-let validateActions (actions: Action list) : Validation<StoryErrors, Action list> =
-    if List.isEmpty actions then
-        Failure [NoActions]
-    else
-        Success actions
-
-let validateResult (result: StoryResult) : Validation<StoryErrors, StoryResult> =
-    if String.IsNullOrWhiteSpace result.Outcome then
-        Failure [ResultEmpty]
-    else
-        Success result
-
-let validateTags (tags: string list) : Validation<StoryErrors, string list> =
-    let invalidTags = tags |> List.filter (fun t -> t.Length > 50)
-    if List.isEmpty invalidTags then
-        Success tags
-    else
-        Failure (invalidTags |> List.map InvalidTag)
-
-// Combine validations - accumulates ALL errors
-let validateStory (draft: StoryDraft) : Validation<StoryErrors, Story> =
-    let createStory title situation task actions result tags =
-        { Id = StoryId (Guid.NewGuid())
-          Title = title
-          Situation = situation
-          Task = task
-          Actions = actions
-          Result = result
-          Tags = tags
-          CreatedAt = DateTimeOffset.UtcNow
-          UpdatedAt = DateTimeOffset.UtcNow }
-
-    // Applicative style - all validations run, errors accumulate
-    createStory
-    <!> validateTitle draft.Title
-    <*> validateSituation draft.Situation
-    <*> validateTask draft.Task
-    <*> validateActions draft.Actions
-    <*> validateResult draft.Result
-    <*> validateTags draft.Tags
+// Combine validations - applicative style, all run, errors accumulate
+let validateUser name email =
+    (fun n e -> { Name = n; Email = e })
+    <!> validateName name
+    <*> validateEmail email
 
 // Usage
-let result = validateStory {
-    Title = ""  // Error: TitleEmpty
-    Situation = { Context = ""; When = None; Where = None }  // Error: SituationEmpty
-    Task = { Challenge = ""; Responsibility = ""; Stakeholders = [] }  // Error: TaskEmpty
-    Actions = []  // Error: NoActions
-    Result = { Outcome = ""; Impact = None; Metrics = None }  // Error: ResultEmpty
-    Tags = []
-}
-
-// result = Failure [TitleEmpty; SituationEmpty; TaskEmpty; NoActions; ResultEmpty]
+let result = validateUser "" "bad"
+// result = Failure ["Name required"; "Invalid email"]
 // ALL errors collected, not just the first one!
 ```
 
@@ -185,100 +119,53 @@ let loadAndProcess: Guid -> Async<Result<ProcessedStory, Error>> =
 ### Lenses for Nested Updates
 
 ```fsharp
-open FSharpPlus
 open FSharpPlus.Lens
 
-// Define lenses for Story structure
-let inline _situation f story =
-    f story.Situation |> map (fun s -> { story with Situation = s })
+// Define lenses for nested structure: Person -> Address -> City
+let inline _address f person =
+    f person.Address |> map (fun a -> { person with Address = a })
 
-let inline _context f situation =
-    f situation.Context |> map (fun c -> { situation with Context = c })
-
-let inline _task f story =
-    f story.Task |> map (fun t -> { story with Task = t })
-
-let inline _challenge f task =
-    f task.Challenge |> map (fun c -> { task with Challenge = c })
-
-let inline _result f story =
-    f story.Result |> map (fun r -> { story with Result = r })
-
-let inline _outcome f result =
-    f result.Outcome |> map (fun o -> { result with Outcome = o })
+let inline _city f address =
+    f address.City |> map (fun c -> { address with City = c })
 
 // Compose lenses
-let _situationContext = _situation << _context
-let _taskChallenge = _task << _challenge
-let _resultOutcome = _result << _outcome
+let _personCity = _address << _city
 
-// Read nested values
-let context = story ^. _situationContext
-let challenge = story ^. _taskChallenge
+// Read nested value
+let city = person ^. _personCity
 
-// Update nested values immutably
-let updatedStory =
-    story
-    |> setl _situationContext "New context for the situation"
-    |> setl _taskChallenge "Updated challenge description"
-    |> over _resultOutcome String.toUpper  // Transform value
+// Update nested value immutably
+let updated = person |> setl _personCity "New York"
 
-// Practical example: update story with user input
-let handleSituationUpdate newContext story =
-    story |> setl _situationContext newContext
-
-let handleTaskUpdate newChallenge story =
-    story |> setl _taskChallenge newChallenge
+// Transform nested value
+let upperCity = person |> over _personCity String.toUpper
 ```
 
 ### Reader Monad for Dependency Injection
 
 ```fsharp
-open FSharpPlus
 open FSharpPlus.Data
 
 // Dependencies as a record
-type StoryDependencies = {
-    Repository: IStoryRepository
-    Validator: Story -> Validation<StoryErrors, Story>
-    Logger: ILogger
-}
+type Deps = { GetUser: int -> string option; Log: string -> unit }
 
 // Operations that depend on environment
-let getStory (id: StoryId) : Reader<StoryDependencies, Task<Story option>> =
-    Reader (fun deps -> deps.Repository.GetById id)
+let greet userId : Reader<Deps, string> =
+    Reader (fun deps ->
+        match deps.GetUser userId with
+        | Some name -> $"Hello, {name}!"
+        | None -> "User not found")
 
-let saveStory (story: Story) : Reader<StoryDependencies, Task<unit>> =
-    Reader (fun deps -> task {
-        deps.Logger.LogInformation("Saving story {Id}", story.Id)
-        do! deps.Repository.Save story
-    })
-
-let validateAndSave (draft: StoryDraft) : Reader<StoryDependencies, Task<Validation<StoryErrors, Story>>> =
-    Reader (fun deps -> task {
-        match deps.Validator (toStory draft) with
-        | Success story ->
-            do! deps.Repository.Save story
-            return Success story
-        | Failure errors ->
-            deps.Logger.LogWarning("Validation failed: {Errors}", errors)
-            return Failure errors
-    })
-
-// Compose Reader operations
-let createStoryWorkflow draft = monad {
-    let! validated = validateAndSave draft
-    match validated with
-    | Success story ->
-        return! saveStory story |> Reader.map (fun _ -> Success story)
-    | Failure errors ->
-        return Failure errors
-}
+let greetAndLog userId : Reader<Deps, unit> =
+    Reader (fun deps ->
+        let msg = Reader.run deps (greet userId)
+        deps.Log msg)
 
 // Run with dependencies
-let runWorkflow deps =
-    createStoryWorkflow someDraft
-    |> Reader.run deps
+let deps = { GetUser = (fun id -> if id = 1 then Some "Alice" else None)
+             Log = printfn "%s" }
+
+greetAndLog 1 |> Reader.run deps  // Prints: Hello, Alice!
 ```
 
 ### Computation Expression Examples
@@ -288,27 +175,16 @@ open FSharpPlus
 
 // Generic monad CE works with any monad
 let optionWorkflow = monad {
-    let! story = findStory storyId
-    let! user = findUser story.UserId
-    return { Story = story; Author = user }
+    let! user = findUser userId
+    let! email = user.Email
+    return email
 }
 
-// Applicative CE for parallel/independent operations
+// Applicative CE for independent operations (can run in parallel)
 let fetchAllData = applicative {
-    let! stories = loadStories ()
-    and! users = loadUsers ()
-    and! tags = loadTags ()
-    return { Stories = stories; Users = users; Tags = tags }
-}
-
-// Validation with applicative
-let validatedStory = applicative {
-    let! title = validateTitle draft.Title
-    and! situation = validateSituation draft.Situation
-    and! task = validateTask draft.Task
-    and! actions = validateActions draft.Actions
-    and! result = validateResult draft.Result
-    return createStory title situation task actions result
+    let! users = loadUsers ()
+    and! config = loadConfig ()
+    return { Users = users; Config = config }
 }
 ```
 

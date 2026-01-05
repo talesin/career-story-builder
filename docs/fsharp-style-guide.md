@@ -220,12 +220,11 @@ match tryGetPerson conn id with
 
 ```fsharp
 // Chain validations with bind (fail-fast)
-let validateOrder order =
-    order
-    |> validateCustomerId
-    |> Result.bind validateShippingAddress
-    |> Result.bind validateLineItems
-    |> Result.bind validatePaymentInfo
+let validateUser user =
+    user
+    |> validateName
+    |> Result.bind validateEmail
+    |> Result.bind validateAge
 ```
 
 ### Use applicative style for error accumulation (FSharpPlus)
@@ -266,43 +265,35 @@ let handleError result =
 
 ```fsharp
 // Define a flattened error type
-type OrderError =
-    | ValidationFailed of ValidationError list
-    | PaymentDeclined of reason: string
-    | InventoryUnavailable of ProductId
-    | ShippingError of ShippingError
+type WorkflowError =
+    | ValidationFailed of string
+    | NotFound of string
+    | Unauthorized
 
 // Each step returns the same error type
-let validateOrder: Order -> Result<ValidatedOrder, OrderError> = ...
-let processPayment: ValidatedOrder -> Result<PaidOrder, OrderError> = ...
-let shipOrder: PaidOrder -> Result<ShippedOrder, OrderError> = ...
+let validate: Input -> Result<Valid, WorkflowError> = ...
+let process: Valid -> Result<Output, WorkflowError> = ...
 
 // Clean pipeline with flat Result type
-let processOrder order =
-    order
-    |> validateOrder
-    |> Result.bind processPayment
-    |> Result.bind shipOrder
+let run input =
+    input |> validate |> Result.bind process
 
 // Pattern match on structured errors, not strings
-let handleOrderError = function
-    | ValidationFailed errors -> showValidationErrors errors
-    | PaymentDeclined reason -> showPaymentError reason
-    | InventoryUnavailable productId -> showOutOfStock productId
-    | ShippingError err -> showShippingError err
+let handleError = function
+    | ValidationFailed msg -> showError msg
+    | NotFound id -> showNotFound id
+    | Unauthorized -> showUnauthorized ()
 ```
 
 **When combining Results from different domains**, map to a common error type at the boundary:
 
 ```fsharp
 // Map domain-specific errors to a common type
-let placeOrder order =
-    order
-    |> validateOrder                                    // Result<_, ValidationError>
-    |> Result.mapError OrderError.ValidationFailed      // lift to OrderError
-    |> Result.bind (fun valid ->
-        processPayment valid
-        |> Result.mapError OrderError.PaymentFailed)    // lift PaymentError to OrderError
+let workflow input =
+    input
+    |> validate                                // Result<_, ValidationError>
+    |> Result.mapError WorkflowError.ValidationFailed
+    |> Result.bind process
 ```
 
 ### See Also

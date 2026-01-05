@@ -120,32 +120,25 @@ and ValidationError =
 ### Result-Based Validation
 
 ```fsharp
-// Railway-oriented validation
-let validateTitle (title: string) : Result<string, ValidationError> =
-    if String.IsNullOrWhiteSpace title then
-        Error (TitleTooShort 1)
-    elif title.Length > 200 then
-        Error (TitleTooLong 200)
-    else
-        Ok title
+// Railway-oriented validation (fail-fast)
+let validateTitle title =
+    if String.IsNullOrWhiteSpace title then Error (TitleTooShort 1)
+    elif title.Length > 200 then Error (TitleTooLong 200)
+    else Ok title
 
-let validateSituation (situation: Situation) : Result<Situation, ValidationError> =
-    if String.IsNullOrWhiteSpace situation.Context then
-        Error MissingSituation
-    else
-        Ok situation
-
-let validateActions (actions: Action list) : Result<Action list, ValidationError> =
-    if List.isEmpty actions then
-        Error NoActions
-    else
-        Ok actions
+let validateSituation situation =
+    if String.IsNullOrWhiteSpace situation.Context then Error MissingSituation
+    else Ok situation
 
 // Compose validations using Result.bind
-let validateStory (draft: StoryDraft) : Result<Story, ValidationError list> =
-    // See FSharpPlus guide for error accumulation
-    ...
+let validateStory title situation =
+    validateTitle title
+    |> Result.bind (fun t ->
+        validateSituation situation
+        |> Result.map (fun s -> { Title = t; Situation = s }))
 ```
+
+For error accumulation (collecting all errors), see [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).
 
 ### Async Data Loading
 

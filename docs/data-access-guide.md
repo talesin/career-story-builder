@@ -64,182 +64,95 @@ open Dapper.FSharp.PostgreSQL  // or MSSQL, MySQL, SQLite
 OptionTypes.register()
 
 // Database record types (match database schema)
-type StoryRecord = {
+type UserRecord = {
+    Id: Guid
+    Name: string
+    Email: string
+    CreatedAt: DateTimeOffset
+}
+
+type PostRecord = {
     Id: Guid
     UserId: Guid
     Title: string
-    SituationContext: string
-    SituationWhen: DateOnly option
-    SituationWhere: string option
-    TaskChallenge: string
-    TaskResponsibility: string
-    TaskStakeholders: string option
-    ResultOutcome: string
-    ResultImpact: string option
-    ResultMetrics: string option
+    Content: string
     CreatedAt: DateTimeOffset
-    UpdatedAt: DateTimeOffset
-}
-
-type ActionRecord = {
-    Id: Guid
-    StoryId: Guid
-    Step: int
-    Description: string
-    Skills: string option
-}
-
-type TagRecord = {
-    Id: Guid
-    Name: string
-}
-
-type StoryTagRecord = {
-    StoryId: Guid
-    TagId: Guid
 }
 
 // Table definitions
-let storiesTable = table<StoryRecord>
-let actionsTable = table<ActionRecord>
-let tagsTable = table<TagRecord>
-let storyTagsTable = table<StoryTagRecord>
+let usersTable = table<UserRecord>
+let postsTable = table<PostRecord>
 ```
 
-### Story Repository (Dapper.FSharp)
+### Basic Repository (Dapper.FSharp)
 
 ```fsharp
 open Dapper.FSharp.PostgreSQL
 
-type StoryRepository(conn: IDbConnection) =
+type PostRepository(conn: IDbConnection) =
 
-    member _.GetAll(userId: Guid) = task {
-        let! stories =
+    member _.GetByUser(userId: Guid) = task {
+        let! posts =
             select {
-                for s in storiesTable do
-                where (s.UserId = userId)
-                orderByDescending s.UpdatedAt
-            } |> conn.SelectAsync<StoryRecord>
-
-        return stories |> Seq.toList
+                for p in postsTable do
+                where (p.UserId = userId)
+                orderByDescending p.CreatedAt
+            } |> conn.SelectAsync<PostRecord>
+        return posts |> Seq.toList
     }
 
     member _.GetById(id: Guid) = task {
-        let! stories =
+        let! posts =
             select {
-                for s in storiesTable do
-                where (s.Id = id)
-            } |> conn.SelectAsync<StoryRecord>
-
-        return stories |> Seq.tryHead
+                for p in postsTable do
+                where (p.Id = id)
+            } |> conn.SelectAsync<PostRecord>
+        return posts |> Seq.tryHead
     }
 
-    member _.Create(story: StoryRecord) = task {
+    member _.Create(post: PostRecord) = task {
         do! insert {
-            into storiesTable
-            value story
+            into postsTable
+            value post
         } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
-        return story
-    }
-
-    member _.Update(story: StoryRecord) = task {
-        do! update {
-            for s in storiesTable do
-            set story
-            where (s.Id = story.Id)
-        } |> conn.UpdateAsync |> Async.AwaitTask |> Async.Ignore
-
-        return story
+        return post
     }
 
     member _.Delete(id: Guid) = task {
         do! delete {
-            for s in storiesTable do
-            where (s.Id = id)
+            for p in postsTable do
+            where (p.Id = id)
         } |> conn.DeleteAsync |> Async.AwaitTask |> Async.Ignore
     }
 ```
 
-### Actions CRUD
+### Joins
 
 ```fsharp
-member _.GetActionsByStoryId(storyId: Guid) = task {
-    let! actions =
-        select {
-            for a in actionsTable do
-            where (a.StoryId = storyId)
-            orderBy a.Step
-        } |> conn.SelectAsync<ActionRecord>
-
-    return actions |> Seq.toList
-}
-
-member _.SaveActions(storyId: Guid, actions: ActionRecord list) = task {
-    // Delete existing actions
-    do! delete {
-        for a in actionsTable do
-        where (a.StoryId = storyId)
-    } |> conn.DeleteAsync |> Async.AwaitTask |> Async.Ignore
-
-    // Insert new actions
-    if not (List.isEmpty actions) then
-        do! insert {
-            into actionsTable
-            values actions
-        } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-}
-```
-
-### Joins (Story with Actions)
-
-```fsharp
-member _.GetStoryWithActions(id: Guid) = task {
-    // Dapper.FSharp join
+member _.GetPostWithUser(postId: Guid) = task {
     let! results =
         select {
-            for s in storiesTable do
-            leftJoin a in actionsTable on (s.Id = a.StoryId)
-            where (s.Id = id)
-            orderBy a.Step
-        } |> conn.SelectAsync<StoryRecord, ActionRecord option>
+            for p in postsTable do
+            leftJoin u in usersTable on (p.UserId = u.Id)
+            where (p.Id = postId)
+        } |> conn.SelectAsync<PostRecord, UserRecord option>
 
-    // Group results
-    let storyOpt = results |> Seq.tryHead |> Option.map fst
-    let actions =
-        results
-        |> Seq.choose (fun (_, a) -> a)
-        |> Seq.toList
-
-    return storyOpt |> Option.map (fun s -> s, actions)
+    return results |> Seq.tryHead
 }
 ```
 
 ### Aggregations
 
 ```fsharp
-member _.GetStoryCountByUser(userId: Guid) = task {
+member _.GetPostCount(userId: Guid) = task {
     let! result =
         select {
-            for s in storiesTable do
-            where (s.UserId = userId)
-            count "*" "StoryCount"
-        } |> conn.SelectAsync<{| StoryCount: int |}>
+            for p in postsTable do
+            where (p.UserId = userId)
+            count "*" "Total"
+        } |> conn.SelectAsync<{| Total: int |}>
 
-    return result |> Seq.head |> _.StoryCount
-}
-
-member _.GetStoriesPerMonth(userId: Guid) = task {
-    let! results =
-        select {
-            for s in storiesTable do
-            where (s.UserId = userId)
-            groupBy (s.CreatedAt.Month)
-            orderBy (s.CreatedAt.Month)
-            count "*" "Count"
-        } |> conn.SelectAsync<{| Month: int; Count: int |}>
-
-    return results |> Seq.toList
+    return result |> Seq.head |> _.Total
 }
 ```
 
@@ -247,29 +160,15 @@ member _.GetStoriesPerMonth(userId: Guid) = task {
 
 ```fsharp
 // For queries too complex for Dapper.FSharp
-member _.SearchStories(userId: Guid, searchTerm: string, tags: string list) = task {
+member _.Search(userId: Guid, searchTerm: string) = task {
     let sql = """
-        SELECT DISTINCT s.*
-        FROM stories s
-        LEFT JOIN story_tags st ON s.id = st.story_id
-        LEFT JOIN tags t ON st.tag_id = t.id
-        WHERE s.user_id = @UserId
-          AND (
-            s.title ILIKE @SearchTerm
-            OR s.situation_context ILIKE @SearchTerm
-            OR s.task_challenge ILIKE @SearchTerm
-            OR s.result_outcome ILIKE @SearchTerm
-          )
-          AND (@Tags IS NULL OR t.name = ANY(@Tags))
-        ORDER BY s.updated_at DESC
+        SELECT * FROM posts
+        WHERE user_id = @UserId
+          AND (title ILIKE @Term OR content ILIKE @Term)
+        ORDER BY created_at DESC
     """
-
-    let! results = conn.QueryAsync<StoryRecord>(
-        sql,
-        {| UserId = userId
-           SearchTerm = $"%%{searchTerm}%%"
-           Tags = if List.isEmpty tags then null else tags |> List.toArray |})
-
+    let! results = conn.QueryAsync<PostRecord>(
+        sql, {| UserId = userId; Term = $"%%{searchTerm}%%" |})
     return results |> Seq.toList
 }
 ```
@@ -277,49 +176,31 @@ member _.SearchStories(userId: Guid, searchTerm: string, tags: string list) = ta
 ### Transactions
 
 ```fsharp
-member _.CreateStoryWithActions(story: StoryRecord, actions: ActionRecord list) = task {
+member _.CreateWithUser(user: UserRecord, post: PostRecord) = task {
     use transaction = conn.BeginTransaction()
-
     try
-        // Insert story
-        do! insert {
-            into storiesTable
-            value story
-        } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
-        // Insert actions
-        if not (List.isEmpty actions) then
-            do! insert {
-                into actionsTable
-                values actions
-            } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
+        do! insert { into usersTable; value user }
+            |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
+        do! insert { into postsTable; value post }
+            |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
         transaction.Commit()
-        return Ok story
+        return Ok post
     with ex ->
         transaction.Rollback()
         return Error ex.Message
 }
 ```
 
-### Type Handler for StoryId
+### Custom Type Handler
 
 ```fsharp
-// Register custom type handlers for domain types
-open Dapper
+// Register type handlers for domain types (e.g., single-case DUs)
+type UserIdHandler() =
+    inherit SqlMapper.TypeHandler<UserId>()
+    override _.SetValue(p, v) = let (UserId id) = v in p.Value <- id
+    override _.Parse(v) = UserId(v :?> Guid)
 
-type StoryIdHandler() =
-    inherit SqlMapper.TypeHandler<StoryId>()
-
-    override _.SetValue(parameter, value) =
-        let (StoryId id) = value
-        parameter.Value <- id
-
-    override _.Parse(value) =
-        StoryId(value :?> Guid)
-
-// Register on startup
-SqlMapper.AddTypeHandler(StoryIdHandler())
+SqlMapper.AddTypeHandler(UserIdHandler())
 ```
 
 ## When to Use Which
