@@ -32,6 +32,8 @@ Minimal stories to test the iterative AI conversation for building STAR-format s
 - AUTH-02: Profile Import
 - AUTH-03: Session Management
 
+**Note:** Sessions use cookie/in-memory storage until database is introduced in Phase 3.
+
 ## Phase 3: Complete Wizard & Draft Management
 
 **Goal:** Full story creation workflow with persistence.
@@ -40,9 +42,7 @@ Minimal stories to test the iterative AI conversation for building STAR-format s
 - ADD-18: Resume Draft
 - ADD-17: Draft Status Indicator
 - ADD-07: AI Suggestions
-- ADD-09: Content Sufficiency Indicator
 - ADD-11: Story Review Request
-- ADD-13: Final Scoring
 
 ## Phase 4: Dashboard & Story List
 
@@ -63,29 +63,25 @@ Minimal stories to test the iterative AI conversation for building STAR-format s
 - DASH-05: Sort Stories
 - DASH-09: View Drafts
 - UPD-03: Direct Section Editing
-- UPD-04: Request Re-Review
 
 ## Phase 6: Metadata & Tags
 
 **Goal:** Add context and organization to stories.
 
+- EMP-02: Add Role
 - ADD-02: Associate Story with Role
-- ADD-03: Associate Story with Project
 - ADD-04: Set Story Time Period
 - ADD-16: Add Tags to Story
 - UPD-08: Manage Story Tags
 - ADD-12: Review-Based Questions
-- ADD-14: Scoring Criteria Visibility
 
 ## Phase 7: Employment History
 
 **Goal:** Track career context for stories.
 
 - EMP-01: View Employment History
-- EMP-02: Add Role
 - EMP-05: View Stories by Role
 - UPD-06: Change Role Association
-- UPD-07: Change Project Association
 
 ## Phase 8: Advanced Settings & Polish
 
@@ -98,8 +94,19 @@ Minimal stories to test the iterative AI conversation for building STAR-format s
 - UPD-02: Re-enter Wizard
 - DEL-03: Bulk Delete
 
+## Phase 9: Scoring & Quality
+
+**Goal:** Add quality scoring and content sufficiency features.
+
+- ADD-09: Content Sufficiency Indicator
+- ADD-13: Final Scoring
+- ADD-14: Scoring Criteria Visibility
+- UPD-04: Request Re-Review
+
 ## Future Considerations (Won't Have - Initial Release)
 
+- ADD-03: Associate Story with Project
+- UPD-07: Change Project Association
 - DASH-06: Filter by Role
 - DASH-07: Filter by Project
 - DASH-08: Filter by Tag

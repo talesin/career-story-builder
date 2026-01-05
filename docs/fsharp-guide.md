@@ -53,7 +53,12 @@ F# is the primary language for this project. The Star story domain benefits from
 
 ```fsharp
 // Core domain types for career stories
-// Wrapped in Star module to avoid collisions with System.Task and F# Result type
+//
+// NOTE: The Star module wrapper is specific to this domain because STAR acronym
+// components (Task, Result) collide with common types (System.Threading.Tasks.Task,
+// F#'s Result<'T,'E>). This is NOT a typical F# pattern - normally you'd define
+// types at module level without wrapping. We use it here solely to avoid these
+// name collisions while keeping the STAR terminology.
 
 module Star =
     type Situation = Situation of string

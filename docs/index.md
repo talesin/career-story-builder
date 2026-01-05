@@ -2,9 +2,13 @@
 
 ## Project Documentation
 
-- [User Stories](user-stories.md) - Feature requirements organized by domain
-- [Delivery Plan](delivery-plan.md) - Phased implementation roadmap
-- [Technology](technology.md) - Technical architecture and stack decisions
+| Document | Purpose |
+| -------- | ------- |
+| [User Stories](user-stories.md) | Feature requirements organized by domain |
+| [Delivery Plan](delivery-plan.md) | Phased implementation roadmap with MOSCOW prioritization |
+| [Implementation Plan](implementation-plan.md) | Detailed technical implementation steps for each phase |
+| [Data Types](data-types.md) | Core F# domain types and interfaces |
+| [Technology](technology.md) | Technical architecture and stack decisions |
 
 ## Reference Guides
 

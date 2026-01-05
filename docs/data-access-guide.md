@@ -60,7 +60,9 @@ Use **plain Dapper** for:
 open Dapper.FSharp
 open Dapper.FSharp.PostgreSQL  // or MSSQL, MySQL, SQLite
 
-// IMPORTANT: Register F# Option types on startup
+// IMPORTANT: Call once at startup (e.g., in Program.fs) before any database access.
+// This registers F# Option type handlers with Dapper so Option<'T> fields
+// serialize/deserialize correctly (None becomes NULL, Some x becomes x).
 OptionTypes.register()
 
 // Database record types (match database schema)
@@ -214,3 +216,7 @@ SqlMapper.AddTypeHandler(UserIdHandler())
 | Window functions              | Plain Dapper  |
 | CTEs                          | Plain Dapper  |
 | Database-specific features    | Plain Dapper  |
+
+## Testing
+
+For repository testing patterns, see [Testing Guide](testing-guide.md).

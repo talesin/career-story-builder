@@ -152,6 +152,7 @@ let propertyTests = testList "Story Properties" [
 ```fsharp
 open Bunit
 open Xunit
+open Moq
 
 type StoryFormTests() =
     inherit BunitContext()
@@ -237,6 +238,8 @@ type StoryFormTests() =
 
 ### Mocking Services for Tests
 
+> **Preferred approach:** Use F# idiomatic mocking (function parameters, test doubles) as shown in the next section. Use Moq only for external types we can't modify that don't lend themselves to functional style.
+
 ```fsharp
 type StoryListTests() =
     inherit BunitContext()
@@ -282,9 +285,9 @@ type StoryListTests() =
         )
 ```
 
-### F# Idiomatic Mocking Patterns
+### F# Idiomatic Mocking Patterns (Preferred)
 
-In F#, prefer fakes and stubs over dynamic mocking frameworks. This approach is simpler and more aligned with functional programming principles.
+**This is the preferred approach for this project.** In F#, use fakes and stubs over dynamic mocking frameworks like Moq. This approach is simpler, more type-safe, and better aligned with functional programming principles.
 
 **Fake functions with mutable capture**:
 
@@ -377,7 +380,13 @@ type StoryApiTests(factory: WebApplicationFactory<Program>) =
 
     [<Fact>]
     member _.``POST /api/stories creates new story``() = task {
-        let dto = {| Title = "Test Story"; ... |}
+        let dto = {|
+            Title = "Test Story"
+            Situation = "Test situation context"
+            Task = "Test task challenge"
+            Action = "Test action taken"
+            Result = "Test outcome achieved"
+        |}
         let! response = client.PostAsJsonAsync("/api/stories", dto)
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode)

@@ -197,14 +197,35 @@ let fetchAllData = applicative {
 | Performance         | Better          | Slightly slower  | Most cases: Result          |
 | User feedback       | Shows one error | Shows all errors | Forms: Validation           |
 
-## Quick Setup
+## Setup
+
+### Package Installation
+
+Add to your `.fsproj`:
+
+```xml
+<PackageReference Include="FSharpPlus" Version="1.*" />
+```
+
+### Common Imports
 
 ```fsharp
-// In your .fsproj
-<PackageReference Include="FSharpPlus" Version="*" />
-
-// In your code
-open FSharpPlus          // Generic operators
-open FSharpPlus.Data     // Validation, Reader, etc.
-open FSharpPlus.Lens     // Optics (when needed)
+open FSharpPlus          // Generic operators (map, bind, etc.)
+open FSharpPlus.Data     // Validation, Reader, NonEmptyList, etc.
+open FSharpPlus.Lens     // Optics (only when needed for nested updates)
 ```
+
+### When FSharpPlus is Required vs Optional
+
+| Feature | FSharpPlus Required? | Alternative |
+| ------- | -------------------- | ----------- |
+| Error accumulation (Validation) | **Required** | Custom implementation is complex and error-prone |
+| `Option.toResultWith` | **Required** | No built-in F# equivalent |
+| Generic operators (`map`, `bind`) | Optional | Use type-specific functions (`List.map`, `Option.bind`) |
+| Lenses | Optional | Use standard F# copy-and-update (`{ record with Field = ... }`) |
+| Reader monad | Optional | Pass dependencies as function parameters |
+
+**Recommendation for this project:**
+
+- Use FSharpPlus for `Validation` and `Option.toResultWith` - these are genuinely useful and have no good alternatives
+- Prefer standard F# for everything else unless you're working with code that already uses FSharpPlus patterns

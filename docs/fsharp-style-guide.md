@@ -962,6 +962,18 @@ type Api() =
         | ValueNone -> getAll()
 ```
 
+**When to use `[<Struct>]` optional parameters:**
+
+- **Hot paths**: Methods called thousands of times per second (API handlers, tight loops)
+- **Low-level libraries**: Where allocation pressure matters
+- **Performance-critical APIs**: Especially when optional params are commonly omitted
+
+**When to skip it:**
+
+- **Application-level code**: The optimization is negligible for most business logic
+- **When readability matters more**: `Some`/`None` is more familiar than `ValueSome`/`ValueNone`
+- **Default choice**: Use standard `?param` unless profiling shows allocation issues
+
 ### Simplified type annotations in computation expressions
 
 ```fsharp

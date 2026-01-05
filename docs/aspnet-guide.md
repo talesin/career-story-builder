@@ -225,6 +225,57 @@ let configureMiddleware (app: WebApplication) =
     app
 ```
 
+### Error Handling Middleware
+
+Convert domain errors to appropriate HTTP responses:
+
+```fsharp
+open Microsoft.AspNetCore.Diagnostics
+
+// Domain error types
+type DomainError =
+    | NotFound of string
+    | ValidationFailed of string list
+    | Unauthorized of string
+    | Conflict of string
+
+// Middleware to convert domain errors to HTTP responses
+let configureDomainErrorHandler (app: WebApplication) =
+    app.Use(fun context next -> task {
+        try
+            do! next.Invoke()
+        with
+        | :? DomainException as ex ->
+            context.Response.ContentType <- "application/json"
+            let (statusCode, body) =
+                match ex.Error with
+                | NotFound msg ->
+                    (StatusCodes.Status404NotFound,
+                     {| error = "NotFound"; message = msg |})
+                | ValidationFailed errors ->
+                    (StatusCodes.Status400BadRequest,
+                     {| error = "ValidationFailed"; messages = errors |})
+                | Unauthorized msg ->
+                    (StatusCodes.Status401Unauthorized,
+                     {| error = "Unauthorized"; message = msg |})
+                | Conflict msg ->
+                    (StatusCodes.Status409Conflict,
+                     {| error = "Conflict"; message = msg |})
+            context.Response.StatusCode <- statusCode
+            do! context.Response.WriteAsJsonAsync(body)
+    }) |> ignore
+    app
+
+// Alternative: Result-based error handling in endpoints
+let handleResult (result: Result<'T, DomainError>) =
+    match result with
+    | Ok value -> Results.Ok(value)
+    | Error (NotFound msg) -> Results.NotFound({| message = msg |})
+    | Error (ValidationFailed errors) -> Results.BadRequest({| errors = errors |})
+    | Error (Unauthorized msg) -> Results.Unauthorized()
+    | Error (Conflict msg) -> Results.Conflict({| message = msg |})
+```
+
 ### Program.fs Setup
 
 ```fsharp
@@ -283,6 +334,29 @@ type StoryService(
     }
 ```
 
+Corresponding appsettings.json structure:
+
+```json
+{
+  "Database": {
+    "ConnectionString": "Host=localhost;Database=career_stories;Username=app;Password=secret",
+    "MaxRetryCount": 3
+  },
+  "Auth": {
+    "Issuer": "career-story-builder",
+    "Audience": "career-story-builder-client",
+    "Key": "your-256-bit-secret-key-here",
+    "ExpirationMinutes": 60
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  }
+}
+```
+
 ## Middleware Order Reference
 
 See: `aspnet#middleware`
@@ -298,3 +372,7 @@ See: `aspnet#middleware`
 8. Custom middleware
 9. Endpoints (last)
 ```
+
+## Testing
+
+For API endpoint and integration testing patterns, see [Testing Guide](testing-guide.md).
