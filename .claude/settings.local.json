@@ -6,7 +6,8 @@
       "Bash(grep:*)",
       "Bash(xargs:*)",
       "Bash(wc:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(tree:*)"
     ]
   }
 }

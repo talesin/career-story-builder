@@ -41,7 +41,7 @@ Docker provides:
 
 ```dockerfile
 # Development Dockerfile - enables hot reload
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
 
 WORKDIR /app
 
@@ -72,7 +72,7 @@ ENTRYPOINT ["dotnet", "watch", "--project", "src/CareerStoryBuilder.Server"]
 # ========================================
 # Stage 1: Build
 # ========================================
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
@@ -94,7 +94,7 @@ RUN dotnet publish src/CareerStoryBuilder.Server \
 # ========================================
 # Stage 2: Production Runtime
 # ========================================
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
