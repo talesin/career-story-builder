@@ -1,6 +1,6 @@
 # Delivery Plan
 
-## MOSCOW Prioritization Key
+## MoSCoW Prioritization Key
 
 - **(M)** Must Have - Core functionality required for viable product
 - **(S)** Should Have - Important features that significantly enhance value

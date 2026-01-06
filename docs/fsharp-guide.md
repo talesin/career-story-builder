@@ -2,11 +2,13 @@
 
 ## Key Patterns for Career Story Builder
 
-F# is the primary language for this project. The Star story domain benefits from:
+F# is the primary language for this project. The STAR story domain benefits from:
 - **Discriminated unions** for modeling story components
 - **Records** for immutable data structures
 - **Result type** for validation and error handling
 - **Pattern matching** for processing different story states
+
+> **Naming Convention**: We use "STAR" when referring to the interview methodology (Situation, Task, Action, Result) and "Star" (PascalCase) for F# module/type names to avoid collisions with common types like `System.Threading.Tasks.Task`.
 
 ## Domain Examples
 

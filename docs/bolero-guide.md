@@ -84,6 +84,15 @@ type Message =
 ### Update Function
 
 ```fsharp
+/// Extract string value from change event (handlers receive 'obj')
+let inline inputValue (e: ChangeEventArgs) = unbox<string> e.Value
+
+// Helper to update editor if present
+let updateEditor f model =
+    match model.CurrentStory with
+    | Some editor -> { model with CurrentStory = Some (f editor) }, Cmd.none
+    | None -> model, Cmd.none
+
 let update (service: IStoryService) (message: Message) (model: Model) =
     match message with
     | SetPage page ->
@@ -127,12 +136,6 @@ let update (service: IStoryService) (message: Message) (model: Model) =
         { model with Error = None }, Cmd.none
 
     | _ -> model, Cmd.none
-
-// Helper to update editor if present
-and updateEditor f model =
-    match model.CurrentStory with
-    | Some editor -> { model with CurrentStory = Some (f editor) }, Cmd.none
-    | None -> model, Cmd.none
 ```
 
 ### View Functions
@@ -169,9 +172,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
                 attr.``type`` "text"
                 attr.value editor.Title
                 attr.placeholder "e.g., Led cross-functional team to deliver..."
-                // unbox e.Value: Event handlers receive JS objects where Value is typed as 'obj'.
-                // Use unbox to cast to the expected type (string for input values).
-                on.change (fun e -> dispatch (SetTitle (unbox e.Value)))
+                on.change (fun e -> dispatch (SetTitle (inputValue e)))
             }
         }
 
@@ -181,7 +182,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
             textarea {
                 attr.placeholder "Describe the context and background..."
                 attr.value editor.Situation
-                on.change (fun e -> dispatch (SetSituation (unbox e.Value)))
+                on.change (fun e -> dispatch (SetSituation (inputValue e)))
             }
         }
 
@@ -191,7 +192,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
             textarea {
                 attr.placeholder "What was the challenge or responsibility?"
                 attr.value editor.Task
-                on.change (fun e -> dispatch (SetTask (unbox e.Value)))
+                on.change (fun e -> dispatch (SetTask (inputValue e)))
             }
         }
 
@@ -201,7 +202,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
             textarea {
                 attr.placeholder "What steps did you take?"
                 attr.value editor.Action
-                on.change (fun e -> dispatch (SetAction (unbox e.Value)))
+                on.change (fun e -> dispatch (SetAction (inputValue e)))
             }
         }
 
@@ -211,7 +212,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
             textarea {
                 attr.placeholder "What was the outcome and impact?"
                 attr.value editor.Result
-                on.change (fun e -> dispatch (SetResult (unbox e.Value)))
+                on.change (fun e -> dispatch (SetResult (inputValue e)))
             }
         }
 
