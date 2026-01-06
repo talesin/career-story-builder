@@ -163,7 +163,7 @@ let configureBillingServices (services: IServiceCollection) =
 - Wrapper methods should be one-liners that delegate to functional code
 - Keep the functional core testable without the wrapper
 
-See: [Design Patterns Guide](design-patterns-guide.md#functional-dependency-injection) for DI pattern details.
+See: [F# Style Guide - Split Module/Class Pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop) for detailed guidance and [Design Patterns Guide](design-patterns-guide.md#functional-dependency-injection) for DI pattern details.
 
 ### Authentication Setup
 
@@ -322,16 +322,33 @@ type AuthOptions() =
     member val Key = "" with get, set
     member val ExpirationMinutes = 60 with get, set
 
-// Usage in service
+// Module: Contains service logic with explicit dependencies
+module StoryOperations =
+    let getAll (log: string -> unit) (getAllStories: unit -> Task<Story list>) = task {
+        log "Fetching all stories"
+        return! getAllStories()
+    }
+
+    let getById (log: string -> unit) (getStory: StoryId -> Task<Story option>) (id: StoryId) = task {
+        log $"Fetching story {id}"
+        return! getStory id
+    }
+
+// Thin wrapper: Adapts module functions for DI
 type StoryService(
     repository: IStoryRepository,
-    dbOptions: IOptions<DatabaseOptions>,
     logger: ILogger<StoryService>) =
 
-    member _.GetAll() = task {
-        logger.LogInformation("Fetching all stories")
-        return! repository.GetAll()
-    }
+    member _.GetAll() =
+        StoryOperations.getAll
+            (fun msg -> logger.LogInformation(msg))
+            repository.GetAll
+
+    member _.GetById(id) =
+        StoryOperations.getById
+            (fun msg -> logger.LogInformation(msg))
+            repository.GetById
+            id
 ```
 
 Corresponding appsettings.json structure:

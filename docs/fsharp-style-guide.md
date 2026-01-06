@@ -862,6 +862,90 @@ let main () =
     // Use processor...
 ```
 
+### Split Module/Class Pattern for Framework Interop
+
+When working with frameworks that require class-based APIs (ASP.NET Core DI, Blazor components, hosted services), use the split module/class pattern to preserve testability and composability.
+
+#### Why This Pattern
+
+1. **Testability**: Module functions can be tested directly without mocking constructors or framework infrastructure
+2. **Composability**: Functions compose naturally via partial application and pipelines
+3. **Separation of Concerns**: Business logic stays in pure F#; framework glue code is isolated
+4. **Reduced Coupling**: Module functions don't depend on framework types (ILogger, IConfiguration)
+
+#### Pattern Structure
+
+```fsharp
+// 1. Module: Contains all logic
+//    - Dependencies as FIRST parameters (enables partial application)
+//    - Business inputs LAST
+//    - No framework types in signatures when possible
+module Billing =
+    type BillingDeps = {
+        ChargeCard: string -> decimal -> Task<Result<unit, string>>
+        Log: string -> unit
+    }
+
+    let charge (deps: BillingDeps) (customerId: string) (amount: decimal) = task {
+        deps.Log $"Charging {customerId} amount {amount}"
+        return! deps.ChargeCard customerId amount
+    }
+
+    let refund (deps: BillingDeps) (customerId: string) (amount: decimal) = task {
+        deps.Log $"Refunding {customerId} amount {amount}"
+        return! deps.ChargeCard customerId (-amount)
+    }
+
+// 2. Wrapper Class: Thin delegation only
+//    - Constructor receives dependencies from DI
+//    - Methods are one-liners delegating to module functions
+//    - NO business logic here
+type BillingService(deps: Billing.BillingDeps) =
+    member _.Charge(customerId, amount) = Billing.charge deps customerId amount
+    member _.Refund(customerId, amount) = Billing.refund deps customerId amount
+```
+
+#### Guidelines
+
+| Guideline | Rationale |
+|-----------|-----------|
+| Dependencies as first parameters | Enables partial application at composition root |
+| Wrapper methods are one-liners | If you're writing logic in the class, it belongs in the module |
+| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing |
+| Create wrapper only at framework boundary | Not every module needs a wrapper class |
+
+#### When to Apply
+
+- **ASP.NET Core services**: Controllers, hosted services, middleware
+- **Blazor/Bolero components**: Extract async operations and state logic
+- **Repository classes**: When using Dapper with DI
+- **Background workers**: Extract processing logic to testable modules
+
+#### Testing Benefits
+
+```fsharp
+// Module functions test directly - no mocking framework needed
+[<Test>]
+let ``charge logs and calls payment gateway`` () = task {
+    let mutable logged = ""
+    let mutable charged = None
+    let testDeps = {
+        Log = fun msg -> logged <- msg
+        ChargeCard = fun cid amt -> task {
+            charged <- Some (cid, amt)
+            return Ok ()
+        }
+    }
+
+    let! result = Billing.charge testDeps "cust123" 50.0m
+
+    Expect.equal logged "Charging cust123 amount 50.0" "Should log"
+    Expect.equal charged (Some ("cust123", 50.0m)) "Should charge"
+}
+```
+
+See also: [ASP.NET Guide - Wrapping Functional Code](aspnet-guide.md#wrapping-functional-code-for-framework-di) for the canonical BillingService example.
+
 ---
 
 ## 13. Async and Task Patterns

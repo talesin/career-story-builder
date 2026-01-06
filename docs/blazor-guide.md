@@ -50,8 +50,26 @@ While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns h
 
 ### Component Lifecycle in Bolero
 
+Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), extract async operations to a module for testability:
+
 ```fsharp
-// Bolero component with lifecycle
+// Module: Contains async loading logic
+// Testable without Blazor infrastructure
+module StoryEditorOps =
+    type LoadResult =
+        | Loading
+        | Loaded of Story
+        | NotFound
+
+    let loadStory (getStory: Guid -> Task<Story option>) (storyId: Guid) = task {
+        let! story = getStory storyId
+        return
+            match story with
+            | Some s -> Loaded s
+            | None -> NotFound
+    }
+
+// Bolero component: Thin wrapper calling module functions
 type StoryEditorComponent() =
     inherit Component()
 
@@ -61,23 +79,25 @@ type StoryEditorComponent() =
     [<Inject>]
     member val StoryService: IStoryService = Unchecked.defaultof<_> with get, set
 
-    member val Story: Story option = None with get, set
-    member val IsLoading: bool = true with get, set
+    member val LoadState: StoryEditorOps.LoadResult = StoryEditorOps.Loading with get, set
 
     override this.OnInitializedAsync() = task {
-        let! story = this.StoryService.GetById this.StoryId
-        this.Story <- story
-        this.IsLoading <- false
+        let! result = StoryEditorOps.loadStory this.StoryService.GetById this.StoryId
+        this.LoadState <- result
     }
 
     override this.Render() =
-        cond this.IsLoading <| function
-            | true -> div { "Loading story..." }
-            | false ->
-                match this.Story with
-                | Some story -> storyView story
-                | None -> div { "Story not found" }
+        match this.LoadState with
+        | StoryEditorOps.Loading -> div { "Loading story..." }
+        | StoryEditorOps.Loaded story -> storyView story
+        | StoryEditorOps.NotFound -> div { "Story not found" }
 ```
+
+**Why extract component logic:**
+
+- **Testability**: `StoryEditorOps.loadStory` can be tested without Blazor runtime
+- **State clarity**: `LoadResult` DU makes states explicit vs boolean flags
+- **Reusability**: Loading logic can be reused across components
 
 ### Validation Attributes for Story Forms
 

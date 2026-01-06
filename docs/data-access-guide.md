@@ -88,12 +88,16 @@ let postsTable = table<PostRecord>
 
 ### Basic Repository (Dapper.FSharp)
 
+Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), separate query logic from the DI wrapper:
+
 ```fsharp
 open Dapper.FSharp.PostgreSQL
 
-type PostRepository(conn: IDbConnection) =
+// Module: Contains all query logic
+// Connection passed as first parameter for testability
+module PostQueries =
 
-    member _.GetByUser(userId: Guid) = task {
+    let getByUser (conn: IDbConnection) (userId: Guid) = task {
         let! posts =
             select {
                 for p in postsTable do
@@ -103,7 +107,7 @@ type PostRepository(conn: IDbConnection) =
         return posts |> Seq.toList
     }
 
-    member _.GetById(id: Guid) = task {
+    let getById (conn: IDbConnection) (id: Guid) = task {
         let! posts =
             select {
                 for p in postsTable do
@@ -112,7 +116,7 @@ type PostRepository(conn: IDbConnection) =
         return posts |> Seq.tryHead
     }
 
-    member _.Create(post: PostRecord) = task {
+    let create (conn: IDbConnection) (post: PostRecord) = task {
         do! insert {
             into postsTable
             value post
@@ -120,18 +124,42 @@ type PostRepository(conn: IDbConnection) =
         return post
     }
 
-    member _.Delete(id: Guid) = task {
+    let delete (conn: IDbConnection) (id: Guid) = task {
         do! delete {
             for p in postsTable do
             where (p.Id = id)
         } |> conn.DeleteAsync |> Async.AwaitTask |> Async.Ignore
     }
+
+// Thin wrapper for ASP.NET Core DI
+type PostRepository(conn: IDbConnection) =
+    member _.GetByUser(userId) = PostQueries.getByUser conn userId
+    member _.GetById(id) = PostQueries.getById conn id
+    member _.Create(post) = PostQueries.create conn post
+    member _.Delete(id) = PostQueries.delete conn id
+```
+
+**Testing module functions directly:**
+
+```fsharp
+[<Test>]
+let ``getByUser returns posts ordered by date`` () = task {
+    use conn = createTestConnection()
+    // ... setup test data ...
+
+    let! posts = PostQueries.getByUser conn testUserId
+
+    Expect.isTrue
+        (posts |> List.pairwise |> List.forall (fun (a, b) -> a.CreatedAt >= b.CreatedAt))
+        "Posts should be ordered descending by date"
+}
 ```
 
 ### Joins
 
 ```fsharp
-member _.GetPostWithUser(postId: Guid) = task {
+// In PostQueries module
+let getWithUser (conn: IDbConnection) (postId: Guid) = task {
     let! results =
         select {
             for p in postsTable do
@@ -146,7 +174,8 @@ member _.GetPostWithUser(postId: Guid) = task {
 ### Aggregations
 
 ```fsharp
-member _.GetPostCount(userId: Guid) = task {
+// In PostQueries module
+let countByUser (conn: IDbConnection) (userId: Guid) = task {
     let! result =
         select {
             for p in postsTable do
@@ -161,8 +190,8 @@ member _.GetPostCount(userId: Guid) = task {
 ### Complex Query (Plain Dapper Fallback)
 
 ```fsharp
-// For queries too complex for Dapper.FSharp
-member _.Search(userId: Guid, searchTerm: string) = task {
+// In PostQueries module - for queries too complex for Dapper.FSharp
+let search (conn: IDbConnection) (userId: Guid) (searchTerm: string) = task {
     let sql = """
         SELECT * FROM posts
         WHERE user_id = @UserId
@@ -178,7 +207,8 @@ member _.Search(userId: Guid, searchTerm: string) = task {
 ### Transactions
 
 ```fsharp
-member _.CreateWithUser(user: UserRecord, post: PostRecord) = task {
+// In PostQueries module
+let createWithUser (conn: IDbConnection) (user: UserRecord) (post: PostRecord) = task {
     use transaction = conn.BeginTransaction()
     try
         do! insert { into usersTable; value user }
