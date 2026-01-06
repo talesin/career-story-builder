@@ -1,155 +1,99 @@
 # F# Language Quick Reference
 
-> References: `$REFERENCES/fsharp/`
-
-## Quick Links by Task
-
-| Task | Reference |
-|------|-----------|
-| Define domain types | `$REFERENCES/fsharp/index.md#domain-modeling-records` |
-| Use discriminated unions | `$REFERENCES/fsharp/index.md#discriminated-unions` |
-| Pattern matching | `$REFERENCES/fsharp/index.md#pattern-matching` |
-| Handle errors with Result | `$REFERENCES/fsharp/index.md#rich-domains` |
-| Railway-oriented programming | `$REFERENCES/fsharp/index.md#railway-oriented` |
-| Async programming | `$REFERENCES/fsharp/index.md#async-programming` |
-| Collections (List, Array, Seq) | `$REFERENCES/fsharp/index.md#collections` |
-| Computation expressions | `$REFERENCES/fsharp/index.md#computation-expressions` |
-| Testing with Expecto | `$REFERENCES/fsharp/index.md#testing-expecto` |
-| Code style | `$REFERENCES/fsharp/index.md#style-guide` |
-
 ## Key Patterns for Career Story Builder
 
-F# is the primary language for this project. The STAR story domain benefits from:
+F# is the primary language for this project. The Star story domain benefits from:
 - **Discriminated unions** for modeling story components
 - **Records** for immutable data structures
 - **Result type** for validation and error handling
 - **Pattern matching** for processing different story states
 
-## Primary References
-
-### Domain Modeling
-- **Records and DUs**: `$REFERENCES/fsharp/index.md#records-unions-lang`
-  - Record syntax and copy-and-update
-  - Anonymous records
-  - Single-case discriminated unions for type safety
-
-- **Rich Domain Building**: `$REFERENCES/fsharp/index.md#rich-domains`
-  - Option type for optional fields
-  - Result type for validation
-  - Making illegal states unrepresentable
-
-### Error Handling
-- **Railway-Oriented Programming**: `$REFERENCES/fsharp/index.md#railway-oriented`
-  - bind, map, and composition
-  - Error track handling
-  - Validation pipelines
-
-### Async and I/O
-- **Task-based Async**: `$REFERENCES/fsharp/index.md#async-programming`
-  - `task { }` computation expressions
-  - Parallel vs sequential execution
-
 ## Domain Examples
 
-### STAR Story Domain Types
+### Star Story Domain Types
+
+Reference: `fsharp#domain-modeling-records`, `fsharp#records-unions`
 
 ```fsharp
 // Core domain types for career stories
-type StoryId = StoryId of Guid
+//
+// NOTE: The Star module wrapper is specific to this domain because STAR acronym
+// components (Task, Result) collide with common types (System.Threading.Tasks.Task,
+// F#'s Result<'T,'E>). This is NOT a typical F# pattern - normally you'd define
+// types at module level without wrapping. We use it here solely to avoid these
+// name collisions while keeping the STAR terminology.
 
-type Situation = {
-    Context: string
-    When: DateOnly option
-    Where: string option
-}
-
-type Task = {
-    Challenge: string
-    Responsibility: string
-    Stakeholders: string list
-}
-
-type Action = {
-    Step: int
-    Description: string
-    Skills: string list
-}
-
-type Result = {
-    Outcome: string
-    Impact: string option
-    Metrics: string option
-}
+module Star =
+    type Situation = Situation of string
+    type Task = Task of string
+    type Action = Action of string
+    type Result = Result of string
 
 type Story = {
-    Id: StoryId
     Title: string
-    Situation: Situation
-    Task: Task
-    Actions: Action list
-    Result: Result
-    Tags: string list
-    CreatedAt: DateTimeOffset
-    UpdatedAt: DateTimeOffset
+    Situation: Star.Situation
+    Task: Star.Task
+    Action: Star.Action
+    Result: Star.Result
+}
+
+// Usage
+let story : Story = {
+    Title = "Led migration project"
+    Situation = Star.Situation "Legacy system needed modernization"
+    Task = Star.Task "Migrate 500k records to new platform"
+    Action = Star.Action "Designed migration strategy with rollback plan"
+    Result = Star.Result "Zero downtime, 40% performance improvement"
 }
 ```
 
 ### Story State with Discriminated Unions
 
+Reference: `fsharp#discriminated-unions`, `fsharp#pattern-matching`
+
 ```fsharp
 // Story editing workflow states
 type StoryDraft =
     | Empty
-    | HasSituation of Situation
-    | HasTask of Situation * Task
-    | HasActions of Situation * Task * Action list
+    | HasSituation of Star.Situation
+    | HasTask of Star.Situation * Star.Task
+    | HasAction of Star.Situation * Star.Task * Star.Action
     | Complete of Story
 
-// Story validation result
-type StoryValidation =
-    | Valid of Story
-    | Invalid of ValidationError list
-
-and ValidationError =
-    | MissingSituation
-    | MissingTask
-    | NoActions
-    | MissingResult
-    | TitleTooShort of minLength: int
+// Validation errors
+type ValidationError =
+    | FieldEmpty of field: string
     | TitleTooLong of maxLength: int
 ```
 
 ### Result-Based Validation
 
+Reference: `fsharp#railway-oriented`, `fsharp#rich-domains`
+
 ```fsharp
-// Railway-oriented validation
-let validateTitle (title: string) : Result<string, ValidationError> =
-    if String.IsNullOrWhiteSpace title then
-        Error (TitleTooShort 1)
-    elif title.Length > 200 then
-        Error (TitleTooLong 200)
-    else
-        Ok title
+// Railway-oriented validation (fail-fast)
+let validateTitle title =
+    if String.IsNullOrWhiteSpace title then Error (FieldEmpty "title")
+    elif title.Length > 200 then Error (TitleTooLong 200)
+    else Ok title
 
-let validateSituation (situation: Situation) : Result<Situation, ValidationError> =
-    if String.IsNullOrWhiteSpace situation.Context then
-        Error MissingSituation
-    else
-        Ok situation
-
-let validateActions (actions: Action list) : Result<Action list, ValidationError> =
-    if List.isEmpty actions then
-        Error NoActions
-    else
-        Ok actions
+let validateSituation (Star.Situation s) =
+    if String.IsNullOrWhiteSpace s then Error (FieldEmpty "situation")
+    else Ok (Star.Situation s)
 
 // Compose validations using Result.bind
-let validateStory (draft: StoryDraft) : Result<Story, ValidationError list> =
-    // See FSharpPlus guide for error accumulation
-    ...
+let validateStory title situation =
+    validateTitle title
+    |> Result.bind (fun t ->
+        validateSituation situation
+        |> Result.map (fun s -> t, s))
 ```
 
+For error accumulation (collecting all errors), see [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation).
+
 ### Async Data Loading
+
+Reference: `fsharp#async-programming`, `fsharp#computation-expressions`
 
 ```fsharp
 // Load story from database
@@ -171,10 +115,15 @@ let saveStory (story: Story) : Task<Result<Story, ValidationError list>> = task 
 
 ## Code Style
 
-Follow the F# style guide: `$REFERENCES/fsharp/index.md#style-guide`
+Reference: `fsharp#style-guide`
 
 Key conventions:
 - Use `camelCase` for values and functions
 - Use `PascalCase` for types, modules, and DU cases
 - Prefer `|>` pipeline over nested function calls
 - Keep functions small and focused
+
+## See Also
+
+- `fsharp#collections` - examples TBD
+- `fsharp#testing-expecto` - examples TBD

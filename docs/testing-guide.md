@@ -1,55 +1,19 @@
 # Testing Patterns Guide
 
-> References:
-> - `$REFERENCES/bunit/` (Blazor component testing)
-> - `$REFERENCES/fsharp/index.md#testing-expecto` (F# testing philosophy)
-
-## Quick Links by Task
-
-### bUnit (Component Testing)
-| Task | Reference |
-|------|-----------|
-| Getting started | `$REFERENCES/bunit/index.md#getting-started` |
-| Passing parameters | `$REFERENCES/bunit/index.md#passing-parameters` |
-| Injecting services | `$REFERENCES/bunit/index.md#injecting-services` |
-| Mocking components | `$REFERENCES/bunit/index.md#substituting-components` |
-| Triggering events | `$REFERENCES/bunit/index.md#triggering-events` |
-| Async testing | `$REFERENCES/bunit/index.md#async-state` |
-| Verifying output | `$REFERENCES/bunit/index.md#verifying-output` |
-| Test doubles | `$REFERENCES/bunit/index.md#test-doubles` |
-
-### F# Testing
-| Task | Reference |
-|------|-----------|
-| Types over tests | `$REFERENCES/fsharp/index.md#testing-expecto` |
-| Expecto framework | `$REFERENCES/fsharp/index.md#testing-expecto` |
-| Property-based testing | `$REFERENCES/fsharp/index.md#testing-expecto` |
-
 ## Key Patterns for Career Story Builder
 
 Testing strategy:
+
 1. **Domain logic**: Unit tests with Expecto, property-based tests with FsCheck
 2. **Components**: bUnit tests for Bolero/Blazor components
 3. **Integration**: Test API endpoints and database operations
 4. **Types over tests**: Leverage F# type system to prevent bugs at compile time
 
-## Primary References
-
-### F# Testing Philosophy
-- **Types Over Tests**: `$REFERENCES/fsharp/index.md#testing-expecto`
-  - Use the type system to make illegal states unrepresentable
-  - Test business logic, not type-enforced constraints
-
-### Component Testing
-- **bUnit Patterns**: `$REFERENCES/bunit/index.md#getting-started`
-  - Render components
-  - Find elements
-  - Trigger events
-  - Assert markup
-
 ## Domain Examples
 
 ### Story Validation Tests (Expecto)
+
+Reference: `fsharp#testing-expecto`
 
 ```fsharp
 open Expecto
@@ -147,9 +111,12 @@ let propertyTests = testList "Story Properties" [
 
 ### Component Tests (bUnit)
 
+Reference: `bunit#getting-started`, `bunit#triggering-events`, `bunit#verifying-output`
+
 ```fsharp
 open Bunit
 open Xunit
+open Moq
 
 type StoryFormTests() =
     inherit BunitContext()
@@ -235,6 +202,10 @@ type StoryFormTests() =
 
 ### Mocking Services for Tests
 
+Reference: `bunit#injecting-services`, `bunit#test-doubles`
+
+> **Preferred approach:** Use F# idiomatic mocking (function parameters, test doubles) as shown in the next section. Use Moq only for external types we can't modify that don't lend themselves to functional style.
+
 ```fsharp
 type StoryListTests() =
     inherit BunitContext()
@@ -280,9 +251,11 @@ type StoryListTests() =
         )
 ```
 
-### F# Idiomatic Mocking Patterns
+### F# Idiomatic Mocking Patterns (Preferred)
 
-In F#, prefer fakes and stubs over dynamic mocking frameworks. This approach is simpler and more aligned with functional programming principles.
+Reference: `fsharp#pure-functional`
+
+**This is the preferred approach for this project.** In F#, use fakes and stubs over dynamic mocking frameworks like Moq. This approach is simpler, more type-safe, and better aligned with functional programming principles.
 
 **Fake functions with mutable capture**:
 
@@ -351,7 +324,7 @@ let test_notifyUser_sends_email () =
     Expect.isNonEmpty sent "Should have sent email"
 ```
 
-See: `$REFERENCES/fsharp/index.md#pure-functional` for dependency injection patterns.
+See: `fsharp#pure-functional` for dependency injection patterns.
 
 ### Integration Tests
 
@@ -375,7 +348,13 @@ type StoryApiTests(factory: WebApplicationFactory<Program>) =
 
     [<Fact>]
     member _.``POST /api/stories creates new story``() = task {
-        let dto = {| Title = "Test Story"; ... |}
+        let dto = {|
+            Title = "Test Story"
+            Situation = "Test situation context"
+            Task = "Test task challenge"
+            Action = "Test action taken"
+            Result = "Test outcome achieved"
+        |}
         let! response = client.PostAsJsonAsync("/api/stories", dto)
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode)
@@ -387,7 +366,7 @@ type StoryApiTests(factory: WebApplicationFactory<Program>) =
 
 ## Test Organization
 
-```
+```text
 tests/
 ├── CareerStoryBuilder.Domain.Tests/
 │   ├── ValidationTests.fs
@@ -402,3 +381,9 @@ tests/
     ├── ApiTests.fs
     └── RepositoryTests.fs
 ```
+
+## See Also
+
+- `bunit#passing-parameters` - examples TBD
+- `bunit#substituting-components` - examples TBD
+- `bunit#async-state` - examples TBD

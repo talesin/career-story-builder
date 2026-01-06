@@ -1,333 +1,236 @@
 # Data Access Guide (Dapper + Dapper.FSharp)
 
-> References:
-> - `$REFERENCES/dapper-fsharp/` (type-safe F# queries)
-> - `$REFERENCES/dapper/` (plain Dapper for complex queries)
-
-## Quick Links by Task
-
-### Dapper.FSharp (Primary)
-| Task | Reference |
-|------|-----------|
-| Setup and configuration | `$REFERENCES/dapper-fsharp/index.md#setup` |
-| Table mapping | `$REFERENCES/dapper-fsharp/index.md#table-mapping` |
-| SELECT queries | `$REFERENCES/dapper-fsharp/index.md#select-queries` |
-| INSERT operations | `$REFERENCES/dapper-fsharp/index.md#insert-operations` |
-| UPDATE operations | `$REFERENCES/dapper-fsharp/index.md#update-operations` |
-| DELETE operations | `$REFERENCES/dapper-fsharp/index.md#delete-operations` |
-| JOINs | `$REFERENCES/dapper-fsharp/index.md#joins` |
-| Aggregations | `$REFERENCES/dapper-fsharp/index.md#aggregations` |
-| Transactions | `$REFERENCES/dapper-fsharp/index.md#patterns` |
-
-### Plain Dapper (Fallback)
-| Task | Reference |
-|------|-----------|
-| Core operations | `$REFERENCES/dapper/index.md#core-operations` |
-| Parameters | `$REFERENCES/dapper/index.md#parameters` |
-| Multi-mapping (joins) | `$REFERENCES/dapper/index.md#multi-mapping` |
-| Async operations | `$REFERENCES/dapper/index.md#async-operations` |
-| Type handlers | `$REFERENCES/dapper/index.md#type-handlers` |
-
 ## Key Patterns for Career Story Builder
 
 Use **Dapper.FSharp** for:
+
 - Type-safe CRUD operations on story entities
 - Simple joins between stories and related tables
 - Aggregations (story counts by tag, etc.)
 
 Use **plain Dapper** for:
+
 - Complex queries that Dapper.FSharp can't express
 - Raw SQL when performance is critical
 - Custom type handling
-
-## Primary References
-
-### Setup
-- **Option Types**: `$REFERENCES/dapper-fsharp/index.md#setup`
-- **Table Definition**: `$REFERENCES/dapper-fsharp/index.md#table-mapping`
-
-### Query Building
-- **Computation Expressions**: `$REFERENCES/dapper-fsharp/index.md#select-queries`
-- **WHERE conditions**: `$REFERENCES/dapper-fsharp/index.md#where-conditions`
 
 ## Domain Examples
 
 ### Story Table Mapping
 
+Reference: `dapper-fsharp#setup`, `dapper-fsharp#table-mapping`
+
 ```fsharp
 open Dapper.FSharp
 open Dapper.FSharp.PostgreSQL  // or MSSQL, MySQL, SQLite
 
-// IMPORTANT: Register F# Option types on startup
+// IMPORTANT: Call once at startup (e.g., in Program.fs) before any database access.
+// This registers F# Option type handlers with Dapper so Option<'T> fields
+// serialize/deserialize correctly (None becomes NULL, Some x becomes x).
 OptionTypes.register()
 
 // Database record types (match database schema)
-type StoryRecord = {
+type UserRecord = {
+    Id: Guid
+    Name: string
+    Email: string
+    CreatedAt: DateTimeOffset
+}
+
+type PostRecord = {
     Id: Guid
     UserId: Guid
     Title: string
-    SituationContext: string
-    SituationWhen: DateOnly option
-    SituationWhere: string option
-    TaskChallenge: string
-    TaskResponsibility: string
-    TaskStakeholders: string option
-    ResultOutcome: string
-    ResultImpact: string option
-    ResultMetrics: string option
+    Content: string
     CreatedAt: DateTimeOffset
-    UpdatedAt: DateTimeOffset
-}
-
-type ActionRecord = {
-    Id: Guid
-    StoryId: Guid
-    Step: int
-    Description: string
-    Skills: string option
-}
-
-type TagRecord = {
-    Id: Guid
-    Name: string
-}
-
-type StoryTagRecord = {
-    StoryId: Guid
-    TagId: Guid
 }
 
 // Table definitions
-let storiesTable = table<StoryRecord>
-let actionsTable = table<ActionRecord>
-let tagsTable = table<TagRecord>
-let storyTagsTable = table<StoryTagRecord>
+let usersTable = table<UserRecord>
+let postsTable = table<PostRecord>
 ```
 
-### Story Repository (Dapper.FSharp)
+### Basic Repository (Dapper.FSharp)
+
+Reference: `dapper-fsharp#select-queries`, `dapper-fsharp#insert-operations`, `dapper-fsharp#delete-operations`
+
+Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), separate query logic from the DI wrapper:
 
 ```fsharp
 open Dapper.FSharp.PostgreSQL
 
-type StoryRepository(conn: IDbConnection) =
+// Module: Contains all query logic
+// Connection passed as first parameter for testability
+module PostQueries =
 
-    member _.GetAll(userId: Guid) = task {
-        let! stories =
+    let getByUser (conn: IDbConnection) (userId: Guid) = task {
+        let! posts =
             select {
-                for s in storiesTable do
-                where (s.UserId = userId)
-                orderByDescending s.UpdatedAt
-            } |> conn.SelectAsync<StoryRecord>
-
-        return stories |> Seq.toList
+                for p in postsTable do
+                where (p.UserId = userId)
+                orderByDescending p.CreatedAt
+            } |> conn.SelectAsync<PostRecord>
+        return posts |> Seq.toList
     }
 
-    member _.GetById(id: Guid) = task {
-        let! stories =
+    let getById (conn: IDbConnection) (id: Guid) = task {
+        let! posts =
             select {
-                for s in storiesTable do
-                where (s.Id = id)
-            } |> conn.SelectAsync<StoryRecord>
-
-        return stories |> Seq.tryHead
+                for p in postsTable do
+                where (p.Id = id)
+            } |> conn.SelectAsync<PostRecord>
+        return posts |> Seq.tryHead
     }
 
-    member _.Create(story: StoryRecord) = task {
+    let create (conn: IDbConnection) (post: PostRecord) = task {
         do! insert {
-            into storiesTable
-            value story
+            into postsTable
+            value post
         } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
-        return story
+        return post
     }
 
-    member _.Update(story: StoryRecord) = task {
-        do! update {
-            for s in storiesTable do
-            set story
-            where (s.Id = story.Id)
-        } |> conn.UpdateAsync |> Async.AwaitTask |> Async.Ignore
-
-        return story
-    }
-
-    member _.Delete(id: Guid) = task {
+    let delete (conn: IDbConnection) (id: Guid) = task {
         do! delete {
-            for s in storiesTable do
-            where (s.Id = id)
+            for p in postsTable do
+            where (p.Id = id)
         } |> conn.DeleteAsync |> Async.AwaitTask |> Async.Ignore
     }
+
+// Thin wrapper for ASP.NET Core DI
+type PostRepository(conn: IDbConnection) =
+    member _.GetByUser(userId) = PostQueries.getByUser conn userId
+    member _.GetById(id) = PostQueries.getById conn id
+    member _.Create(post) = PostQueries.create conn post
+    member _.Delete(id) = PostQueries.delete conn id
 ```
 
-### Actions CRUD
+**Testing module functions directly:**
 
 ```fsharp
-member _.GetActionsByStoryId(storyId: Guid) = task {
-    let! actions =
-        select {
-            for a in actionsTable do
-            where (a.StoryId = storyId)
-            orderBy a.Step
-        } |> conn.SelectAsync<ActionRecord>
+[<Test>]
+let ``getByUser returns posts ordered by date`` () = task {
+    use conn = createTestConnection()
+    // ... setup test data ...
 
-    return actions |> Seq.toList
-}
+    let! posts = PostQueries.getByUser conn testUserId
 
-member _.SaveActions(storyId: Guid, actions: ActionRecord list) = task {
-    // Delete existing actions
-    do! delete {
-        for a in actionsTable do
-        where (a.StoryId = storyId)
-    } |> conn.DeleteAsync |> Async.AwaitTask |> Async.Ignore
-
-    // Insert new actions
-    if not (List.isEmpty actions) then
-        do! insert {
-            into actionsTable
-            values actions
-        } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
+    Expect.isTrue
+        (posts |> List.pairwise |> List.forall (fun (a, b) -> a.CreatedAt >= b.CreatedAt))
+        "Posts should be ordered descending by date"
 }
 ```
 
-### Joins (Story with Actions)
+### Joins
+
+Reference: `dapper-fsharp#joins`
 
 ```fsharp
-member _.GetStoryWithActions(id: Guid) = task {
-    // Dapper.FSharp join
+// In PostQueries module
+let getWithUser (conn: IDbConnection) (postId: Guid) = task {
     let! results =
         select {
-            for s in storiesTable do
-            leftJoin a in actionsTable on (s.Id = a.StoryId)
-            where (s.Id = id)
-            orderBy a.Step
-        } |> conn.SelectAsync<StoryRecord, ActionRecord option>
+            for p in postsTable do
+            leftJoin u in usersTable on (p.UserId = u.Id)
+            where (p.Id = postId)
+        } |> conn.SelectAsync<PostRecord, UserRecord option>
 
-    // Group results
-    let storyOpt = results |> Seq.tryHead |> Option.map fst
-    let actions =
-        results
-        |> Seq.choose (fun (_, a) -> a)
-        |> Seq.toList
-
-    return storyOpt |> Option.map (fun s -> s, actions)
+    return results |> Seq.tryHead
 }
 ```
 
 ### Aggregations
 
+Reference: `dapper-fsharp#aggregations`
+
 ```fsharp
-member _.GetStoryCountByUser(userId: Guid) = task {
+// In PostQueries module
+let countByUser (conn: IDbConnection) (userId: Guid) = task {
     let! result =
         select {
-            for s in storiesTable do
-            where (s.UserId = userId)
-            count "*" "StoryCount"
-        } |> conn.SelectAsync<{| StoryCount: int |}>
+            for p in postsTable do
+            where (p.UserId = userId)
+            count "*" "Total"
+        } |> conn.SelectAsync<{| Total: int |}>
 
-    return result |> Seq.head |> _.StoryCount
-}
-
-member _.GetStoriesPerMonth(userId: Guid) = task {
-    let! results =
-        select {
-            for s in storiesTable do
-            where (s.UserId = userId)
-            groupBy (s.CreatedAt.Month)
-            orderBy (s.CreatedAt.Month)
-            count "*" "Count"
-        } |> conn.SelectAsync<{| Month: int; Count: int |}>
-
-    return results |> Seq.toList
+    return result |> Seq.head |> _.Total
 }
 ```
 
 ### Complex Query (Plain Dapper Fallback)
 
+Reference: `dapper#core-operations`
+
 ```fsharp
-// For queries too complex for Dapper.FSharp
-member _.SearchStories(userId: Guid, searchTerm: string, tags: string list) = task {
+// In PostQueries module - for queries too complex for Dapper.FSharp
+let search (conn: IDbConnection) (userId: Guid) (searchTerm: string) = task {
     let sql = """
-        SELECT DISTINCT s.*
-        FROM stories s
-        LEFT JOIN story_tags st ON s.id = st.story_id
-        LEFT JOIN tags t ON st.tag_id = t.id
-        WHERE s.user_id = @UserId
-          AND (
-            s.title ILIKE @SearchTerm
-            OR s.situation_context ILIKE @SearchTerm
-            OR s.task_challenge ILIKE @SearchTerm
-            OR s.result_outcome ILIKE @SearchTerm
-          )
-          AND (@Tags IS NULL OR t.name = ANY(@Tags))
-        ORDER BY s.updated_at DESC
+        SELECT * FROM posts
+        WHERE user_id = @UserId
+          AND (title ILIKE @Term OR content ILIKE @Term)
+        ORDER BY created_at DESC
     """
-
-    let! results = conn.QueryAsync<StoryRecord>(
-        sql,
-        {| UserId = userId
-           SearchTerm = $"%%{searchTerm}%%"
-           Tags = if List.isEmpty tags then null else tags |> List.toArray |})
-
+    let! results = conn.QueryAsync<PostRecord>(
+        sql, {| UserId = userId; Term = $"%%{searchTerm}%%" |})
     return results |> Seq.toList
 }
 ```
 
 ### Transactions
 
+Reference: `dapper-fsharp#patterns`
+
 ```fsharp
-member _.CreateStoryWithActions(story: StoryRecord, actions: ActionRecord list) = task {
+// In PostQueries module
+let createWithUser (conn: IDbConnection) (user: UserRecord) (post: PostRecord) = task {
     use transaction = conn.BeginTransaction()
-
     try
-        // Insert story
-        do! insert {
-            into storiesTable
-            value story
-        } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
-        // Insert actions
-        if not (List.isEmpty actions) then
-            do! insert {
-                into actionsTable
-                values actions
-            } |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
-
+        do! insert { into usersTable; value user }
+            |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
+        do! insert { into postsTable; value post }
+            |> conn.InsertAsync |> Async.AwaitTask |> Async.Ignore
         transaction.Commit()
-        return Ok story
+        return Ok post
     with ex ->
         transaction.Rollback()
         return Error ex.Message
 }
 ```
 
-### Type Handler for StoryId
+### Custom Type Handler
+
+Reference: `dapper#type-handlers`
 
 ```fsharp
-// Register custom type handlers for domain types
-open Dapper
+// Register type handlers for domain types (e.g., single-case DUs)
+type UserIdHandler() =
+    inherit SqlMapper.TypeHandler<UserId>()
+    override _.SetValue(p, v) = let (UserId id) = v in p.Value <- id
+    override _.Parse(v) = UserId(v :?> Guid)
 
-type StoryIdHandler() =
-    inherit SqlMapper.TypeHandler<StoryId>()
-
-    override _.SetValue(parameter, value) =
-        let (StoryId id) = value
-        parameter.Value <- id
-
-    override _.Parse(value) =
-        StoryId(value :?> Guid)
-
-// Register on startup
-SqlMapper.AddTypeHandler(StoryIdHandler())
+SqlMapper.AddTypeHandler(UserIdHandler())
 ```
 
 ## When to Use Which
 
-| Scenario | Use |
-|----------|-----|
-| Simple CRUD | Dapper.FSharp |
-| Type-safe queries | Dapper.FSharp |
+| Scenario                      | Use           |
+| ----------------------------- | ------------- |
+| Simple CRUD                   | Dapper.FSharp |
+| Type-safe queries             | Dapper.FSharp |
 | Simple joins (up to 5 tables) | Dapper.FSharp |
-| Full-text search | Plain Dapper |
-| Window functions | Plain Dapper |
-| CTEs | Plain Dapper |
-| Database-specific features | Plain Dapper |
+| Full-text search              | Plain Dapper  |
+| Window functions              | Plain Dapper  |
+| CTEs                          | Plain Dapper  |
+| Database-specific features    | Plain Dapper  |
+
+## Testing
+
+For repository testing patterns, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `dapper-fsharp#update-operations` - examples TBD
+- `dapper-fsharp#where-conditions` - examples TBD
+- `dapper#parameters` - examples TBD
+- `dapper#multi-mapping` - examples TBD
+- `dapper#async-operations` - examples TBD

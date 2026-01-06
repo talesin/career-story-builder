@@ -1,22 +1,5 @@
 # Docker Container Development Guide
 
-> References: `$REFERENCES/docker/`
-
-## Quick Links by Task
-
-| Task | Reference |
-|------|-----------|
-| Docker concepts | `$REFERENCES/docker/index.md#introduction` |
-| Install Docker | `$REFERENCES/docker/index.md#installing` |
-| Write Dockerfiles | `$REFERENCES/docker/index.md#images` |
-| Multi-stage builds | `$REFERENCES/docker/index.md#multi-stage` |
-| Run containers | `$REFERENCES/docker/index.md#containers` |
-| View logs | `$REFERENCES/docker/index.md#exploring` |
-| Debug containers | `$REFERENCES/docker/index.md#debugging` |
-| Docker Compose | `$REFERENCES/docker/index.md#compose` |
-| Production deployment | `$REFERENCES/docker/index.md#production` |
-| Security | `$REFERENCES/docker/index.md#advanced` |
-
 ## Key Patterns for Career Story Builder
 
 Docker provides:
@@ -24,26 +7,15 @@ Docker provides:
 - **Production container**: Optimized multi-stage build
 - **Compose**: Full stack with database and app
 
-## Primary References
-
-### Dockerfile Best Practices
-- **Multi-Stage Builds**: `$REFERENCES/docker/index.md#images`
-  - Build stage with SDK
-  - Production stage with runtime only
-
-### Docker Compose
-- **Service Configuration**: `$REFERENCES/docker/index.md#compose`
-  - Service definitions
-  - Networks and volumes
-  - Environment variables
-
 ## Domain Examples
 
 ### Development Dockerfile
 
+Reference: `docker#images`, `docker#containers`
+
 ```dockerfile
 # Development Dockerfile - enables hot reload
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS dev
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
 
 WORKDIR /app
 
@@ -70,11 +42,13 @@ ENTRYPOINT ["dotnet", "watch", "--project", "src/CareerStoryBuilder.Server"]
 
 ### Production Dockerfile (Multi-Stage)
 
+Reference: `docker#images`, `docker#multi-stage`, `docker#production`
+
 ```dockerfile
 # ========================================
 # Stage 1: Build
 # ========================================
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
@@ -96,7 +70,7 @@ RUN dotnet publish src/CareerStoryBuilder.Server \
 # ========================================
 # Stage 2: Production Runtime
 # ========================================
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
@@ -117,6 +91,8 @@ ENTRYPOINT ["dotnet", "CareerStoryBuilder.Server.dll"]
 ```
 
 ### Docker Compose (Development)
+
+Reference: `docker#compose`
 
 ```yaml
 # docker-compose.yml
@@ -172,6 +148,8 @@ networks:
 ```
 
 ### Docker Compose (Production)
+
+Reference: `docker#compose`, `docker#production`
 
 ```yaml
 # docker-compose.prod.yml
@@ -233,6 +211,8 @@ volumes:
 ```
 
 ### Common Commands
+
+Reference: `docker#containers`, `docker#exploring`
 
 ```bash
 # Development
@@ -307,7 +287,7 @@ ASPNETCORE_ENVIRONMENT=Production
 
 ## Production Checklist
 
-From `$REFERENCES/docker/index.md#production`:
+From `docker#production`:
 
 - [ ] Resource limits configured (memory, CPU)
 - [ ] Log rotation enabled (`max-size`, `max-file`)
@@ -320,11 +300,18 @@ From `$REFERENCES/docker/index.md#production`:
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| `latest` tag | Unpredictable deployments | Use specific version tags |
-| Root user | Security vulnerability | Use `USER` directive |
-| No resource limits | Runaway containers | Set `--memory` and `--cpus` |
-| Secrets in images | Security risk | Use env vars or secrets |
-| No health checks | Silent failures | Add `HEALTHCHECK` |
-| Single massive layer | Slow rebuilds | Order for layer caching |
+| Anti-Pattern         | Problem                   | Solution                    |
+| -------------------- | ------------------------- | --------------------------- |
+| `latest` tag         | Unpredictable deployments | Use specific version tags   |
+| Root user            | Security vulnerability    | Use `USER` directive        |
+| No resource limits   | Runaway containers        | Set `--memory` and `--cpus` |
+| Secrets in images    | Security risk             | Use env vars or secrets     |
+| No health checks     | Silent failures           | Add `HEALTHCHECK`           |
+| Single massive layer | Slow rebuilds             | Order for layer caching     |
+
+## See Also
+
+- `docker#introduction` - examples TBD
+- `docker#installing` - examples TBD
+- `docker#debugging` - examples TBD
+- `docker#advanced` - examples TBD

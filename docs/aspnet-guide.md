@@ -1,51 +1,19 @@
 # ASP.NET Core Backend Guide
 
-> References: `$REFERENCES/aspnet/`
-
-## Quick Links by Task
-
-| Task | Reference |
-|------|-----------|
-| Configure DI | `$REFERENCES/aspnet/index.md#dependency-injection` |
-| Load configuration | `$REFERENCES/aspnet/index.md#configuration` |
-| Set up middleware | `$REFERENCES/aspnet/index.md#middleware` |
-| Define routes | `$REFERENCES/aspnet/index.md#routing` |
-| Create minimal APIs | `$REFERENCES/aspnet/index.md#minimal-apis` |
-| Add authentication | `$REFERENCES/aspnet/index.md#authentication` |
-| Add authorization | `$REFERENCES/aspnet/index.md#authorization` |
-| Optimize performance | `$REFERENCES/aspnet/index.md#performance` |
-| Write tests | `$REFERENCES/aspnet/index.md#testing` |
-
 ## Key Patterns for Career Story Builder
 
 ASP.NET Core hosts the Bolero application and provides:
+
 - API endpoints for story CRUD operations
 - Authentication and user management
 - Configuration and dependency injection
 - Middleware pipeline for cross-cutting concerns
 
-## Primary References
-
-### Minimal APIs
-- **Route Handlers**: `$REFERENCES/aspnet/index.md#minimal-apis`
-  - Parameter binding
-  - Response types
-  - Route groups
-
-### Dependency Injection
-- **Service Lifetimes**: `$REFERENCES/aspnet/index.md#dependency-injection`
-  - Singleton, Scoped, Transient
-  - Keyed services
-
-### Security
-- **Authentication/Authorization**: `$REFERENCES/aspnet/index.md#security`
-  - JWT Bearer tokens
-  - Cookie authentication
-  - Policy-based authorization
-
 ## Domain Examples
 
 ### Story API Endpoints
+
+Reference: `aspnet#minimal-apis`, `aspnet#routing`
 
 ```fsharp
 open Microsoft.AspNetCore.Builder
@@ -98,6 +66,8 @@ let configureStoryEndpoints (app: WebApplication) =
 ```
 
 ### Service Registration
+
+Reference: `aspnet#dependency-injection`
 
 ```fsharp
 open Microsoft.Extensions.DependencyInjection
@@ -155,14 +125,17 @@ let configureBillingServices (services: IServiceCollection) =
 ```
 
 **Guidelines**:
+
 - Only add wrappers at the edges (controllers, hosted services)
 - Never embed core business logic in the wrapper
 - Wrapper methods should be one-liners that delegate to functional code
 - Keep the functional core testable without the wrapper
 
-See: [Design Patterns Guide](design-patterns-guide.md#functional-dependency-injection) for DI pattern details.
+See: [F# Style Guide - Split Module/Class Pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop) for detailed guidance and [Design Patterns Guide](design-patterns-guide.md#functional-dependency-injection) for DI pattern details.
 
 ### Authentication Setup
+
+Reference: `aspnet#authentication`, `aspnet#security`
 
 ```fsharp
 open Microsoft.AspNetCore.Authentication.JwtBearer
@@ -188,6 +161,8 @@ let configureAuth (builder: WebApplicationBuilder) =
 ```
 
 ### Middleware Pipeline
+
+Reference: `aspnet#middleware`
 
 ```fsharp
 let configureMiddleware (app: WebApplication) =
@@ -220,6 +195,57 @@ let configureMiddleware (app: WebApplication) =
     app.UseBlazorFrameworkFiles() |> ignore
 
     app
+```
+
+### Error Handling Middleware
+
+Convert domain errors to appropriate HTTP responses:
+
+```fsharp
+open Microsoft.AspNetCore.Diagnostics
+
+// Domain error types
+type DomainError =
+    | NotFound of string
+    | ValidationFailed of string list
+    | Unauthorized of string
+    | Conflict of string
+
+// Middleware to convert domain errors to HTTP responses
+let configureDomainErrorHandler (app: WebApplication) =
+    app.Use(fun context next -> task {
+        try
+            do! next.Invoke()
+        with
+        | :? DomainException as ex ->
+            context.Response.ContentType <- "application/json"
+            let (statusCode, body) =
+                match ex.Error with
+                | NotFound msg ->
+                    (StatusCodes.Status404NotFound,
+                     {| error = "NotFound"; message = msg |})
+                | ValidationFailed errors ->
+                    (StatusCodes.Status400BadRequest,
+                     {| error = "ValidationFailed"; messages = errors |})
+                | Unauthorized msg ->
+                    (StatusCodes.Status401Unauthorized,
+                     {| error = "Unauthorized"; message = msg |})
+                | Conflict msg ->
+                    (StatusCodes.Status409Conflict,
+                     {| error = "Conflict"; message = msg |})
+            context.Response.StatusCode <- statusCode
+            do! context.Response.WriteAsJsonAsync(body)
+    }) |> ignore
+    app
+
+// Alternative: Result-based error handling in endpoints
+let handleResult (result: Result<'T, DomainError>) =
+    match result with
+    | Ok value -> Results.Ok(value)
+    | Error (NotFound msg) -> Results.NotFound({| message = msg |})
+    | Error (ValidationFailed errors) -> Results.BadRequest({| errors = errors |})
+    | Error (Unauthorized msg) -> Results.Unauthorized()
+    | Error (Conflict msg) -> Results.Conflict({| message = msg |})
 ```
 
 ### Program.fs Setup
@@ -256,6 +282,8 @@ let main args =
 
 ### Options Pattern for Configuration
 
+Reference: `aspnet#configuration`
+
 ```fsharp
 // Configuration types
 type DatabaseOptions() =
@@ -268,23 +296,63 @@ type AuthOptions() =
     member val Key = "" with get, set
     member val ExpirationMinutes = 60 with get, set
 
-// Usage in service
+// Module: Contains service logic with explicit dependencies
+module StoryOperations =
+    let getAll (log: string -> unit) (getAllStories: unit -> Task<Story list>) = task {
+        log "Fetching all stories"
+        return! getAllStories()
+    }
+
+    let getById (log: string -> unit) (getStory: StoryId -> Task<Story option>) (id: StoryId) = task {
+        log $"Fetching story {id}"
+        return! getStory id
+    }
+
+// Thin wrapper: Adapts module functions for DI
 type StoryService(
     repository: IStoryRepository,
-    dbOptions: IOptions<DatabaseOptions>,
     logger: ILogger<StoryService>) =
 
-    member _.GetAll() = task {
-        logger.LogInformation("Fetching all stories")
-        return! repository.GetAll()
+    member _.GetAll() =
+        StoryOperations.getAll
+            (fun msg -> logger.LogInformation(msg))
+            repository.GetAll
+
+    member _.GetById(id) =
+        StoryOperations.getById
+            (fun msg -> logger.LogInformation(msg))
+            repository.GetById
+            id
+```
+
+Corresponding appsettings.json structure:
+
+```json
+{
+  "Database": {
+    "ConnectionString": "Host=localhost;Database=career_stories;Username=app;Password=secret",
+    "MaxRetryCount": 3
+  },
+  "Auth": {
+    "Issuer": "career-story-builder",
+    "Audience": "career-story-builder-client",
+    "Key": "your-256-bit-secret-key-here",
+    "ExpirationMinutes": 60
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
     }
+  }
+}
 ```
 
 ## Middleware Order Reference
 
-See: `$REFERENCES/aspnet/index.md#middleware`
+See: `aspnet#middleware`
 
-```
+```text
 1. Exception handling (first)
 2. HTTPS redirection
 3. Static files
@@ -295,3 +363,13 @@ See: `$REFERENCES/aspnet/index.md#middleware`
 8. Custom middleware
 9. Endpoints (last)
 ```
+
+## Testing
+
+For API endpoint and integration testing patterns, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `aspnet#authorization` - examples TBD
+- `aspnet#performance` - examples TBD
+- `aspnet#testing` - examples TBD

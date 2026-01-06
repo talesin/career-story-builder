@@ -1,54 +1,18 @@
 # Bolero MVU Development Guide
 
-> References: `$REFERENCES/bolero/`
-
-## Quick Links by Task
-
-| Task | Reference |
-|------|-----------|
-| Set up Bolero project | `$REFERENCES/bolero/index.md#getting-started` |
-| Write HTML with DSL | `$REFERENCES/bolero/index.md#html-dsl` |
-| Set up MVU architecture | `$REFERENCES/bolero/index.md#mvu-architecture` |
-| Define routes | `$REFERENCES/bolero/index.md#routing` |
-| Client-server remoting | `$REFERENCES/bolero/index.md#remoting` |
-| Use HTML templates | `$REFERENCES/bolero/index.md#templating` |
-| Create components | `$REFERENCES/bolero/index.md#components` |
-| Configure hosting | `$REFERENCES/bolero/index.md#server` |
-| Best practices | `$REFERENCES/bolero/index.md#patterns` |
-
 ## Key Patterns for Career Story Builder
 
 Bolero provides an F#-first approach to Blazor using the MVU (Model-View-Update) pattern:
+
 - **Model**: Immutable state representing the current application state
 - **View**: Pure function rendering the UI from the model
 - **Update**: Pure function handling messages and producing new state
 
-## Primary References
-
-### MVU Architecture
-- **Elmish Integration**: `$REFERENCES/bolero/index.md#mvu-architecture`
-  - ProgramComponent base class
-  - Model and Messages definition
-  - Update function patterns
-  - Commands for side effects
-
-### HTML DSL
-- **Writing Views**: `$REFERENCES/bolero/index.md#html-dsl`
-  - Element builders (`div { }`, `button { }`)
-  - Attributes (`attr.*`)
-  - Event handlers (`on.*`)
-  - Conditional rendering (`cond`)
-  - Lists (`forEach`)
-
-### Routing
-- **Page Navigation**: `$REFERENCES/bolero/index.md#routing`
-  - Route definitions with DUs
-  - Path and query parameters
-  - Navigation links
-
 ## Domain Examples
 
 ### Story Editor Model
+
+Reference: `bolero#mvu-architecture`
 
 ```fsharp
 open Elmish
@@ -62,39 +26,16 @@ type Page =
     | [<EndPoint "/stories/new">] NewStory
     | [<EndPoint "/stories/{id}/edit">] EditStory of id: Guid
 
-// Story editor state
+// Story editor form state (matches CreateStoryDto structure)
+// See data-types.md for authoritative type definitions
 type StoryEditorModel = {
     Title: string
-    Situation: SituationForm
-    Task: TaskForm
-    Actions: ActionForm list
-    Result: ResultForm
+    Situation: string
+    Task: string
+    Action: string
+    Result: string
     IsSaving: bool
-    Errors: ValidationError list
-}
-
-and SituationForm = {
-    Context: string
-    When: string
-    Where: string
-}
-
-and TaskForm = {
-    Challenge: string
-    Responsibility: string
-    Stakeholders: string
-}
-
-and ActionForm = {
-    Step: int
-    Description: string
-    Skills: string
-}
-
-and ResultForm = {
-    Outcome: string
-    Impact: string
-    Metrics: string
+    Errors: string list
 }
 
 // Application model
@@ -124,69 +65,97 @@ type Message =
     | EditStory of StoryId
     | StoryLoaded of Story
 
-    // Form updates
+    // Form updates (one per STAR field)
     | SetTitle of string
-    | SetSituationContext of string
-    | SetSituationWhen of string
-    | SetSituationWhere of string
-    | SetTaskChallenge of string
-    | SetTaskResponsibility of string
-    | SetTaskStakeholders of string
-    | AddAction
-    | RemoveAction of int
-    | SetActionDescription of step: int * description: string
-    | SetActionSkills of step: int * skills: string
-    | SetResultOutcome of string
-    | SetResultImpact of string
-    | SetResultMetrics of string
+    | SetSituation of string
+    | SetTask of string
+    | SetAction of string
+    | SetResult of string
 
     // Save
     | SaveStory
     | StorySaved of Story
-    | SaveFailed of ValidationError list
+    | SaveFailed of string list
+
+    // Error handling
+    | ClearError
 ```
 
 ### Update Function
 
 ```fsharp
-let update (message: Message) (model: Model) =
+let update (service: IStoryService) (message: Message) (model: Model) =
     match message with
     | SetPage page ->
         { model with Page = page }, Cmd.none
 
     | LoadStories ->
         { model with IsLoading = true },
-        Cmd.OfTask.either storyService.GetAll () StoriesLoaded LoadStoriesFailed
+        Cmd.OfAsync.either service.GetAll () StoriesLoaded LoadStoriesFailed
 
     | StoriesLoaded stories ->
         { model with Stories = stories; IsLoading = false }, Cmd.none
 
-    | SetTitle title ->
-        match model.CurrentStory with
-        | Some editor ->
-            { model with CurrentStory = Some { editor with Title = title } }, Cmd.none
-        | None -> model, Cmd.none
+    | StartNewStory ->
+        let empty = { Title = ""; Situation = ""; Task = ""; Action = ""; Result = ""; IsSaving = false; Errors = [] }
+        { model with CurrentStory = Some empty }, Cmd.none
+
+    // Form field updates - helper to update current story
+    | SetTitle v -> model |> updateEditor (fun e -> { e with Title = v })
+    | SetSituation v -> model |> updateEditor (fun e -> { e with Situation = v })
+    | SetTask v -> model |> updateEditor (fun e -> { e with Task = v })
+    | SetAction v -> model |> updateEditor (fun e -> { e with Action = v })
+    | SetResult v -> model |> updateEditor (fun e -> { e with Result = v })
 
     | SaveStory ->
         match model.CurrentStory with
         | Some editor ->
+            let dto = { Title = editor.Title; Situation = editor.Situation
+                        Task = editor.Task; Action = editor.Action; Result = editor.Result }
             { model with CurrentStory = Some { editor with IsSaving = true } },
-            Cmd.OfTask.either storyService.Save (toStory editor) StorySaved SaveFailed
+            Cmd.OfAsync.either service.Create dto StorySaved SaveFailed
         | None -> model, Cmd.none
 
     | StorySaved story ->
-        { model with
-            CurrentStory = None
-            Stories = story :: model.Stories },
+        { model with CurrentStory = None; Stories = story :: model.Stories },
         Cmd.ofMsg (SetPage StoryList)
 
+    | SaveFailed errors ->
+        model |> updateEditor (fun e -> { e with Errors = errors; IsSaving = false })
+
+    | ClearError ->
+        { model with Error = None }, Cmd.none
+
     | _ -> model, Cmd.none
+
+// Helper to update editor if present
+and updateEditor f model =
+    match model.CurrentStory with
+    | Some editor -> { model with CurrentStory = Some (f editor) }, Cmd.none
+    | None -> model, Cmd.none
 ```
 
 ### View Functions
 
+Reference: `bolero#html-dsl`
+
 ```fsharp
 open Bolero.Html
+
+// Error display view - shows application errors from Model.Error
+let errorView (error: string option) dispatch =
+    cond error <| function
+        | Some msg ->
+            div {
+                attr.``class`` "alert alert-danger"
+                text msg
+                button {
+                    attr.``class`` "close"
+                    on.click (fun _ -> dispatch ClearError)
+                    "×"
+                }
+            }
+        | None -> empty ()
 
 let storyFormView (editor: StoryEditorModel) dispatch =
     div {
@@ -200,60 +169,49 @@ let storyFormView (editor: StoryEditorModel) dispatch =
                 attr.``type`` "text"
                 attr.value editor.Title
                 attr.placeholder "e.g., Led cross-functional team to deliver..."
+                // unbox e.Value: Event handlers receive JS objects where Value is typed as 'obj'.
+                // Use unbox to cast to the expected type (string for input values).
                 on.change (fun e -> dispatch (SetTitle (unbox e.Value)))
             }
         }
 
-        // Situation section
+        // Situation
         fieldset {
             legend { "Situation" }
             textarea {
                 attr.placeholder "Describe the context and background..."
-                attr.value editor.Situation.Context
-                on.change (fun e -> dispatch (SetSituationContext (unbox e.Value)))
+                attr.value editor.Situation
+                on.change (fun e -> dispatch (SetSituation (unbox e.Value)))
             }
         }
 
-        // Task section
+        // Task
         fieldset {
             legend { "Task" }
             textarea {
                 attr.placeholder "What was the challenge or responsibility?"
-                attr.value editor.Task.Challenge
-                on.change (fun e -> dispatch (SetTaskChallenge (unbox e.Value)))
+                attr.value editor.Task
+                on.change (fun e -> dispatch (SetTask (unbox e.Value)))
             }
         }
 
-        // Actions section
+        // Action
         fieldset {
-            legend { "Actions" }
-            forEach editor.Actions <| fun action ->
-                div {
-                    attr.key (string action.Step)
-                    input {
-                        attr.``type`` "text"
-                        attr.value action.Description
-                        on.change (fun e ->
-                            dispatch (SetActionDescription (action.Step, unbox e.Value)))
-                    }
-                    button {
-                        on.click (fun _ -> dispatch (RemoveAction action.Step))
-                        "Remove"
-                    }
-                }
-            button {
-                on.click (fun _ -> dispatch AddAction)
-                "Add Action"
+            legend { "Action" }
+            textarea {
+                attr.placeholder "What steps did you take?"
+                attr.value editor.Action
+                on.change (fun e -> dispatch (SetAction (unbox e.Value)))
             }
         }
 
-        // Result section
+        // Result
         fieldset {
             legend { "Result" }
             textarea {
                 attr.placeholder "What was the outcome and impact?"
-                attr.value editor.Result.Outcome
-                on.change (fun e -> dispatch (SetResultOutcome (unbox e.Value)))
+                attr.value editor.Result
+                on.change (fun e -> dispatch (SetResult (unbox e.Value)))
             }
         }
 
@@ -263,7 +221,7 @@ let storyFormView (editor: StoryEditorModel) dispatch =
                 ul {
                     attr.``class`` "errors"
                     forEach editor.Errors <| fun error ->
-                        li { text (formatError error) }
+                        li { text error }
                 }
             | false -> empty ()
 
@@ -280,6 +238,8 @@ let storyFormView (editor: StoryEditorModel) dispatch =
 ```
 
 ### Routing Setup
+
+Reference: `bolero#routing`
 
 ```fsharp
 let router = Router.infer SetPage (fun m -> m.Page)
@@ -298,24 +258,23 @@ type App() =
 
 ### Remoting Service
 
+Reference: `bolero#remoting`
+
 ```fsharp
-// Shared service interface
-type IStoryService =
-    { getAll: unit -> Async<Story list>
-      getById: Guid -> Async<Story option>
-      save: Story -> Async<Result<Story, ValidationError list>>
-      delete: Guid -> Async<unit> }
-    interface IRemoteService with
-        member _.BasePath = "/api/stories"
+// Service interface defined in data-types.md (abstract member style)
+// See data-types.md for the authoritative IStoryService definition
 
 // Client usage with commands
 let loadStoriesCmd (service: IStoryService) =
-    Cmd.OfAsync.either service.getAll () StoriesLoaded LoadStoriesFailed
+    Cmd.OfAsync.either (fun () -> service.GetAll() |> Async.AwaitTask) () StoriesLoaded LoadStoriesFailed
+
+let saveStoryCmd (service: IStoryService) (dto: CreateStoryDto) =
+    Cmd.OfAsync.either (fun () -> service.Create(dto) |> Async.AwaitTask) () StorySaved SaveFailed
 ```
 
 ## Component Organization
 
-```
+```text
 src/
 ├── Client/
 │   ├── Main.fs           # ProgramComponent, router
@@ -331,3 +290,15 @@ src/
     ├── Domain.fs         # STAR story types
     └── Services.fs       # IStoryService interface
 ```
+
+## Testing
+
+For component testing patterns with bUnit, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `bolero#getting-started` - examples TBD
+- `bolero#templating` - examples TBD
+- `bolero#components` - examples TBD
+- `bolero#server` - examples TBD
+- `bolero#patterns` - examples TBD

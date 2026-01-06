@@ -1,55 +1,40 @@
 # Blazor Component Patterns Guide
 
-> References: `$REFERENCES/blazor/`
-
-## Quick Links by Task
-
-| Task | Reference |
-|------|-----------|
-| Understand Blazor basics | `$REFERENCES/blazor/index.md#introduction` |
-| Learn Razor syntax | `$REFERENCES/blazor/index.md#razor-syntax` |
-| Component lifecycle | `$REFERENCES/blazor/index.md#component-lifecycle` |
-| Component parameters | `$REFERENCES/blazor/index.md#components` |
-| Two-way binding | `$REFERENCES/blazor/index.md#two-way-binding` |
-| Forms and validation | `$REFERENCES/blazor/index.md#forms-validation` |
-| Dependency injection | `$REFERENCES/blazor/index.md#di-patterns` |
-| JavaScript interop | `$REFERENCES/blazor/index.md#js-interop` |
-| Authentication | `$REFERENCES/blazor/index.md#security` |
-
 ## Key Patterns for Career Story Builder
 
 While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns helps when:
+
 - Working with component lifecycle methods
 - Understanding render modes (Server vs WebAssembly)
 - Integrating with Blazor component libraries
 - Handling forms and validation
 
-## Primary References
-
-### Component Lifecycle
-- **Lifecycle Methods**: `$REFERENCES/blazor/index.md#component-lifecycle`
-  - `OnInitialized` / `OnInitializedAsync`
-  - `OnParametersSet` / `OnParametersSetAsync`
-  - `OnAfterRender` / `OnAfterRenderAsync`
-
-### Forms and Validation
-- **EditForm**: `$REFERENCES/blazor/index.md#forms-validation`
-  - Input components
-  - DataAnnotations validation
-  - Custom validation
-
-### Render Modes
-- **Choosing Modes**: `$REFERENCES/blazor/index.md#render-modes`
-  - Server-side (SignalR)
-  - WebAssembly (client-side)
-  - Auto mode
-
 ## Domain Examples
 
 ### Component Lifecycle in Bolero
 
+Reference: `blazor#component-lifecycle`
+
+Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), extract async operations to a module for testability:
+
 ```fsharp
-// Bolero component with lifecycle
+// Module: Contains async loading logic
+// Testable without Blazor infrastructure
+module StoryEditorOps =
+    type LoadResult =
+        | Loading
+        | Loaded of Story
+        | NotFound
+
+    let loadStory (getStory: Guid -> Task<Story option>) (storyId: Guid) = task {
+        let! story = getStory storyId
+        return
+            match story with
+            | Some s -> Loaded s
+            | None -> NotFound
+    }
+
+// Bolero component: Thin wrapper calling module functions
 type StoryEditorComponent() =
     inherit Component()
 
@@ -59,25 +44,29 @@ type StoryEditorComponent() =
     [<Inject>]
     member val StoryService: IStoryService = Unchecked.defaultof<_> with get, set
 
-    member val Story: Story option = None with get, set
-    member val IsLoading: bool = true with get, set
+    member val LoadState: StoryEditorOps.LoadResult = StoryEditorOps.Loading with get, set
 
     override this.OnInitializedAsync() = task {
-        let! story = this.StoryService.GetById this.StoryId
-        this.Story <- story
-        this.IsLoading <- false
+        let! result = StoryEditorOps.loadStory this.StoryService.GetById this.StoryId
+        this.LoadState <- result
     }
 
     override this.Render() =
-        cond this.IsLoading <| function
-            | true -> div { "Loading story..." }
-            | false ->
-                match this.Story with
-                | Some story -> storyView story
-                | None -> div { "Story not found" }
+        match this.LoadState with
+        | StoryEditorOps.Loading -> div { "Loading story..." }
+        | StoryEditorOps.Loaded story -> storyView story
+        | StoryEditorOps.NotFound -> div { "Story not found" }
 ```
 
+**Why extract component logic:**
+
+- **Testability**: `StoryEditorOps.loadStory` can be tested without Blazor runtime
+- **State clarity**: `LoadResult` DU makes states explicit vs boolean flags
+- **Reusability**: Loading logic can be reused across components
+
 ### Validation Attributes for Story Forms
+
+Reference: `blazor#forms-validation`
 
 ```fsharp
 open System.ComponentModel.DataAnnotations
@@ -142,6 +131,8 @@ let storyFormWithValidation (model: StoryEditorModel) (errors: Map<string, strin
 
 ### Service Lifetime Considerations
 
+Reference: `blazor#di-patterns`
+
 ```fsharp
 // In Program.fs or Startup
 // For Blazor Server: use Scoped (one per SignalR circuit)
@@ -158,6 +149,8 @@ builder.Services.AddTransient<IStoryValidator, StoryValidator>()
 ```
 
 ### JavaScript Interop for Rich Text
+
+Reference: `blazor#js-interop`
 
 ```fsharp
 // For rich text editing of story descriptions
@@ -176,25 +169,33 @@ member this.GetRichTextContent(elementId: string) = task {
 
 ## Blazor Anti-Patterns to Avoid
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| Static state in Server mode | Shared across users | Use Scoped services |
-| Missing `StateHasChanged` | UI doesn't update | Call after async updates |
-| `firstRender` not checked | JS runs on every render | Check in `OnAfterRenderAsync` |
-| Singleton user state | Data leaks between users | Use Scoped for user data |
+| Anti-Pattern                | Problem                  | Solution                      |
+| --------------------------- | ------------------------ | ----------------------------- |
+| Static state in Server mode | Shared across users      | Use Scoped services           |
+| Missing `StateHasChanged`   | UI doesn't update        | Call after async updates      |
+| `firstRender` not checked   | JS runs on every render  | Check in `OnAfterRenderAsync` |
+| Singleton user state        | Data leaks between users | Use Scoped for user data      |
 
-See: `$REFERENCES/blazor/index.md#anti-patterns`
+See: `blazor#anti-patterns`
 
 ## Render Mode Decision
 
 For Career Story Builder:
 
-| Consideration | Recommendation |
-|---------------|----------------|
-| SEO needed? | Server or Pre-render |
-| Offline support? | WebAssembly |
-| Real-time collab? | Server (SignalR) |
-| Simple deployment? | Server |
-| Client-side perf? | WebAssembly |
+| Consideration      | Recommendation       |
+| ------------------ | -------------------- |
+| SEO needed?        | Server or Pre-render |
+| Offline support?   | WebAssembly          |
+| Real-time collab?  | Server (SignalR)     |
+| Simple deployment? | Server               |
+| Client-side perf?  | WebAssembly          |
 
-See: `$REFERENCES/blazor/index.md#render-modes`
+See: `blazor#render-modes`
+
+## See Also
+
+- `blazor#introduction` - examples TBD
+- `blazor#razor-syntax` - examples TBD
+- `blazor#components` - examples TBD
+- `blazor#two-way-binding` - examples TBD
+- `blazor#security` - examples TBD

@@ -21,6 +21,7 @@ This guide establishes consistent coding patterns for F# compiled applications. 
 15. [Formatting and Indentation](#15-formatting-and-indentation)
 16. [Naming Conventions](#16-naming-conventions)
 17. [Anti-Patterns to Avoid](#17-anti-patterns-to-avoid)
+18. [Addendum: Notes on Style Variations](#addendum-notes-on-style-variations)
 
 ---
 
@@ -183,19 +184,20 @@ let tryInsertRecord ...    // Returns Result<int, Error>
 let tryValidateEmail ...   // Returns Result<EmailAddress, ValidationError>
 ```
 
-### Define a `Result.ofOption` helper
+### Use `Option.toResultWith` from FSharpPlus
+
+Convert Option values to Result using FSharpPlus:
 
 ```fsharp
-module Result =
-    let ofOption errorValue = function
-        | Some x -> Ok x
-        | None -> Error errorValue
+open FSharpPlus
 
 // Usage
 conn.Query<Person>(sql, params)
 |> Seq.tryHead
-|> Result.ofOption (NotFound "Person not found")
+|> Option.toResultWith (fun () -> NotFound "Person not found")
 ```
+
+The error factory is a `unit -> 'Error` function, allowing lazy error construction.
 
 ### Match is appropriate for complex Result flows
 
@@ -217,15 +219,22 @@ match tryGetPerson conn id with
 ### Use Railway-Oriented Programming for validation pipelines
 
 ```fsharp
-// Chain validations with bind
-let validateOrder order =
-    order
-    |> validateCustomerId
-    |> Result.bind validateShippingAddress
-    |> Result.bind validateLineItems
-    |> Result.bind validatePaymentInfo
+// Chain validations with bind (fail-fast)
+let validateUser user =
+    user
+    |> validateName
+    |> Result.bind validateEmail
+    |> Result.bind validateAge
+```
 
-// Use applicative style for error accumulation
+### Use applicative style for error accumulation (FSharpPlus)
+
+> *Note: The `<!>` (map) and `<*>` (apply) operators require [FSharpPlus](fsharpplus-guide.md). These enable applicative validation which accumulates all errors rather than failing on the first.*
+
+```fsharp
+open FSharpPlus
+
+// Applicative style - collects ALL validation errors
 let validatePerson name email age =
     let createPerson n e a = { Name = n; Email = e; Age = a }
     createPerson
@@ -233,6 +242,63 @@ let validatePerson name email age =
     <*> validateEmail email
     <*> validateAge age
 ```
+
+### Avoid deeply nested Result types
+
+While ROP is valuable for validation pipelines, avoid creating deeply nested Result types or using string-based error discrimination. These patterns become difficult to maintain and indicate the error model needs restructuring.
+
+```fsharp
+// Avoid - nested Results are hard to work with
+type BadResult = Result<Result<User, string>, string list>
+
+// Avoid - "stringly typed" error handling is fragile
+let handleError result =
+    match result with
+    | Error e when e.Contains "not found" -> // brittle string matching
+        handleNotFound()
+    | Error e when e.Contains "invalid" ->
+        handleInvalid()
+    | _ -> handleOther()
+```
+
+**Flatten nested Results** by defining a unified error type:
+
+```fsharp
+// Define a flattened error type
+type WorkflowError =
+    | ValidationFailed of string
+    | NotFound of string
+    | Unauthorized
+
+// Each step returns the same error type
+let validate: Input -> Result<Valid, WorkflowError> = ...
+let process: Valid -> Result<Output, WorkflowError> = ...
+
+// Clean pipeline with flat Result type
+let run input =
+    input |> validate |> Result.bind process
+
+// Pattern match on structured errors, not strings
+let handleError = function
+    | ValidationFailed msg -> showError msg
+    | NotFound id -> showNotFound id
+    | Unauthorized -> showUnauthorized ()
+```
+
+**When combining Results from different domains**, map to a common error type at the boundary:
+
+```fsharp
+// Map domain-specific errors to a common type
+let workflow input =
+    input
+    |> validate                                // Result<_, ValidationError>
+    |> Result.mapError WorkflowError.ValidationFailed
+    |> Result.bind process
+```
+
+### See Also
+
+For **error accumulation** (collecting all validation errors rather than failing on the first), see the [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation) which covers the `Validation` type and applicative patterns.
 
 ---
 
@@ -644,6 +710,51 @@ let getArrayElement index array =
     else array.[index]
 ```
 
+### Prefer specific exception functions
+
+When raising exceptions, use the specific argument and operation functions rather than the generic `failwith` or `failwithf`. These raise more specific exception types that are easier to catch and debug.
+
+```fsharp
+// Prefer - specific exception types (in order of preference)
+let processInput input =
+    if isNull input then
+        nullArg (nameof input)                    // ArgumentNullException
+    elif String.IsNullOrWhiteSpace input then
+        invalidArg (nameof input) "Cannot be empty" // ArgumentException
+    else
+        input.Trim()
+
+let withdraw amount balance =
+    if amount <= 0m then
+        invalidArg (nameof amount) "Amount must be positive"
+    elif amount > balance then
+        invalidOp "Insufficient funds"            // InvalidOperationException
+    else
+        balance - amount
+
+// Avoid - raises base Exception type, harder to catch specifically
+let processInputBad input =
+    if String.IsNullOrWhiteSpace input then
+        failwith "Input cannot be empty"          // Don't use
+    else
+        input.Trim()
+
+let withdrawBad amount balance =
+    if amount > balance then
+        failwithf "Cannot withdraw %M from %M" amount balance  // Don't use
+    else
+        balance - amount
+```
+
+**Exception function reference:**
+
+| Function                           | Exception Type              | Use Case                    |
+| ---------------------------------- | --------------------------- | --------------------------- |
+| `nullArg "paramName"`              | `ArgumentNullException`     | Null argument received      |
+| `invalidArg "paramName" "message"` | `ArgumentException`         | Invalid argument value      |
+| `invalidOp "message"`              | `InvalidOperationException` | Invalid state for operation |
+| `raise (SpecificException(...))`   | Custom type                 | Domain-specific exceptions  |
+
 ### Fail fast vs error accumulation
 
 ```fsharp
@@ -652,11 +763,20 @@ let processOrder order =
     validateOrder order
     |> Result.bind processPayment
     |> Result.bind shipOrder
+```
 
-// Error accumulation - use applicative
-let validatePerson name email age =
-    (validateName name, validateEmail email, validateAge age)
-    |||> Result.map3 (fun n e a -> { Name = n; Email = e; Age = a })
+For **error accumulation** (showing all errors at once), use FSharpPlus:
+
+```fsharp
+open FSharpPlus
+
+// Error accumulation - use applicative CE (FSharpPlus)
+let validatePerson name email age = applicative {
+    let! n = validateName name
+    and! e = validateEmail email
+    and! a = validateAge age
+    return { Name = n; Email = e; Age = a }
+}
 ```
 
 ---
@@ -741,6 +861,90 @@ let main () =
 
     // Use processor...
 ```
+
+### Split Module/Class Pattern for Framework Interop
+
+When working with frameworks that require class-based APIs (ASP.NET Core DI, Blazor components, hosted services), use the split module/class pattern to preserve testability and composability.
+
+#### Why This Pattern
+
+1. **Testability**: Module functions can be tested directly without mocking constructors or framework infrastructure
+2. **Composability**: Functions compose naturally via partial application and pipelines
+3. **Separation of Concerns**: Business logic stays in pure F#; framework glue code is isolated
+4. **Reduced Coupling**: Module functions don't depend on framework types (ILogger, IConfiguration)
+
+#### Pattern Structure
+
+```fsharp
+// 1. Module: Contains all logic
+//    - Dependencies as FIRST parameters (enables partial application)
+//    - Business inputs LAST
+//    - No framework types in signatures when possible
+module Billing =
+    type BillingDeps = {
+        ChargeCard: string -> decimal -> Task<Result<unit, string>>
+        Log: string -> unit
+    }
+
+    let charge (deps: BillingDeps) (customerId: string) (amount: decimal) = task {
+        deps.Log $"Charging {customerId} amount {amount}"
+        return! deps.ChargeCard customerId amount
+    }
+
+    let refund (deps: BillingDeps) (customerId: string) (amount: decimal) = task {
+        deps.Log $"Refunding {customerId} amount {amount}"
+        return! deps.ChargeCard customerId (-amount)
+    }
+
+// 2. Wrapper Class: Thin delegation only
+//    - Constructor receives dependencies from DI
+//    - Methods are one-liners delegating to module functions
+//    - NO business logic here
+type BillingService(deps: Billing.BillingDeps) =
+    member _.Charge(customerId, amount) = Billing.charge deps customerId amount
+    member _.Refund(customerId, amount) = Billing.refund deps customerId amount
+```
+
+#### Guidelines
+
+| Guideline | Rationale |
+|-----------|-----------|
+| Dependencies as first parameters | Enables partial application at composition root |
+| Wrapper methods are one-liners | If you're writing logic in the class, it belongs in the module |
+| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing |
+| Create wrapper only at framework boundary | Not every module needs a wrapper class |
+
+#### When to Apply
+
+- **ASP.NET Core services**: Controllers, hosted services, middleware
+- **Blazor/Bolero components**: Extract async operations and state logic
+- **Repository classes**: When using Dapper with DI
+- **Background workers**: Extract processing logic to testable modules
+
+#### Testing Benefits
+
+```fsharp
+// Module functions test directly - no mocking framework needed
+[<Test>]
+let ``charge logs and calls payment gateway`` () = task {
+    let mutable logged = ""
+    let mutable charged = None
+    let testDeps = {
+        Log = fun msg -> logged <- msg
+        ChargeCard = fun cid amt -> task {
+            charged <- Some (cid, amt)
+            return Ok ()
+        }
+    }
+
+    let! result = Billing.charge testDeps "cust123" 50.0m
+
+    Expect.equal logged "Charging cust123 amount 50.0" "Should log"
+    Expect.equal charged (Some ("cust123", 50.0m)) "Should charge"
+}
+```
+
+See also: [ASP.NET Guide - Wrapping Functional Code](aspnet-guide.md#wrapping-functional-code-for-framework-di) for the canonical BillingService example.
 
 ---
 
@@ -841,6 +1045,18 @@ type Api() =
         | ValueSome q -> searchFor q
         | ValueNone -> getAll()
 ```
+
+**When to use `[<Struct>]` optional parameters:**
+
+- **Hot paths**: Methods called thousands of times per second (API handlers, tight loops)
+- **Low-level libraries**: Where allocation pressure matters
+- **Performance-critical APIs**: Especially when optional params are commonly omitted
+
+**When to skip it:**
+
+- **Application-level code**: The optimization is negligible for most business logic
+- **When readability matters more**: `Some`/`None` is more familiar than `ValueSome`/`ValueNone`
+- **Default choice**: Use standard `?param` unless profiling shows allocation issues
 
 ### Simplified type annotations in computation expressions
 
@@ -978,16 +1194,16 @@ type ThisThat = This | That
 
 ## 16. Naming Conventions
 
-| Element          | Convention         | Example           |
-|------------------|--------------------|-------------------|
-| Types            | PascalCase         | `CustomerService` |
-| Modules          | PascalCase         | `StringUtils`     |
-| Functions        | camelCase          | `calculateTotal`  |
-| Values           | camelCase          | `customerName`    |
-| Parameters       | camelCase          | `inputValue`      |
-| Type parameters  | 'PascalCase or 'a  | `'T`, `'a`        |
-| DU cases         | PascalCase         | `Some`, `None`    |
-| Record fields    | PascalCase         | `FirstName`       |
+| Element         | Convention        | Example           |
+| --------------- | ----------------- | ----------------- |
+| Types           | PascalCase        | `CustomerService` |
+| Modules         | PascalCase        | `StringUtils`     |
+| Functions       | camelCase         | `calculateTotal`  |
+| Values          | camelCase         | `customerName`    |
+| Parameters      | camelCase         | `inputValue`      |
+| Type parameters | 'PascalCase or 'a | `'T`, `'a`        |
+| DU cases        | PascalCase        | `Some`, `None`    |
+| Record fields   | PascalCase        | `FirstName`       |
 
 ### Function naming
 
@@ -1220,19 +1436,45 @@ match tryFindUser id with
 
 ## Quick Reference
 
-| Pattern | Prefer | Avoid |
-| --- | --- | --- |
-| Property access | `_.Name` | `(fun x -> x.Name)` |
-| Default value | `Option.defaultValue "N/A"` | `match ... None -> "N/A"` |
-| Default with effect | `Option.defaultWith (fun () -> ...)` | `match ... None -> ...` |
-| Equality check | `Option.contains target` | `Option.map ((=) target) \|> Option.defaultValue false` |
-| Side effect on Some | `Option.iter` | `match ... Some -> ... \| None -> ()` |
-| Negation | `not (expr)` | `not <\| expr` |
-| String interpolation | `$"Hello {name}"` | `sprintf "Hello %s" name` |
-| Result-returning fn | `tryDoSomething` | `doSomething` |
-| Empty check | `String.IsNullOrWhiteSpace` | Manual length/null checks |
-| Concurrent tasks | `let! a = x() and! b = y()` | Sequential `let!` bindings |
-| Struct optionals | `[<Struct>] ?param` | `?param` in hot paths |
-| Accumulation | `List.fold`, `List.sumBy` | `mutable` with `for` loops |
-| Iteration | `List.tryFind`, recursion | `while` with mutable state |
-| Record updates | `{ record with Field = value }` | Mutable record fields |
+| Pattern              | Prefer                               | Avoid                                                    |
+| -------------------- | ------------------------------------ | -------------------------------------------------------- |
+| Property access      | `_.Name`                             | `(fun x -> x.Name)`                                      |
+| Default value        | `Option.defaultValue "N/A"`          | `match ... None -> "N/A"`                                |
+| Default with effect  | `Option.defaultWith (fun () -> ...)` | `match ... None -> ...`                                  |
+| Equality check       | `Option.contains target`             | `Option.map ((=) target) \| > Option.defaultValue false` |
+| Side effect on Some  | `Option.iter`                        | `match ... Some -> ... \| None -> ()`                    |
+| Negation             | `not (expr)`                         | `not <\| expr`                                           |
+| String interpolation | `$"Hello {name}"`                    | `sprintf "Hello %s" name`                                |
+| Result-returning fn  | `tryDoSomething`                     | `doSomething`                                            |
+| Empty check          | `String.IsNullOrWhiteSpace`          | Manual length/null checks                                |
+| Concurrent tasks     | `let! a = x() and! b = y()`          | Sequential `let!` bindings                               |
+| Struct optionals     | `[<Struct>] ?param`                  | `?param` in hot paths                                    |
+| Accumulation         | `List.fold`, `List.sumBy`            | `mutable` with `for` loops                               |
+| Iteration            | `List.tryFind`, recursion            | `while` with mutable state                               |
+| Record updates       | `{ record with Field = value }`      | Mutable record fields                                    |
+
+---
+
+## Addendum: Notes on Style Variations
+
+The following points represent areas where this guide either differs from or extends the official Microsoft F# style guide. These are noted for awareness rather than as recommendations to change.
+
+### `try` prefix convention
+
+This guide uses the `try` prefix for functions returning `Result<'T, 'Error>` (e.g., `tryGetPerson` returns `Result<Person option, DatabaseError>`). The Microsoft convention uses `try` for functions that catch exceptions and return `Option<'T>` (e.g., `tryReadAllTextIfPresent` returns `Option<string>`). Both conventions are valid; this codebase follows the Result-based convention consistently.
+
+### Namespace vs module organization
+
+Microsoft recommends namespaces over top-level modules for publicly consumable code, as modules compile to static classes. This guide does not prescribe a preference—use namespaces for libraries intended for external consumption.
+
+### Generic type syntax
+
+Microsoft recommends postfix syntax for built-in types only (`int list`, `int option`, `int array`, `int seq`) and prefix syntax for all others (`Dictionary<string, int>`, `Set<string>`). This guide does not explicitly address this convention.
+
+### Pattern match spacing
+
+Microsoft specifies no space before parentheses in patterns: `Some(y)` rather than `Some (y)`. This guide's examples typically use the unparenthesized form `Some y` which is also valid.
+
+### Point-free style in public APIs
+
+Microsoft warns against point-free composition (`>>`) in public APIs because tooling cannot display parameter names, making the API harder to discover. This guide recommends `>>` for simple pipelines but does not explicitly address the public API consideration.
