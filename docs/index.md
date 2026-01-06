@@ -39,7 +39,7 @@
 
 ## External Reference Mapping
 
-The guides in this directory use `tech#anchor` tags (e.g., `fsharp#railway-oriented`, `bolero#mvu-architecture`) that reference external documentation in a separate repository.
+The guides in this directory use bare `tech#anchor` tags (e.g., `fsharp#railway-oriented`, `bolero#mvu-architecture`) that reference external documentation topics in a separate repository. Always use the bare `tech#anchor` form without any `$REFERENCES/` path prefix.
 
 ### Purpose of External References
 
