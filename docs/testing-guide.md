@@ -1,28 +1,5 @@
 # Testing Patterns Guide
 
-## Quick Links by Task
-
-### bUnit (Component Testing)
-
-| Task               | Topic                         |
-| ------------------ | ----------------------------- |
-| Getting started    | bunit#getting-started         |
-| Passing parameters | bunit#passing-parameters      |
-| Injecting services | bunit#injecting-services      |
-| Mocking components | bunit#substituting-components |
-| Triggering events  | bunit#triggering-events       |
-| Async testing      | bunit#async-state             |
-| Verifying output   | bunit#verifying-output        |
-| Test doubles       | bunit#test-doubles            |
-
-### F# Testing
-
-| Task                   | Topic                  |
-| ---------------------- | ---------------------- |
-| Types over tests       | fsharp#testing-expecto |
-| Expecto framework      | fsharp#testing-expecto |
-| Property-based testing | fsharp#testing-expecto |
-
 ## Key Patterns for Career Story Builder
 
 Testing strategy:
@@ -32,26 +9,11 @@ Testing strategy:
 3. **Integration**: Test API endpoints and database operations
 4. **Types over tests**: Leverage F# type system to prevent bugs at compile time
 
-## Primary References
-
-### F# Testing Philosophy
-
-- **Types Over Tests**: `fsharp#testing-expecto`
-  - Use the type system to make illegal states unrepresentable
-  - Test business logic, not type-enforced constraints
-  - See also: [F# Style Guide](fsharp-style-guide.md) for domain modeling patterns that reduce test surface
-
-### Component Testing
-
-- **bUnit Patterns**: `bunit#getting-started`
-  - Render components
-  - Find elements
-  - Trigger events
-  - Assert markup
-
 ## Domain Examples
 
 ### Story Validation Tests (Expecto)
+
+Reference: `fsharp#testing-expecto`
 
 ```fsharp
 open Expecto
@@ -149,6 +111,8 @@ let propertyTests = testList "Story Properties" [
 
 ### Component Tests (bUnit)
 
+Reference: `bunit#getting-started`, `bunit#triggering-events`, `bunit#verifying-output`
+
 ```fsharp
 open Bunit
 open Xunit
@@ -238,6 +202,8 @@ type StoryFormTests() =
 
 ### Mocking Services for Tests
 
+Reference: `bunit#injecting-services`, `bunit#test-doubles`
+
 > **Preferred approach:** Use F# idiomatic mocking (function parameters, test doubles) as shown in the next section. Use Moq only for external types we can't modify that don't lend themselves to functional style.
 
 ```fsharp
@@ -286,6 +252,8 @@ type StoryListTests() =
 ```
 
 ### F# Idiomatic Mocking Patterns (Preferred)
+
+Reference: `fsharp#pure-functional`
 
 **This is the preferred approach for this project.** In F#, use fakes and stubs over dynamic mocking frameworks like Moq. This approach is simpler, more type-safe, and better aligned with functional programming principles.
 
@@ -413,3 +381,9 @@ tests/
     ├── ApiTests.fs
     └── RepositoryTests.fs
 ```
+
+## See Also
+
+- `bunit#passing-parameters` - examples TBD
+- `bunit#substituting-components` - examples TBD
+- `bunit#async-state` - examples TBD

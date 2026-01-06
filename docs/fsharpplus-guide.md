@@ -1,18 +1,5 @@
 # FSharpPlus Advanced Patterns Guide
 
-## Quick Links by Task
-
-| Task                            | Topic                              |
-| ------------------------------- | ---------------------------------- |
-| Getting started                 | fsharpplus#getting-started         |
-| Generic operators               | fsharpplus#operators               |
-| Abstractions (Functor, Monad)   | fsharpplus#abstractions            |
-| Computation expressions         | fsharpplus#computation-expressions |
-| Validation (error accumulation) | fsharpplus#validation              |
-| Reader monad (DI)               | fsharpplus#reader-monad            |
-| Lenses for nested updates       | fsharpplus#lens                    |
-| Monad transformers              | fsharpplus#monad-transformers      |
-
 ## When to Use FSharpPlus
 
 This project uses FSharpPlus for advanced functional patterns. Consider FSharpPlus when you need:
@@ -37,30 +24,11 @@ FSharpPlus provides advanced functional patterns:
 - **Lenses**: Update deeply nested story structures
 - **Reader**: Dependency injection pattern
 
-## Primary References
-
-### Validation
-- **Error Accumulation**: `fsharpplus#data-types`
-  - `Validation<'Error, 'T>` vs `Result<'T, 'Error>`
-  - `Success` and `Failure` cases
-  - Applicative style with `<!>` and `<*>`
-
-### Operators
-- **Generic Functions**: `fsharpplus#operators`
-  - `map` (`<!>`, `<<|`, `|>>`)
-  - `apply` (`<*>`)
-  - `bind` (`>>=`, `=<<`)
-  - Kleisli composition (`>=>`, `<=<`)
-
-### Lenses
-- **Optics**: `fsharpplus#lens`
-  - View with `^.`
-  - Set with `.->`
-  - Update with `%->`
-
 ## Domain Examples
 
 ### Validation with Error Accumulation
+
+Reference: `fsharpplus#validation`, `fsharpplus#data-types`
 
 ```fsharp
 open FSharpPlus
@@ -91,6 +59,8 @@ let result = validateUser "" "bad"
 
 ### Generic Operators
 
+Reference: `fsharpplus#operators`
+
 ```fsharp
 open FSharpPlus
 
@@ -118,6 +88,8 @@ let loadAndProcess: Guid -> Async<Result<ProcessedStory, Error>> =
 
 ### Lenses for Nested Updates
 
+Reference: `fsharpplus#lens`
+
 ```fsharp
 open FSharpPlus.Lens
 
@@ -142,6 +114,8 @@ let upperCity = person |> over _personCity String.toUpper
 ```
 
 ### Reader Monad for Dependency Injection
+
+Reference: `fsharpplus#reader-monad`
 
 ```fsharp
 open FSharpPlus.Data
@@ -169,6 +143,8 @@ greetAndLog 1 |> Reader.run deps  // Prints: Hello, Alice!
 ```
 
 ### Computation Expression Examples
+
+Reference: `fsharpplus#computation-expressions`
 
 ```fsharp
 open FSharpPlus
@@ -229,3 +205,9 @@ open FSharpPlus.Lens     // Optics (only when needed for nested updates)
 
 - Use FSharpPlus for `Validation` and `Option.toResultWith` - these are genuinely useful and have no good alternatives
 - Prefer standard F# for everything else unless you're working with code that already uses FSharpPlus patterns
+
+## See Also
+
+- `fsharpplus#getting-started` - examples TBD
+- `fsharpplus#abstractions` - examples TBD
+- `fsharpplus#monad-transformers` - examples TBD

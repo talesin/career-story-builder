@@ -1,19 +1,5 @@
 # ASP.NET Core Backend Guide
 
-## Quick Links by Task
-
-| Task                 | Topic                       |
-| -------------------- | --------------------------- |
-| Configure DI         | aspnet#dependency-injection |
-| Load configuration   | aspnet#configuration        |
-| Set up middleware    | aspnet#middleware           |
-| Define routes        | aspnet#routing              |
-| Create minimal APIs  | aspnet#minimal-apis         |
-| Add authentication   | aspnet#authentication       |
-| Add authorization    | aspnet#authorization        |
-| Optimize performance | aspnet#performance          |
-| Write tests          | aspnet#testing              |
-
 ## Key Patterns for Career Story Builder
 
 ASP.NET Core hosts the Bolero application and provides:
@@ -23,31 +9,11 @@ ASP.NET Core hosts the Bolero application and provides:
 - Configuration and dependency injection
 - Middleware pipeline for cross-cutting concerns
 
-## Primary References
-
-### Minimal APIs
-
-- **Route Handlers**: `aspnet#minimal-apis`
-  - Parameter binding
-  - Response types
-  - Route groups
-
-### Dependency Injection
-
-- **Service Lifetimes**: `aspnet#dependency-injection`
-  - Singleton, Scoped, Transient
-  - Keyed services
-
-### Security
-
-- **Authentication/Authorization**: `aspnet#security`
-  - JWT Bearer tokens
-  - Cookie authentication
-  - Policy-based authorization
-
 ## Domain Examples
 
 ### Story API Endpoints
+
+Reference: `aspnet#minimal-apis`, `aspnet#routing`
 
 ```fsharp
 open Microsoft.AspNetCore.Builder
@@ -100,6 +66,8 @@ let configureStoryEndpoints (app: WebApplication) =
 ```
 
 ### Service Registration
+
+Reference: `aspnet#dependency-injection`
 
 ```fsharp
 open Microsoft.Extensions.DependencyInjection
@@ -167,6 +135,8 @@ See: [F# Style Guide - Split Module/Class Pattern](fsharp-style-guide.md#split-m
 
 ### Authentication Setup
 
+Reference: `aspnet#authentication`, `aspnet#security`
+
 ```fsharp
 open Microsoft.AspNetCore.Authentication.JwtBearer
 
@@ -191,6 +161,8 @@ let configureAuth (builder: WebApplicationBuilder) =
 ```
 
 ### Middleware Pipeline
+
+Reference: `aspnet#middleware`
 
 ```fsharp
 let configureMiddleware (app: WebApplication) =
@@ -310,6 +282,8 @@ let main args =
 
 ### Options Pattern for Configuration
 
+Reference: `aspnet#configuration`
+
 ```fsharp
 // Configuration types
 type DatabaseOptions() =
@@ -393,3 +367,9 @@ See: `aspnet#middleware`
 ## Testing
 
 For API endpoint and integration testing patterns, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `aspnet#authorization` - examples TBD
+- `aspnet#performance` - examples TBD
+- `aspnet#testing` - examples TBD

@@ -1,30 +1,5 @@
 # Design Patterns Guide (Functional)
 
-## Quick Links by Task
-
-### Functional Design Principles
-
-| Task                       | Topic                      |
-| -------------------------- | -------------------------- |
-| Immutability basics        | design#immutability        |
-| Persistent data structures | design#persistent-data     |
-| Recursion patterns         | design#recursion-iteration |
-| Lazy evaluation            | design#laziness            |
-| State management           | design#state-management    |
-| Data flow pipelines        | design#data-flow           |
-| SOLID in functional code   | design#solid               |
-| Testing patterns           | design#testing             |
-
-### Gang of Four (OO Patterns)
-
-| Task                | Topic                   |
-| ------------------- | ----------------------- |
-| Pattern overview    | design#gof-introduction |
-| Creational patterns | design#gof-creational   |
-| Structural patterns | design#gof-structural   |
-| Behavioral patterns | design#gof-behavioral   |
-| Patterns in FP      | design#patterns-review  |
-
 ## Key Patterns for Career Story Builder
 
 Functional design principles guide the architecture:
@@ -34,25 +9,11 @@ Functional design principles guide the architecture:
 - **Data transformation pipelines**: Processing story data
 - **SOLID principles**: Applied to F# modules and functions
 
-## Primary References
-
-### Railway-Oriented Programming
-
-- **Error Handling**: `design#data-flow`
-  - Result type for validation
-  - Bind/map for chaining
-  - Error accumulation
-
-### SOLID in F\#
-
-- **Functional SOLID**: `design#solid`
-  - SRP: Small focused functions
-  - OCP: Extend via composition
-  - DIP: Depend on abstractions (interfaces/functions)
-
 ## Domain Examples
 
 ### Railway-Oriented Validation Pipeline
+
+Reference: `design#data-flow`
 
 ```fsharp
 // Railway-Oriented Programming: chain validations, fail on first error
@@ -124,6 +85,8 @@ let getRecentActive' count =
 ```
 
 ### SOLID in Functional F\#
+
+Reference: `design#solid`
 
 ```fsharp
 // Single Responsibility Principle - each module has one job
@@ -226,6 +189,8 @@ let notifyUser = UserWorkflow.notifyUser deps
 
 ### State Machine Pattern
 
+Reference: `design#state-management`
+
 ```fsharp
 // State machine for form workflow
 
@@ -255,6 +220,8 @@ let transition state event =
 ```
 
 ### Command Pattern for Operations
+
+Reference: `design#gof-behavioral`
 
 ```fsharp
 // Command pattern for undo/redo
@@ -294,3 +261,15 @@ let undo user history =
 | Extend behavior       | Strategy (functions)         | design#gof-behavioral    |
 | Build complex objects | Builder                      | design#gof-creational    |
 | Notify changes        | Observer (events)            | design#gof-behavioral    |
+
+## See Also
+
+- `design#immutability` - examples TBD
+- `design#persistent-data` - examples TBD
+- `design#recursion-iteration` - examples TBD
+- `design#laziness` - examples TBD
+- `design#testing` - examples TBD
+- `design#gof-introduction` - examples TBD
+- `design#gof-creational` - examples TBD
+- `design#gof-structural` - examples TBD
+- `design#patterns-review` - examples TBD

@@ -1,20 +1,5 @@
 # F# Language Quick Reference
 
-## Quick Links by Task
-
-| Task                           | Topic                          |
-| ------------------------------ | ------------------------------ |
-| Define domain types            | fsharp#domain-modeling-records |
-| Use discriminated unions       | fsharp#discriminated-unions    |
-| Pattern matching               | fsharp#pattern-matching        |
-| Handle errors with Result      | fsharp#rich-domains            |
-| Railway-oriented programming   | fsharp#railway-oriented        |
-| Async programming              | fsharp#async-programming       |
-| Collections (List, Array, Seq) | fsharp#collections             |
-| Computation expressions        | fsharp#computation-expressions |
-| Testing with Expecto           | fsharp#testing-expecto         |
-| Code style                     | fsharp#style-guide             |
-
 ## Key Patterns for Career Story Builder
 
 F# is the primary language for this project. The Star story domain benefits from:
@@ -23,33 +8,11 @@ F# is the primary language for this project. The Star story domain benefits from
 - **Result type** for validation and error handling
 - **Pattern matching** for processing different story states
 
-## Primary References
-
-### Domain Modeling
-- **Records and DUs**: `fsharp#records-unions`
-  - Record syntax and copy-and-update
-  - Anonymous records
-  - Single-case discriminated unions for type safety
-
-- **Rich Domain Building**: `fsharp#rich-domains`
-  - Option type for optional fields
-  - Result type for validation
-  - Making illegal states unrepresentable
-
-### Error Handling
-- **Railway-Oriented Programming**: `fsharp#railway-oriented`
-  - bind, map, and composition
-  - Error track handling
-  - Validation pipelines
-
-### Async and I/O
-- **Task-based Async**: `fsharp#async-programming`
-  - `task { }` computation expressions
-  - Parallel vs sequential execution
-
 ## Domain Examples
 
 ### Star Story Domain Types
+
+Reference: `fsharp#domain-modeling-records`, `fsharp#records-unions`
 
 ```fsharp
 // Core domain types for career stories
@@ -86,6 +49,8 @@ let story : Story = {
 
 ### Story State with Discriminated Unions
 
+Reference: `fsharp#discriminated-unions`, `fsharp#pattern-matching`
+
 ```fsharp
 // Story editing workflow states
 type StoryDraft =
@@ -102,6 +67,8 @@ type ValidationError =
 ```
 
 ### Result-Based Validation
+
+Reference: `fsharp#railway-oriented`, `fsharp#rich-domains`
 
 ```fsharp
 // Railway-oriented validation (fail-fast)
@@ -126,6 +93,8 @@ For error accumulation (collecting all errors), see [FSharpPlus Guide](fsharpplu
 
 ### Async Data Loading
 
+Reference: `fsharp#async-programming`, `fsharp#computation-expressions`
+
 ```fsharp
 // Load story from database
 let loadStory (id: StoryId) : Task<Story option> = task {
@@ -146,10 +115,15 @@ let saveStory (story: Story) : Task<Result<Story, ValidationError list>> = task 
 
 ## Code Style
 
-Follow the F# style guide: `fsharp#style-guide`
+Reference: `fsharp#style-guide`
 
 Key conventions:
 - Use `camelCase` for values and functions
 - Use `PascalCase` for types, modules, and DU cases
 - Prefer `|>` pipeline over nested function calls
 - Keep functions small and focused
+
+## See Also
+
+- `fsharp#collections` - examples TBD
+- `fsharp#testing-expecto` - examples TBD

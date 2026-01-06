@@ -1,31 +1,5 @@
 # Data Access Guide (Dapper + Dapper.FSharp)
 
-## Quick Links by Task
-
-### Dapper.FSharp (Primary)
-
-| Task                    | Topic                           |
-| ----------------------- | ------------------------------- |
-| Setup and configuration | dapper-fsharp#setup             |
-| Table mapping           | dapper-fsharp#table-mapping     |
-| SELECT queries          | dapper-fsharp#select-queries    |
-| INSERT operations       | dapper-fsharp#insert-operations |
-| UPDATE operations       | dapper-fsharp#update-operations |
-| DELETE operations       | dapper-fsharp#delete-operations |
-| JOINs                   | dapper-fsharp#joins             |
-| Aggregations            | dapper-fsharp#aggregations      |
-| Transactions            | dapper-fsharp#patterns          |
-
-### Plain Dapper (Fallback)
-
-| Task                  | Topic                   |
-| --------------------- | ----------------------- |
-| Core operations       | dapper#core-operations  |
-| Parameters            | dapper#parameters       |
-| Multi-mapping (joins) | dapper#multi-mapping    |
-| Async operations      | dapper#async-operations |
-| Type handlers         | dapper#type-handlers    |
-
 ## Key Patterns for Career Story Builder
 
 Use **Dapper.FSharp** for:
@@ -40,21 +14,11 @@ Use **plain Dapper** for:
 - Raw SQL when performance is critical
 - Custom type handling
 
-## Primary References
-
-### Setup
-
-- **Option Types**: `dapper-fsharp#setup`
-- **Table Definition**: `dapper-fsharp#table-mapping`
-
-### Query Building
-
-- **Computation Expressions**: `dapper-fsharp#select-queries`
-- **WHERE conditions**: `dapper-fsharp#where-conditions`
-
 ## Domain Examples
 
 ### Story Table Mapping
+
+Reference: `dapper-fsharp#setup`, `dapper-fsharp#table-mapping`
 
 ```fsharp
 open Dapper.FSharp
@@ -87,6 +51,8 @@ let postsTable = table<PostRecord>
 ```
 
 ### Basic Repository (Dapper.FSharp)
+
+Reference: `dapper-fsharp#select-queries`, `dapper-fsharp#insert-operations`, `dapper-fsharp#delete-operations`
 
 Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), separate query logic from the DI wrapper:
 
@@ -157,6 +123,8 @@ let ``getByUser returns posts ordered by date`` () = task {
 
 ### Joins
 
+Reference: `dapper-fsharp#joins`
+
 ```fsharp
 // In PostQueries module
 let getWithUser (conn: IDbConnection) (postId: Guid) = task {
@@ -172,6 +140,8 @@ let getWithUser (conn: IDbConnection) (postId: Guid) = task {
 ```
 
 ### Aggregations
+
+Reference: `dapper-fsharp#aggregations`
 
 ```fsharp
 // In PostQueries module
@@ -189,6 +159,8 @@ let countByUser (conn: IDbConnection) (userId: Guid) = task {
 
 ### Complex Query (Plain Dapper Fallback)
 
+Reference: `dapper#core-operations`
+
 ```fsharp
 // In PostQueries module - for queries too complex for Dapper.FSharp
 let search (conn: IDbConnection) (userId: Guid) (searchTerm: string) = task {
@@ -205,6 +177,8 @@ let search (conn: IDbConnection) (userId: Guid) (searchTerm: string) = task {
 ```
 
 ### Transactions
+
+Reference: `dapper-fsharp#patterns`
 
 ```fsharp
 // In PostQueries module
@@ -224,6 +198,8 @@ let createWithUser (conn: IDbConnection) (user: UserRecord) (post: PostRecord) =
 ```
 
 ### Custom Type Handler
+
+Reference: `dapper#type-handlers`
 
 ```fsharp
 // Register type handlers for domain types (e.g., single-case DUs)
@@ -250,3 +226,11 @@ SqlMapper.AddTypeHandler(UserIdHandler())
 ## Testing
 
 For repository testing patterns, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `dapper-fsharp#update-operations` - examples TBD
+- `dapper-fsharp#where-conditions` - examples TBD
+- `dapper#parameters` - examples TBD
+- `dapper#multi-mapping` - examples TBD
+- `dapper#async-operations` - examples TBD

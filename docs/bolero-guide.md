@@ -1,19 +1,5 @@
 # Bolero MVU Development Guide
 
-## Quick Links by Task
-
-| Task                    | Topic                   |
-| ----------------------- | ----------------------- |
-| Set up Bolero project   | bolero#getting-started  |
-| Write HTML with DSL     | bolero#html-dsl         |
-| Set up MVU architecture | bolero#mvu-architecture |
-| Define routes           | bolero#routing          |
-| Client-server remoting  | bolero#remoting         |
-| Use HTML templates      | bolero#templating       |
-| Create components       | bolero#components       |
-| Configure hosting       | bolero#server           |
-| Best practices          | bolero#patterns         |
-
 ## Key Patterns for Career Story Builder
 
 Bolero provides an F#-first approach to Blazor using the MVU (Model-View-Update) pattern:
@@ -22,35 +8,11 @@ Bolero provides an F#-first approach to Blazor using the MVU (Model-View-Update)
 - **View**: Pure function rendering the UI from the model
 - **Update**: Pure function handling messages and producing new state
 
-## Primary References
-
-### MVU Architecture
-
-- **Elmish Integration**: `bolero#mvu-architecture`
-  - ProgramComponent base class
-  - Model and Messages definition
-  - Update function patterns
-  - Commands for side effects
-
-### HTML DSL
-
-- **Writing Views**: `bolero#html-dsl`
-  - Element builders (`div { }`, `button { }`)
-  - Attributes (`attr.*`)
-  - Event handlers (`on.*`)
-  - Conditional rendering (`cond`)
-  - Lists (`forEach`)
-
-### Routing
-
-- **Page Navigation**: `bolero#routing`
-  - Route definitions with DUs
-  - Path and query parameters
-  - Navigation links
-
 ## Domain Examples
 
 ### Story Editor Model
+
+Reference: `bolero#mvu-architecture`
 
 ```fsharp
 open Elmish
@@ -175,6 +137,8 @@ and updateEditor f model =
 
 ### View Functions
 
+Reference: `bolero#html-dsl`
+
 ```fsharp
 open Bolero.Html
 
@@ -275,6 +239,8 @@ let storyFormView (editor: StoryEditorModel) dispatch =
 
 ### Routing Setup
 
+Reference: `bolero#routing`
+
 ```fsharp
 let router = Router.infer SetPage (fun m -> m.Page)
 
@@ -291,6 +257,8 @@ type App() =
 ```
 
 ### Remoting Service
+
+Reference: `bolero#remoting`
 
 ```fsharp
 // Service interface defined in data-types.md (abstract member style)
@@ -326,3 +294,11 @@ src/
 ## Testing
 
 For component testing patterns with bUnit, see [Testing Guide](testing-guide.md).
+
+## See Also
+
+- `bolero#getting-started` - examples TBD
+- `bolero#templating` - examples TBD
+- `bolero#components` - examples TBD
+- `bolero#server` - examples TBD
+- `bolero#patterns` - examples TBD

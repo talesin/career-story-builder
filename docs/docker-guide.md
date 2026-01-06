@@ -1,20 +1,5 @@
 # Docker Container Development Guide
 
-## Quick Links by Task
-
-| Task                  | Topic               |
-| --------------------- | ------------------- |
-| Docker concepts       | docker#introduction |
-| Install Docker        | docker#installing   |
-| Write Dockerfiles     | docker#images       |
-| Multi-stage builds    | docker#multi-stage  |
-| Run containers        | docker#containers   |
-| View logs             | docker#exploring    |
-| Debug containers      | docker#debugging    |
-| Docker Compose        | docker#compose      |
-| Production deployment | docker#production   |
-| Security              | docker#advanced     |
-
 ## Key Patterns for Career Story Builder
 
 Docker provides:
@@ -22,22 +7,11 @@ Docker provides:
 - **Production container**: Optimized multi-stage build
 - **Compose**: Full stack with database and app
 
-## Primary References
-
-### Dockerfile Best Practices
-- **Multi-Stage Builds**: `docker#images`
-  - Build stage with SDK
-  - Production stage with runtime only
-
-### Docker Compose
-- **Service Configuration**: `docker#compose`
-  - Service definitions
-  - Networks and volumes
-  - Environment variables
-
 ## Domain Examples
 
 ### Development Dockerfile
+
+Reference: `docker#images`, `docker#containers`
 
 ```dockerfile
 # Development Dockerfile - enables hot reload
@@ -67,6 +41,8 @@ ENTRYPOINT ["dotnet", "watch", "--project", "src/CareerStoryBuilder.Server"]
 ```
 
 ### Production Dockerfile (Multi-Stage)
+
+Reference: `docker#images`, `docker#multi-stage`, `docker#production`
 
 ```dockerfile
 # ========================================
@@ -115,6 +91,8 @@ ENTRYPOINT ["dotnet", "CareerStoryBuilder.Server.dll"]
 ```
 
 ### Docker Compose (Development)
+
+Reference: `docker#compose`
 
 ```yaml
 # docker-compose.yml
@@ -170,6 +148,8 @@ networks:
 ```
 
 ### Docker Compose (Production)
+
+Reference: `docker#compose`, `docker#production`
 
 ```yaml
 # docker-compose.prod.yml
@@ -231,6 +211,8 @@ volumes:
 ```
 
 ### Common Commands
+
+Reference: `docker#containers`, `docker#exploring`
 
 ```bash
 # Development
@@ -326,3 +308,10 @@ From `docker#production`:
 | Secrets in images    | Security risk             | Use env vars or secrets     |
 | No health checks     | Silent failures           | Add `HEALTHCHECK`           |
 | Single massive layer | Slow rebuilds             | Order for layer caching     |
+
+## See Also
+
+- `docker#introduction` - examples TBD
+- `docker#installing` - examples TBD
+- `docker#debugging` - examples TBD
+- `docker#advanced` - examples TBD

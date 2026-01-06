@@ -1,19 +1,5 @@
 # Blazor Component Patterns Guide
 
-## Quick Links by Task
-
-| Task                 | Topic                      |
-| -------------------- | -------------------------- |
-| Blazor intro         | blazor#introduction        |
-| Razor syntax         | blazor#razor-syntax        |
-| Component lifecycle  | blazor#component-lifecycle |
-| Component parameters | blazor#components          |
-| Two-way binding      | blazor#two-way-binding     |
-| Forms and validation | blazor#forms-validation    |
-| Dependency injection | blazor#di-patterns         |
-| JavaScript interop   | blazor#js-interop          |
-| Authentication       | blazor#security            |
-
 ## Key Patterns for Career Story Builder
 
 While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns helps when:
@@ -23,32 +9,11 @@ While Bolero wraps Blazor with F#-friendly APIs, understanding Blazor patterns h
 - Integrating with Blazor component libraries
 - Handling forms and validation
 
-## Primary References
-
-### Component Lifecycle
-
-- **Lifecycle Methods**: `blazor#component-lifecycle`
-  - `OnInitialized` / `OnInitializedAsync`
-  - `OnParametersSet` / `OnParametersSetAsync`
-  - `OnAfterRender` / `OnAfterRenderAsync`
-
-### Forms and Validation
-
-- **EditForm**: `blazor#forms-validation`
-  - Input components
-  - DataAnnotations validation
-  - Custom validation
-
-### Render Modes
-
-- **Choosing Modes**: `blazor#render-modes`
-  - Server-side (SignalR)
-  - WebAssembly (client-side)
-  - Auto mode
-
 ## Domain Examples
 
 ### Component Lifecycle in Bolero
+
+Reference: `blazor#component-lifecycle`
 
 Following the [split module/class pattern](fsharp-style-guide.md#split-moduleclass-pattern-for-framework-interop), extract async operations to a module for testability:
 
@@ -100,6 +65,8 @@ type StoryEditorComponent() =
 - **Reusability**: Loading logic can be reused across components
 
 ### Validation Attributes for Story Forms
+
+Reference: `blazor#forms-validation`
 
 ```fsharp
 open System.ComponentModel.DataAnnotations
@@ -164,6 +131,8 @@ let storyFormWithValidation (model: StoryEditorModel) (errors: Map<string, strin
 
 ### Service Lifetime Considerations
 
+Reference: `blazor#di-patterns`
+
 ```fsharp
 // In Program.fs or Startup
 // For Blazor Server: use Scoped (one per SignalR circuit)
@@ -180,6 +149,8 @@ builder.Services.AddTransient<IStoryValidator, StoryValidator>()
 ```
 
 ### JavaScript Interop for Rich Text
+
+Reference: `blazor#js-interop`
 
 ```fsharp
 // For rich text editing of story descriptions
@@ -220,3 +191,11 @@ For Career Story Builder:
 | Client-side perf?  | WebAssembly          |
 
 See: `blazor#render-modes`
+
+## See Also
+
+- `blazor#introduction` - examples TBD
+- `blazor#razor-syntax` - examples TBD
+- `blazor#components` - examples TBD
+- `blazor#two-way-binding` - examples TBD
+- `blazor#security` - examples TBD
