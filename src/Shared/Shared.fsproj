@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Domain/Ids.fs" />
+    <Compile Include="Domain/Star.fs" />
+    <Compile Include="Domain/Conversation.fs" />
+    <Compile Include="Dto/Api.fs" />
+  </ItemGroup>
+
+</Project>
