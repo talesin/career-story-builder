@@ -23,4 +23,4 @@ type AppComponentTests() =
 
         // Assert
         let paragraph = cut.Find("p")
-        Assert.Contains("STAR story", paragraph.TextContent)
+        Assert.Contains("SAR story", paragraph.TextContent)

@@ -30,6 +30,7 @@ type StoryAction =
     | StoryAction of string
 
     member this.Value = match this with StoryAction a -> a
+
 /// The outcome and impact of your actions.
 type StoryResult =
     | StoryResult of string

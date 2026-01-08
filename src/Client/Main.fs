@@ -26,7 +26,7 @@ let view model _dispatch =
     div {
         attr.``class`` "container"
         h1 { "Career Story Builder" }
-        p { "AI-assisted STAR story creation for career interviews." }
+        p { "AI-assisted SAR story creation for career interviews." }
     }
 
 /// Main application component.
