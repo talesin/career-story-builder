@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharpPlus" Version="1.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Domain/Ids.fs" />
+    <Compile Include="Domain/Errors.fs" />
+    <Compile Include="Domain/Story.fs" />
+    <Compile Include="Domain/Conversation.fs" />
+    <Compile Include="Dto/Api.fs" />
+  </ItemGroup>
+
+</Project>

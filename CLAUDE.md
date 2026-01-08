@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Career Story Builder is an AI-assisted application for writing STAR-format career stories (Situation, Task, Action, Result). Built with F# for both frontend and backend using Bolero (F# for Blazor) and ASP.NET Core.
+Career Story Builder is an AI-assisted application for writing SAR-format career stories (Situation, Action, Result). Built with F# for both frontend and backend using Bolero (F# for Blazor) and ASP.NET Core.
 
 ## Technology Stack
 
@@ -72,7 +72,7 @@ All guides reference materials in `~/Documents/Code/_references/`. See `docs/` f
 
 ## Domain Model
 
-Core domain is STAR stories with:
+Core domain is SAR stories with:
 - Stories linked to Roles and Projects in employment history
 - AI-assisted iterative refinement workflow
 - Per-section and overall quality scoring

@@ -31,7 +31,6 @@ type Page =
 type StoryEditorModel = {
     Title: string
     Situation: string
-    Task: string
     Action: string
     Result: string
     IsSaving: bool
@@ -65,10 +64,9 @@ type Message =
     | EditStory of StoryId
     | StoryLoaded of Story
 
-    // Form updates (one per STAR field)
+    // Form updates (one per SAR field)
     | SetTitle of string
     | SetSituation of string
-    | SetTask of string
     | SetAction of string
     | SetResult of string
 
@@ -106,13 +104,12 @@ let update (service: IStoryService) (message: Message) (model: Model) =
         { model with Stories = stories; IsLoading = false }, Cmd.none
 
     | StartNewStory ->
-        let empty = { Title = ""; Situation = ""; Task = ""; Action = ""; Result = ""; IsSaving = false; Errors = [] }
+        let empty = { Title = ""; Situation = ""; Action = ""; Result = ""; IsSaving = false; Errors = [] }
         { model with CurrentStory = Some empty }, Cmd.none
 
     // Form field updates - helper to update current story
     | SetTitle v -> model |> updateEditor (fun e -> { e with Title = v })
     | SetSituation v -> model |> updateEditor (fun e -> { e with Situation = v })
-    | SetTask v -> model |> updateEditor (fun e -> { e with Task = v })
     | SetAction v -> model |> updateEditor (fun e -> { e with Action = v })
     | SetResult v -> model |> updateEditor (fun e -> { e with Result = v })
 
@@ -120,7 +117,7 @@ let update (service: IStoryService) (message: Message) (model: Model) =
         match model.CurrentStory with
         | Some editor ->
             let dto = { Title = editor.Title; Situation = editor.Situation
-                        Task = editor.Task; Action = editor.Action; Result = editor.Result }
+                        Action = editor.Action; Result = editor.Result }
             { model with CurrentStory = Some { editor with IsSaving = true } },
             Cmd.OfAsync.either service.Create dto StorySaved SaveFailed
         | None -> model, Cmd.none
@@ -183,16 +180,6 @@ let storyFormView (editor: StoryEditorModel) dispatch =
                 attr.placeholder "Describe the context and background..."
                 attr.value editor.Situation
                 on.change (fun e -> dispatch (SetSituation (inputValue e)))
-            }
-        }
-
-        // Task
-        fieldset {
-            legend { "Task" }
-            textarea {
-                attr.placeholder "What was the challenge or responsibility?"
-                attr.value editor.Task
-                on.change (fun e -> dispatch (SetTask (inputValue e)))
             }
         }
 
@@ -288,7 +275,7 @@ src/
 ├── Server/
 │   └── StoryService.fs   # Remote service implementation
 └── Shared/
-    ├── Domain.fs         # STAR story types
+    ├── Domain.fs         # SAR story types
     └── Services.fs       # IStoryService interface
 ```
 

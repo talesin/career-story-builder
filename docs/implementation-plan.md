@@ -91,7 +91,7 @@ Implement shared types and API endpoints.
 **User Stories:** Foundation for ADD-01, ADD-05, ADD-06, ADD-08, ADD-10
 
 **Deliverables:**
-- `Star` module types (Situation, Task, Action, Result)
+- `Star` module types (Situation, Action, Result)
 - `Story`, `ChatMessage`, `WorkflowStep`, `ConversationState` types
 - API endpoint definitions
 - DTOs for client-server communication
