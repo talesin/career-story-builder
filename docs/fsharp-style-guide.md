@@ -1,6 +1,30 @@
 # F# Style Guide
 
-This guide establishes consistent coding patterns for F# compiled applications. The goal is conciseness without sacrificing readability, following modern F# idioms and leveraging F# 10+ features.
+This guide establishes consistent coding patterns for F# applications. The goal is conciseness without sacrificing readability, following modern F# idioms and leveraging F# 10+ features.
+
+## Guiding Principles
+
+**Pragmatic FP over dogmatic purity.** We have a clear preference for functional programming—pipelines, immutability, pure functions, and algebraic data types. However, F# is a multi-paradigm language, and we embrace that when it improves clarity.
+
+If a functional approach becomes verbose or unwieldy, consider light OO techniques:
+- Adding `.Value` members to single-case DUs for convenient extraction
+- Using instance methods when they read more naturally than module functions
+- Defining classes when integrating with .NET frameworks that expect them
+
+**Immutability is non-negotiable.** Pragmatism about OO syntax does not extend to mutation. Avoid mutable state unless there is a measured performance requirement. Adding a member to a type is fine; making that member mutate internal state is not.
+
+```fsharp
+// Good - OO syntax, still pure
+type EmailAddress = EmailAddress of string with
+    member this.Value = match this with EmailAddress s -> s
+    member this.Domain = this.Value.Split('@').[1]
+
+// Bad - mutation hidden behind OO interface
+type Counter() =
+    let mutable count = 0
+    member _.Increment() = count <- count + 1  // Avoid
+    member _.Count = count
+```
 
 ## Table of Contents
 
@@ -599,13 +623,42 @@ type OrderId = OrderId of int
 
 // Constructor with validation
 module EmailAddress =
-    let create str =
+    let tryCreate str =
         if String.length str > 0 && str.Contains("@")
         then Ok (EmailAddress str)
         else Error "Invalid email format"
-
-    let value (EmailAddress str) = str
 ```
+
+### Add `.Value` member for convenient extraction
+
+Single-case DUs benefit from a `.Value` property for clean access without pattern matching or module functions.
+
+```fsharp
+// Define with .Value member
+type EmailAddress = EmailAddress of string with
+    member this.Value = match this with EmailAddress s -> s
+
+type CustomerId = CustomerId of Guid with
+    member this.Value = match this with CustomerId id -> id
+
+// Usage - clean property access
+let domain = email.Value.Split('@').[1]
+let idString = customer.Id.Value.ToString()
+
+// Works well with underscore shorthand
+customers |> List.map _.Id.Value
+```
+
+**Why `.Value` over module functions or static `Extract`:**
+- **Discoverable**: IntelliSense shows it immediately
+- **Concise**: `x.Value` vs `EmailAddress.value x` or `extract x`
+- **Chainable**: `customer.Email.Value.ToLower()`
+- **Familiar**: Consistent with .NET conventions
+
+**Keep module functions for:**
+- Factory methods with validation (`EmailAddress.tryCreate`)
+- Pipeline-friendly extraction when needed (`|> List.map EmailAddress.value`)
+- Additional domain operations (`EmailAddress.domain`)
 
 ### Model states explicitly with discriminated unions
 

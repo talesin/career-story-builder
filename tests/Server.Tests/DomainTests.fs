@@ -1,7 +1,6 @@
 module CareerStoryBuilder.Tests.DomainTests
 
 open Expecto
-open FSharpPlus
 open CareerStoryBuilder.Domain
 
 let storyTitleTests =
@@ -24,7 +23,7 @@ let storyTitleTests =
         test "tryCreate trims whitespace" {
             let result = StoryTitle.tryCreate "  My Story  "
             match result with
-            | Ok title -> Expect.equal (extract title) "My Story" "Should trim whitespace"
+            | Ok title -> Expect.equal title.Value "My Story" "Should trim whitespace"
             | Error _ -> failtest "Expected Ok"
         }
     ]
@@ -34,10 +33,10 @@ let storyTests =
     testList "Story" [
         test "Story.empty creates empty story for forms" {
             let story = Story.empty
-            Expect.equal (extract story.Title) "" "Title should be empty"
-            Expect.equal (extract story.Situation) "" "Situation should be empty"
-            Expect.equal (extract story.Action) "" "Action should be empty"
-            Expect.equal (extract story.Result) "" "Result should be empty"
+            Expect.equal story.Title.Value "" "Title should be empty"
+            Expect.equal story.Situation.Value "" "Situation should be empty"
+            Expect.equal story.Action.Value "" "Action should be empty"
+            Expect.equal story.Result.Value "" "Result should be empty"
         }
 
         test "Story.tryCreate validates title" {
@@ -62,8 +61,8 @@ let storyTests =
             Expect.isOk result "Should succeed with valid title"
             match result with
             | Ok story ->
-                Expect.equal (extract story.Title) "Led migration project" "Title should match"
-                Expect.equal (extract story.Situation) "Legacy system needed modernization" "Situation should match"
+                Expect.equal story.Title.Value "Led migration project" "Title should match"
+                Expect.equal story.Situation.Value "Legacy system needed modernization" "Situation should match"
             | Error _ -> failtest "Expected Ok"
         }
     ]
@@ -78,13 +77,13 @@ let idTests =
 
         test "StoryId.value extracts the Guid" {
             let id = StoryId.create()
-            let guid = StoryId.value id
+            let guid = id.Value
             Expect.isNotNull (box guid) "Guid should not be null"
         }
 
         test "StoryId uses UUIDv7 (version 7)" {
             let id = StoryId.create()
-            let guid = StoryId.value id
+            let guid = id.Value
             Expect.equal (guid.Version) 7 "Should be UUIDv7"
         }
     ]

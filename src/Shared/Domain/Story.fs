@@ -1,14 +1,13 @@
 namespace CareerStoryBuilder.Domain
 
 open System
-open FSharpPlus
 
 /// Story title with validation.
 type StoryTitle =
     private
     | StoryTitle of string
 
-    static member Extract(StoryTitle s) = s
+    member this.Value = match this with StoryTitle s -> s
 
 module StoryTitle =
     let tryCreate (title: string) =
@@ -24,19 +23,18 @@ module StoryTitle =
 type StorySituation =
     | StorySituation of string
 
-    static member Extract(StorySituation s) = s
+    member this.Value = match this with StorySituation s -> s
 
 /// The specific steps you took to address the situation.
 type StoryAction =
     | StoryAction of string
 
-    static member Extract(StoryAction a) = a
-
+    member this.Value = match this with StoryAction a -> a
 /// The outcome and impact of your actions.
 type StoryResult =
     | StoryResult of string
 
-    static member Extract(StoryResult r) = r
+    member this.Value = match this with StoryResult r -> r
 
 /// A complete SAR story for career interviews.
 type Story =
@@ -48,7 +46,7 @@ type Story =
 module Story =
     let tryCreate title situation action result =
         StoryTitle.tryCreate title
-        |> map (fun t ->
+        |> Result.map (fun t ->
             { Title = t
               Situation = situation
               Action = action
