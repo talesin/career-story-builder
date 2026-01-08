@@ -11,7 +11,7 @@
   <ItemGroup>
     <Compile Include="Domain/Ids.fs" />
     <Compile Include="Domain/Errors.fs" />
-    <Compile Include="Domain/Star.fs" />
+    <Compile Include="Domain/Story.fs" />
     <Compile Include="Domain/Conversation.fs" />
     <Compile Include="Dto/Api.fs" />
   </ItemGroup>

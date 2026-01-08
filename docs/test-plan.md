@@ -112,18 +112,7 @@ Then I should see a clarifying question about the situation
   And the question should ask about when, where, or what prompted the situation
 ```
 
-#### Scenario 6.2: AI identifies missing Task details
-
-```gherkin
-Given I have submitted my initial story description
-  And the AI has analyzed my input
-  And my description lacks clarity on my specific responsibility
-When the AI response is displayed
-Then I should see a clarifying question about my task or role
-  And the question should ask what I was specifically asked to do
-```
-
-#### Scenario 6.3: AI identifies missing Action details
+#### Scenario 6.2: AI identifies missing Action details
 
 ```gherkin
 Given I have submitted my initial story description
@@ -134,7 +123,7 @@ Then I should see a clarifying question about actions
   And the question should ask what specific steps I took
 ```
 
-#### Scenario 6.4: AI identifies missing Result details
+#### Scenario 6.3: AI identifies missing Result details
 
 ```gherkin
 Given I have submitted my initial story description
@@ -250,16 +239,16 @@ Then the AI should remember all previous context
 
 ### ADD-10: AI-Assisted Story Generation
 
-> As a user, I want the AI to help transform my raw input into a professionally written STAR-format story so that the final output is polished and interview-ready.
+> As a user, I want the AI to help transform my raw input into a professionally written SAR-format story so that the final output is polished and interview-ready.
 
-#### Scenario 10.1: AI generates complete STAR story
+#### Scenario 10.1: AI generates complete SAR story
 
 ```gherkin
 Given I have provided sufficient detail through the refinement process
   And I click "Generate Story"
 When the AI processes my inputs
 Then I should see a professionally formatted story
-  And the story should have distinct Situation, Task, Action, and Result sections
+  And the story should have distinct Situation, Action, and Result sections
   And each section should incorporate my provided details
 ```
 

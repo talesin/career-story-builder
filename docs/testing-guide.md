@@ -24,7 +24,6 @@ let storyValidationTests = testList "Story Validation" [
             Id = StoryId (Guid.NewGuid())
             Title = "Led migration to cloud infrastructure"
             Situation = { Context = "Legacy on-prem system..."; When = Some (DateOnly(2023, 1, 1)); Where = Some "Acme Corp" }
-            Task = { Challenge = "Migrate 50+ services"; Responsibility = "Technical lead"; Stakeholders = ["Engineering"; "Ops"] }
             Actions = [
                 { Step = 1; Description = "Assessed current state"; Skills = ["Analysis"] }
                 { Step = 2; Description = "Designed migration plan"; Skills = ["Architecture"; "AWS"] }
@@ -73,7 +72,6 @@ type StoryGenerators =
         gen {
             let! title = Arb.generate<NonEmptyString> |> Gen.map (fun s -> s.Get)
             let! context = Arb.generate<NonEmptyString> |> Gen.map (fun s -> s.Get)
-            let! challenge = Arb.generate<NonEmptyString> |> Gen.map (fun s -> s.Get)
             let! outcome = Arb.generate<NonEmptyString> |> Gen.map (fun s -> s.Get)
             let! actionCount = Gen.choose (1, 10)
             let! actions = Gen.listOfLength actionCount (gen {
@@ -85,7 +83,6 @@ type StoryGenerators =
                 Id = StoryId (Guid.NewGuid())
                 Title = title
                 Situation = { Context = context; When = None; Where = None }
-                Task = { Challenge = challenge; Responsibility = ""; Stakeholders = [] }
                 Actions = actions |> List.mapi (fun i a -> { a with Step = i + 1 })
                 Result = { Outcome = outcome; Impact = None; Metrics = None }
                 Tags = []
@@ -351,7 +348,6 @@ type StoryApiTests(factory: WebApplicationFactory<Program>) =
         let dto = {|
             Title = "Test Story"
             Situation = "Test situation context"
-            Task = "Test task challenge"
             Action = "Test action taken"
             Result = "Test outcome achieved"
         |}

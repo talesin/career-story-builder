@@ -36,7 +36,6 @@ let storyTests =
             let story = Story.empty
             Expect.equal (extract story.Title) "" "Title should be empty"
             Expect.equal (extract story.Situation) "" "Situation should be empty"
-            Expect.equal (extract story.Task) "" "Task should be empty"
             Expect.equal (extract story.Action) "" "Action should be empty"
             Expect.equal (extract story.Result) "" "Result should be empty"
         }
@@ -45,10 +44,9 @@ let storyTests =
             let result =
                 Story.tryCreate
                     ""  // Invalid empty title
-                    (Star.Situation "Context")
-                    (Star.Task "Challenge")
-                    (Star.Action "Steps taken")
-                    (Star.Result "Outcome")
+                    (StorySituation "Context")
+                    (StoryAction "Steps taken")
+                    (StoryResult "Outcome")
 
             Expect.isError result "Should fail with empty title"
         }
@@ -57,10 +55,9 @@ let storyTests =
             let result =
                 Story.tryCreate
                     "Led migration project"
-                    (Star.Situation "Legacy system needed modernization")
-                    (Star.Task "Migrate 500k records to new platform")
-                    (Star.Action "Designed migration strategy with rollback plan")
-                    (Star.Result "Zero downtime, 40% performance improvement")
+                    (StorySituation "Legacy system needed modernization")
+                    (StoryAction "Designed migration strategy with rollback plan")
+                    (StoryResult "Zero downtime, 40% performance improvement")
 
             Expect.isOk result "Should succeed with valid title"
             match result with

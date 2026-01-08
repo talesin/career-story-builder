@@ -2,13 +2,13 @@
 
 ## Key Patterns for Career Story Builder
 
-F# is the primary language for this project. The STAR story domain benefits from:
+F# is the primary language for this project. The SAR story domain benefits from:
 - **Discriminated unions** for modeling story components
 - **Records** for immutable data structures
 - **Result type** for validation and error handling
 - **Pattern matching** for processing different story states
 
-> **Naming Convention**: We use "STAR" when referring to the interview methodology (Situation, Task, Action, Result) and "Star" (PascalCase) for F# module/type names to avoid collisions with common types like `System.Threading.Tasks.Task`.
+> **Naming Convention**: We use "SAR" when referring to the interview methodology (Situation, Action, Result) and "Star" (PascalCase) for F# module/type names to avoid collision with F#'s `Result<'T,'E>` type.
 
 ## Domain Examples
 
@@ -19,22 +19,19 @@ Reference: `fsharp#domain-modeling-records`, `fsharp#records-unions`
 ```fsharp
 // Core domain types for career stories
 //
-// NOTE: The Star module wrapper is specific to this domain because STAR acronym
-// components (Task, Result) collide with common types (System.Threading.Tasks.Task,
-// F#'s Result<'T,'E>). This is NOT a typical F# pattern - normally you'd define
-// types at module level without wrapping. We use it here solely to avoid these
-// name collisions while keeping the STAR terminology.
+// NOTE: The Star module wrapper is specific to this domain because the SAR acronym
+// component Result collides with F#'s Result<'T,'E>. This is NOT a typical F#
+// pattern - normally you'd define types at module level without wrapping. We use
+// it here solely to avoid the name collision while keeping the SAR terminology.
 
 module Star =
     type Situation = Situation of string
-    type Task = Task of string
     type Action = Action of string
     type Result = Result of string
 
 type Story = {
     Title: string
     Situation: Star.Situation
-    Task: Star.Task
     Action: Star.Action
     Result: Star.Result
 }
@@ -43,7 +40,6 @@ type Story = {
 let story : Story = {
     Title = "Led migration project"
     Situation = Star.Situation "Legacy system needed modernization"
-    Task = Star.Task "Migrate 500k records to new platform"
     Action = Star.Action "Designed migration strategy with rollback plan"
     Result = Star.Result "Zero downtime, 40% performance improvement"
 }
@@ -58,8 +54,7 @@ Reference: `fsharp#discriminated-unions`, `fsharp#pattern-matching`
 type StoryDraft =
     | Empty
     | HasSituation of Star.Situation
-    | HasTask of Star.Situation * Star.Task
-    | HasAction of Star.Situation * Star.Task * Star.Action
+    | HasAction of Star.Situation * Star.Action
     | Complete of Story
 
 // Validation errors

@@ -2,7 +2,7 @@
 
 Minimal F# types for the Phase 1 prototype. These will evolve as features are added in later phases.
 
-> **Namespacing**: Star component types are wrapped in `module Star` to avoid collisions with `System.Threading.Tasks.Task` and F#'s `Result<'T,'E>` type. Access via `Star.Task`, `Star.Result`, etc.
+> **Namespacing**: Star component types are wrapped in `module Star` to avoid collision with F#'s `Result<'T,'E>` type. Access via `Star.Situation`, `Star.Action`, `Star.Result`, etc.
 
 ## ID Types
 
@@ -21,14 +21,12 @@ Simple string wrappers for type safety:
 ```fsharp
 module Star =
     type Situation = Situation of string
-    type Task = Task of string
     type Action = Action of string
     type Result = Result of string
 
 type Story = {
     Title: string
     Situation: Star.Situation
-    Task: Star.Task
     Action: Star.Action
     Result: Star.Result
 }
@@ -40,7 +38,6 @@ Usage:
 let story : Story = {
     Title = "Led migration project"
     Situation = Star.Situation "Legacy system needed modernization"
-    Task = Star.Task "Migrate 500k records to new platform"
     Action = Star.Action "Designed migration strategy with rollback plan"
     Result = Star.Result "Zero downtime, 40% performance improvement"
 }
@@ -96,7 +93,6 @@ Data transfer objects for API communication:
 type CreateStoryDto = {
     Title: string
     Situation: string
-    Task: string
     Action: string
     Result: string
 }
@@ -104,7 +100,6 @@ type CreateStoryDto = {
 type UpdateStoryDto = {
     Title: string option
     Situation: string option
-    Task: string option
     Action: string option
     Result: string option
 }
@@ -118,7 +113,6 @@ Example valid story for use in tests:
 let validStory : Story = {
     Title = "Led migration project"
     Situation = Star.Situation "Legacy system needed modernization due to performance issues"
-    Task = Star.Task "Migrate 500k records to new platform within 3 months"
     Action = Star.Action "Designed migration strategy with rollback plan and led team of 4"
     Result = Star.Result "Zero downtime, 40% performance improvement, completed 2 weeks early"
 }

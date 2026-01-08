@@ -96,7 +96,7 @@ As a user, I want to optionally specify a time period for when the story occurre
 As a user, I want to write an initial free-form description of my accomplishment so that I can capture the essence of my experience before structuring it.
 
 **ADD-06 (M): AI-Guided Clarification**
-As a user, I want the AI to ask me clarifying questions about my initial story so that I can provide sufficient detail for each STAR component (Situation, Task, Action, Result).
+As a user, I want the AI to ask me clarifying questions about my initial story so that I can provide sufficient detail for each SAR component (Situation, Action, Result).
 
 **ADD-07 (S): AI Suggestions**
 As a user, I want the AI to offer suggestions and prompts when my content is thin so that I can recall and articulate important details I may have overlooked.
