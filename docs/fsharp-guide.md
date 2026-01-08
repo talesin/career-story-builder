@@ -8,41 +8,45 @@ F# is the primary language for this project. The SAR story domain benefits from:
 - **Result type** for validation and error handling
 - **Pattern matching** for processing different story states
 
-> **Naming Convention**: We use "SAR" when referring to the interview methodology (Situation, Action, Result) and "Star" (PascalCase) for F# module/type names to avoid collision with F#'s `Result<'T,'E>` type.
-
 ## Domain Examples
 
-### Star Story Domain Types
+### SAR Story Domain Types
 
 Reference: `fsharp#domain-modeling-records`, `fsharp#records-unions`
 
 ```fsharp
 // Core domain types for career stories
-//
-// NOTE: The Star module wrapper is specific to this domain because the SAR acronym
-// component Result collides with F#'s Result<'T,'E>. This is NOT a typical F#
-// pattern - normally you'd define types at module level without wrapping. We use
-// it here solely to avoid the name collision while keeping the SAR terminology.
+// Single-case DUs with .Value members for type safety and convenient extraction
 
-module Star =
-    type Situation = Situation of string
-    type Action = Action of string
-    type Result = Result of string
+type StoryTitle = private StoryTitle of string with
+    member this.Value = match this with StoryTitle s -> s
+
+type StorySituation = StorySituation of string with
+    member this.Value = match this with StorySituation s -> s
+
+type StoryAction = StoryAction of string with
+    member this.Value = match this with StoryAction a -> a
+
+type StoryResult = StoryResult of string with
+    member this.Value = match this with StoryResult r -> r
 
 type Story = {
-    Title: string
-    Situation: Star.Situation
-    Action: Star.Action
-    Result: Star.Result
+    Title: StoryTitle
+    Situation: StorySituation
+    Action: StoryAction
+    Result: StoryResult
 }
 
 // Usage
 let story : Story = {
-    Title = "Led migration project"
-    Situation = Star.Situation "Legacy system needed modernization"
-    Action = Star.Action "Designed migration strategy with rollback plan"
-    Result = Star.Result "Zero downtime, 40% performance improvement"
+    Title = StoryTitle "Led migration project"
+    Situation = StorySituation "Legacy system needed modernization"
+    Action = StoryAction "Designed migration strategy with rollback plan"
+    Result = StoryResult "Zero downtime, 40% performance improvement"
 }
+
+// Access values via .Value member
+let title = story.Title.Value
 ```
 
 ### Story State with Discriminated Unions
@@ -53,8 +57,8 @@ Reference: `fsharp#discriminated-unions`, `fsharp#pattern-matching`
 // Story editing workflow states
 type StoryDraft =
     | Empty
-    | HasSituation of Star.Situation
-    | HasAction of Star.Situation * Star.Action
+    | HasSituation of StorySituation
+    | HasAction of StorySituation * StoryAction
     | Complete of Story
 
 // Validation errors
@@ -72,11 +76,11 @@ Reference: `fsharp#railway-oriented`, `fsharp#rich-domains`
 let validateTitle title =
     if String.IsNullOrWhiteSpace title then Error (FieldEmpty "title")
     elif title.Length > 200 then Error (TitleTooLong 200)
-    else Ok title
+    else Ok (StoryTitle title)
 
-let validateSituation (Star.Situation s) =
-    if String.IsNullOrWhiteSpace s then Error (FieldEmpty "situation")
-    else Ok (Star.Situation s)
+let validateSituation (situation: StorySituation) =
+    if String.IsNullOrWhiteSpace situation.Value then Error (FieldEmpty "situation")
+    else Ok situation
 
 // Compose validations using Result.bind
 let validateStory title situation =

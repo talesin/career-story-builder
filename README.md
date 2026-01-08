@@ -1,14 +1,13 @@
 # Career Story Builder
 
-An AI supported career story builder, helping professionals write STAR style career stories useful for building resumes, personal talent reviews or promotion documents.
+An AI supported career story builder, helping professionals write SAR style career stories useful for building resumes, personal talent reviews or promotion documents.
 
-## STAR Story Domain
+## SAR Story Domain
 
-This application helps professionals write career stories using the STAR format:
+This application helps professionals write career stories using the SAR format:
 
 - **S**ituation - Context and background
-- **T**ask - The challenge or responsibility
-- **A**ction - Steps taken to address the task
+- **A**ction - Steps taken to address the situation
 - **R**esult - Outcomes and impact
 
 ## Architecture Overview

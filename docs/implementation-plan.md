@@ -159,7 +159,7 @@ User refines story sections based on AI feedback.
 - Save section updates
 
 **Tasks:**
-1. Create `RefinementView` with STAR section editors
+1. Create `RefinementView` with SAR section editors
 2. Implement refinement prompts for each section
 3. Add inline suggestion display
 4. Update conversation state with edits
@@ -167,7 +167,7 @@ User refines story sections based on AI feedback.
 
 ### 1.6 - AI-Assisted Story Generation (ADD-10)
 
-AI generates complete STAR story from conversation.
+AI generates complete SAR story from conversation.
 
 **Deliverables:**
 - "Generate Story" action
@@ -303,7 +303,7 @@ CareerStoryBuilder/
 │   ├── Shared/
 │   │   ├── Shared.fsproj
 │   │   ├── Domain/
-│   │   │   ├── Star.fs
+│   │   │   ├── Story.fs
 │   │   │   └── Conversation.fs
 │   │   └── Dto/
 │   │       └── Api.fs
