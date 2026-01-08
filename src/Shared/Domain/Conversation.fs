@@ -12,7 +12,7 @@ type ChatMessage = {
     Role: MessageRole
     Content: string
     Timestamp: DateTimeOffset
-    Error: string option
+    Error: ConversationError option
 }
 
 module ChatMessage =
@@ -33,11 +33,12 @@ type WorkflowStep =
     | Generation
 
 /// State of the AI-assisted story building conversation.
+/// Messages are stored in reverse chronological order (newest first) for O(1) append.
 type ConversationState = {
     Messages: ChatMessage list
     CurrentStep: WorkflowStep
     DraftStory: Story option
-    LastError: string option
+    LastError: ConversationError option
     IsProcessing: bool
 }
 
@@ -50,9 +51,13 @@ module ConversationState =
         IsProcessing = false
     }
 
+    /// Add a message. Messages stored in reverse chronological order (O(1) prepend).
     let addMessage message state = {
-        state with Messages = state.Messages @ [ message ]
+        state with Messages = message :: state.Messages
     }
+
+    /// Get messages in chronological order for display.
+    let messagesChronological state = state.Messages |> List.rev
 
     let setStep step state = { state with CurrentStep = step }
 

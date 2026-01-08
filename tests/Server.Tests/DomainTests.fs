@@ -1,42 +1,73 @@
 module CareerStoryBuilder.Tests.DomainTests
 
 open Expecto
+open FSharpPlus
 open CareerStoryBuilder.Domain
 
-/// Extract string value from Star.Situation
-let situationValue (Star.Situation s) = s
+let storyTitleTests =
+    testList "StoryTitle" [
+        test "tryCreate rejects empty title" {
+            let result = StoryTitle.tryCreate ""
+            Expect.isError result "Empty title should fail"
+        }
 
-/// Extract string value from Star.Task
-let taskValue (Star.Task s) = s
+        test "tryCreate rejects whitespace title" {
+            let result = StoryTitle.tryCreate "   "
+            Expect.isError result "Whitespace title should fail"
+        }
 
-/// Extract string value from Star.Action
-let actionValue (Star.Action s) = s
+        test "tryCreate accepts valid title" {
+            let result = StoryTitle.tryCreate "My Career Story"
+            Expect.isOk result "Valid title should succeed"
+        }
 
-/// Extract string value from Star.Result
-let resultValue (Star.Result s) = s
+        test "tryCreate trims whitespace" {
+            let result = StoryTitle.tryCreate "  My Story  "
+            match result with
+            | Ok title -> Expect.equal (extract title) "My Story" "Should trim whitespace"
+            | Error _ -> failtest "Expected Ok"
+        }
+    ]
+
 
 let storyTests =
     testList "Story" [
-        test "Story.empty creates empty story" {
+        test "Story.empty creates empty story for forms" {
             let story = Story.empty
-            Expect.equal story.Title "" "Title should be empty"
-            Expect.equal (situationValue story.Situation) "" "Situation should be empty"
-            Expect.equal (taskValue story.Task) "" "Task should be empty"
-            Expect.equal (actionValue story.Action) "" "Action should be empty"
-            Expect.equal (resultValue story.Result) "" "Result should be empty"
+            Expect.equal (extract story.Title) "" "Title should be empty"
+            Expect.equal (extract story.Situation) "" "Situation should be empty"
+            Expect.equal (extract story.Task) "" "Task should be empty"
+            Expect.equal (extract story.Action) "" "Action should be empty"
+            Expect.equal (extract story.Result) "" "Result should be empty"
         }
 
-        test "Story.create creates story with values" {
-            let story =
-                Story.create
+        test "Story.tryCreate validates title" {
+            let result =
+                Story.tryCreate
+                    ""  // Invalid empty title
+                    (Star.Situation "Context")
+                    (Star.Task "Challenge")
+                    (Star.Action "Steps taken")
+                    (Star.Result "Outcome")
+
+            Expect.isError result "Should fail with empty title"
+        }
+
+        test "Story.tryCreate succeeds with valid title" {
+            let result =
+                Story.tryCreate
                     "Led migration project"
                     (Star.Situation "Legacy system needed modernization")
                     (Star.Task "Migrate 500k records to new platform")
                     (Star.Action "Designed migration strategy with rollback plan")
                     (Star.Result "Zero downtime, 40% performance improvement")
 
-            Expect.equal story.Title "Led migration project" "Title should match"
-            Expect.equal (situationValue story.Situation) "Legacy system needed modernization" "Situation should match"
+            Expect.isOk result "Should succeed with valid title"
+            match result with
+            | Ok story ->
+                Expect.equal (extract story.Title) "Led migration project" "Title should match"
+                Expect.equal (extract story.Situation) "Legacy system needed modernization" "Situation should match"
+            | Error _ -> failtest "Expected Ok"
         }
     ]
 
@@ -53,6 +84,12 @@ let idTests =
             let guid = StoryId.value id
             Expect.isNotNull (box guid) "Guid should not be null"
         }
+
+        test "StoryId uses UUIDv7 (version 7)" {
+            let id = StoryId.create()
+            let guid = StoryId.value id
+            Expect.equal (guid.Version) 7 "Should be UUIDv7"
+        }
     ]
 
 let conversationTests =
@@ -65,13 +102,36 @@ let conversationTests =
             Expect.isFalse state.IsProcessing "Should not be processing"
         }
 
-        test "ConversationState.addMessage appends message" {
+        test "ConversationState.addMessage prepends message" {
             let state = ConversationState.initial
-            let message = ChatMessage.create User "Hello"
-            let newState = ConversationState.addMessage message state
+            let message1 = ChatMessage.create User "First"
+            let message2 = ChatMessage.create Assistant "Second"
 
-            Expect.hasLength newState.Messages 1 "Should have one message"
-            Expect.equal newState.Messages[0].Content "Hello" "Message content should match"
+            let newState =
+                state
+                |> ConversationState.addMessage message1
+                |> ConversationState.addMessage message2
+
+            Expect.hasLength newState.Messages 2 "Should have two messages"
+            // Messages are stored in reverse order (newest first)
+            Expect.equal newState.Messages[0].Content "Second" "First in list is newest"
+            Expect.equal newState.Messages[1].Content "First" "Second in list is oldest"
+        }
+
+        test "ConversationState.messagesChronological returns chronological order" {
+            let state = ConversationState.initial
+            let message1 = ChatMessage.create User "First"
+            let message2 = ChatMessage.create Assistant "Second"
+
+            let newState =
+                state
+                |> ConversationState.addMessage message1
+                |> ConversationState.addMessage message2
+
+            let chronological = ConversationState.messagesChronological newState
+
+            Expect.equal chronological[0].Content "First" "First chronologically"
+            Expect.equal chronological[1].Content "Second" "Second chronologically"
         }
 
         test "ConversationState.setStep changes workflow step" {
@@ -80,11 +140,19 @@ let conversationTests =
 
             Expect.equal newState.CurrentStep Clarification "Step should be Clarification"
         }
+
+        test "ChatMessage.withError sets typed error" {
+            let message = ChatMessage.create User "Test"
+            let errorMessage = ChatMessage.withError AiServiceUnavailable message
+
+            Expect.equal errorMessage.Error (Some AiServiceUnavailable) "Should have error"
+        }
     ]
 
 [<Tests>]
 let allTests =
     testList "Domain" [
+        storyTitleTests
         storyTests
         idTests
         conversationTests
