@@ -11,7 +11,7 @@
 
 **Goal:** Validate the core AI-assisted story creation workflow.
 
-Minimal stories to test the iterative AI conversation for building STAR-format stories:
+Minimal stories to test the iterative AI conversation for building SAR-format stories:
 
 - ADD-01: Start New Story
 - ADD-05: Initial Story Capture

@@ -4,6 +4,62 @@
 
 This plan details the implementation approach for the Career Story Builder application. Phase 0 and 1 are detailed with specific dot releases; subsequent phases provide high-level guidance referencing the delivery plan.
 
+## Progress Checklist
+
+### Phase 0: Infrastructure Setup
+- [x] 0.1 - Project Scaffolding
+- [x] 0.2 - Docker Configuration
+- [ ] 0.3 - Static Placeholder Site
+- [ ] 0.4 - Test Infrastructure
+
+### Phase 1: Core AI Workflow (Prototype)
+- [ ] 1.1 - Domain Types & API Contract
+- [ ] 1.2 - Start New Story (ADD-01)
+- [ ] 1.3 - Initial Story Capture (ADD-05)
+- [ ] 1.4 - AI-Guided Clarification (ADD-06)
+- [ ] 1.5 - Iterative Refinement (ADD-08)
+- [ ] 1.6 - AI-Assisted Story Generation (ADD-10)
+
+### Phase 2: Authentication & API Setup
+- [ ] LinkedIn OAuth integration
+- [ ] User session management
+- [ ] Secure API key storage
+- [ ] API key validation UI
+
+### Phase 3: Complete Wizard & Draft Management
+- [ ] PostgreSQL database integration
+- [ ] Draft save/resume functionality
+- [ ] Quality scoring system
+- [ ] Review workflow
+
+### Phase 4: Dashboard & Story List
+- [ ] Story list view with cards/table
+- [ ] Story detail view
+- [ ] Edit and delete operations
+
+### Phase 5: Search, Filter & Enhanced Editing
+- [ ] Full-text search
+- [ ] Filter/sort controls
+- [ ] Direct section editing
+
+### Phase 6: Metadata & Tags
+- [ ] Role/project associations
+- [ ] Tagging system
+- [ ] Scoring criteria display
+
+### Phase 7: Employment History
+- [ ] Employment history management
+- [ ] Role/project CRUD
+- [ ] Story-to-role linking
+
+### Phase 8: Advanced Settings & Polish
+- [ ] Profile management
+- [ ] AI provider selection
+- [ ] Content preferences
+- [ ] Bulk operations
+
+---
+
 ## Phase 0: Infrastructure Setup
 
 ### 0.1 - Project Scaffolding
@@ -159,7 +215,7 @@ User refines story sections based on AI feedback.
 - Save section updates
 
 **Tasks:**
-1. Create `RefinementView` with STAR section editors
+1. Create `RefinementView` with SAR section editors
 2. Implement refinement prompts for each section
 3. Add inline suggestion display
 4. Update conversation state with edits
@@ -167,7 +223,7 @@ User refines story sections based on AI feedback.
 
 ### 1.6 - AI-Assisted Story Generation (ADD-10)
 
-AI generates complete STAR story from conversation.
+AI generates complete SAR story from conversation.
 
 **Deliverables:**
 - "Generate Story" action
@@ -293,32 +349,39 @@ AI generates complete STAR story from conversation.
 CareerStoryBuilder/
 ├── CareerStoryBuilder.sln
 ├── global.json
+├── Directory.Build.props
 ├── Dockerfile
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
+├── docker-compose.remote.yml      # Remote Docker host support
+├── .dockerignore
 ├── scripts/
-│   ├── build.sh
-│   └── run.sh
+│   ├── build.sh / build.ps1
+│   ├── run.sh / run.ps1
+│   ├── test.sh / test.ps1
+│   └── shell.sh / shell.ps1
 ├── src/
 │   ├── Shared/
 │   │   ├── Shared.fsproj
 │   │   ├── Domain/
-│   │   │   ├── Star.fs
+│   │   │   ├── Ids.fs             # StoryId, UserId, RoleId types
+│   │   │   ├── Errors.fs          # ValidationError, StoryError, ConversationError
+│   │   │   ├── Story.fs
 │   │   │   └── Conversation.fs
 │   │   └── Dto/
 │   │       └── Api.fs
 │   ├── Server/
 │   │   ├── Server.fsproj
 │   │   ├── Program.fs
-│   │   └── Api/
+│   │   └── Api/                   # Added in Phase 1.4+
 │   │       ├── ClarificationApi.fs
 │   │       └── GenerationApi.fs
 │   └── Client/
 │       ├── Client.fsproj
 │       ├── Main.fs
-│       ├── Model.fs
-│       ├── Update.fs
-│       └── Views/
+│       ├── Model.fs               # Added in Phase 1.2+
+│       ├── Update.fs              # Added in Phase 1.2+
+│       └── Views/                 # Added in Phase 1.2+
 │           ├── InitialCaptureView.fs
 │           ├── ChatView.fs
 │           ├── RefinementView.fs
@@ -326,7 +389,8 @@ CareerStoryBuilder/
 ├── tests/
 │   ├── Server.Tests/
 │   │   ├── Server.Tests.fsproj
-│   │   └── ApiTests.fs
+│   │   ├── Program.fs             # Expecto test runner entry point
+│   │   └── DomainTests.fs
 │   └── Client.Tests/
 │       ├── Client.Tests.fsproj
 │       └── ComponentTests.fs

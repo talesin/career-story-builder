@@ -99,7 +99,7 @@ Then I should see a suggestion to provide more detail
 
 ### ADD-06: AI-Guided Clarification
 
-> As a user, I want the AI to ask me clarifying questions about my initial story so that I can provide sufficient detail for each STAR component.
+> As a user, I want the AI to ask me clarifying questions about my initial story so that I can provide sufficient detail for each SAR component.
 
 #### Scenario 6.1: AI identifies missing Situation details
 
@@ -139,7 +139,7 @@ Then I should see a clarifying question about results
 ```gherkin
 Given I have submitted a brief initial story description
   And the AI has analyzed my input
-  And multiple STAR components need clarification
+  And multiple SAR components need clarification
 When the AI response is displayed
 Then I should see multiple clarifying questions
   And the questions should be prioritized by importance
@@ -199,7 +199,7 @@ Then the AI should incorporate this information
 
 ```gherkin
 Given I have been refining my story through dialogue
-  And all STAR components have sufficient detail
+  And all SAR components have sufficient detail
 When the AI analyzes the current story state
 Then the AI should indicate the story is ready for generation
   And I should see a "Generate Story" or similar call-to-action

@@ -121,4 +121,4 @@ dist/
 # External references configuration (machine-specific)
 .references.md
 
-.fake
+.fake.claude/settings.local.json

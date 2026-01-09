@@ -1,14 +1,13 @@
 # Career Story Builder
 
-An AI supported career story builder, helping professionals write STAR style career stories useful for building resumes, personal talent reviews or promotion documents.
+An AI supported career story builder, helping professionals write SAR style career stories useful for building resumes, personal talent reviews or promotion documents.
 
-## STAR Story Domain
+## SAR Story Domain
 
-This application helps professionals write career stories using the STAR format:
+This application helps professionals write career stories using the SAR format:
 
 - **S**ituation - Context and background
-- **T**ask - The challenge or responsibility
-- **A**ction - Steps taken to address the task
+- **A**ction - Steps taken to address the situation
 - **R**esult - Outcomes and impact
 
 ## Architecture Overview
@@ -20,6 +19,30 @@ The application uses **asynchronous communication** between the frontend and bac
 - **Event-driven updates** - The UI reacts to data changes without requiring full page refreshes
 
 This async-first approach ensures a smooth user experience even during longer operations like AI-assisted story generation.
+
+## Prerequisites
+
+- **Docker** with **Docker Compose** plugin
+  - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Compose)
+  - Or [Docker Engine](https://docs.docker.com/engine/install/) + [Compose plugin](https://docs.docker.com/compose/install/)
+
+## Quick Start
+
+**macOS/Linux (bash):**
+```bash
+./scripts/run.sh        # Start dev server (hot reload)
+./scripts/test.sh       # Run tests
+./scripts/run.sh stop   # Stop
+```
+
+**Windows (PowerShell):**
+```powershell
+./scripts/run.ps1       # Start dev server (hot reload)
+./scripts/test.ps1      # Run tests
+./scripts/run.ps1 stop  # Stop
+```
+
+Open http://localhost:8001 in your browser.
 
 ## Documentation
 

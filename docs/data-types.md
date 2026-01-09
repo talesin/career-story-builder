@@ -2,33 +2,43 @@
 
 Minimal F# types for the Phase 1 prototype. These will evolve as features are added in later phases.
 
-> **Namespacing**: Star component types are wrapped in `module Star` to avoid collision with F#'s `Result<'T,'E>` type. Access via `Star.Situation`, `Star.Action`, `Star.Result`, etc.
-
 ## ID Types
 
-All entity IDs use ordered UUIDs (UUIDv7) for database-friendly sequential ordering:
+All entity IDs use ordered UUIDs (UUIDv7) for database-friendly sequential ordering. Each has a `.Value` member for convenient extraction:
 
 ```fsharp
-type StoryId = StoryId of Guid
-type UserId = UserId of Guid
-type RoleId = RoleId of Guid
+type StoryId = StoryId of Guid with
+    member this.Value = match this with StoryId id -> id
+
+type UserId = UserId of Guid with
+    member this.Value = match this with UserId id -> id
+
+type RoleId = RoleId of Guid with
+    member this.Value = match this with RoleId id -> id
 ```
 
-## Star Components
+## SAR Components
 
-Simple string wrappers for type safety:
+Single-case discriminated unions with `.Value` members for type safety:
 
 ```fsharp
-module Star =
-    type Situation = Situation of string
-    type Action = Action of string
-    type Result = Result of string
+type StoryTitle = private StoryTitle of string with
+    member this.Value = match this with StoryTitle s -> s
+
+type StorySituation = StorySituation of string with
+    member this.Value = match this with StorySituation s -> s
+
+type StoryAction = StoryAction of string with
+    member this.Value = match this with StoryAction a -> a
+
+type StoryResult = StoryResult of string with
+    member this.Value = match this with StoryResult r -> r
 
 type Story = {
-    Title: string
-    Situation: Star.Situation
-    Action: Star.Action
-    Result: Star.Result
+    Title: StoryTitle
+    Situation: StorySituation
+    Action: StoryAction
+    Result: StoryResult
 }
 ```
 
@@ -36,11 +46,14 @@ Usage:
 
 ```fsharp
 let story : Story = {
-    Title = "Led migration project"
-    Situation = Star.Situation "Legacy system needed modernization"
-    Action = Star.Action "Designed migration strategy with rollback plan"
-    Result = Star.Result "Zero downtime, 40% performance improvement"
+    Title = StoryTitle "Led migration project"
+    Situation = StorySituation "Legacy system needed modernization"
+    Action = StoryAction "Designed migration strategy with rollback plan"
+    Result = StoryResult "Zero downtime, 40% performance improvement"
 }
+
+// Access values via .Value member
+let title = story.Title.Value  // "Led migration project"
 ```
 
 ## Conversation State
@@ -111,10 +124,10 @@ Example valid story for use in tests:
 
 ```fsharp
 let validStory : Story = {
-    Title = "Led migration project"
-    Situation = Star.Situation "Legacy system needed modernization due to performance issues"
-    Action = Star.Action "Designed migration strategy with rollback plan and led team of 4"
-    Result = Star.Result "Zero downtime, 40% performance improvement, completed 2 weeks early"
+    Title = StoryTitle "Led migration project"
+    Situation = StorySituation "Legacy system needed modernization due to performance issues"
+    Action = StoryAction "Designed migration strategy with rollback plan and led team of 4"
+    Result = StoryResult "Zero downtime, 40% performance improvement, completed 2 weeks early"
 }
 ```
 

@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "${APP_PORT:-8001}:${APP_PORT:-8001}"
+    volumes:
+      # Mount source for hot reload
+      - .:/app
+      # Preserve nuget packages between rebuilds
+      - nuget-cache:/root/.nuget/packages
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:${APP_PORT:-8001}
+
+volumes:
+  nuget-cache:

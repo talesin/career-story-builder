@@ -105,10 +105,10 @@ As a user, I want the AI to offer suggestions and prompts when my content is thi
 As a user, I want to engage in a back-and-forth dialogue with the AI so that I can progressively develop my story until it meets quality thresholds.
 
 **ADD-09 (S): Content Sufficiency Indicator**
-As a user, I want to see an indicator showing whether each STAR section has enough content (configurable, typically one paragraph per section) so that I know when my story is ready for review.
+As a user, I want to see an indicator showing whether each SAR section has enough content (configurable, typically one paragraph per section) so that I know when my story is ready for review.
 
 **ADD-10 (M): AI-Assisted Story Generation**
-As a user, I want the AI to help transform my raw input into a professionally written STAR-format story so that the final output is polished and interview-ready.
+As a user, I want the AI to help transform my raw input into a professionally written SAR-format story so that the final output is polished and interview-ready.
 
 **ADD-11 (S): Story Review Request**
 As a user, I want to request an AI review of my completed story so that I can receive structured feedback before finalizing.
@@ -117,7 +117,7 @@ As a user, I want to request an AI review of my completed story so that I can re
 As a user, I want the AI review to generate targeted follow-up questions so that I can further strengthen weak areas of my story.
 
 **ADD-13 (S): Final Scoring**
-As a user, I want each STAR section to receive an individual score and my story to receive an overall score based on defined criteria so that I can objectively assess story quality.
+As a user, I want each SAR section to receive an individual score and my story to receive an overall score based on defined criteria so that I can objectively assess story quality.
 
 **ADD-14 (C): Scoring Criteria Visibility**
 As a user, I want to understand the criteria used for scoring so that I know how to improve my stories.
@@ -145,7 +145,7 @@ As a user, I want to open an existing story for editing so that I can make impro
 As a user, I want to re-enter the guided wizard workflow for an existing story so that I can use AI assistance to enhance previously created content.
 
 **UPD-03 (S): Direct Section Editing**
-As a user, I want to edit individual STAR sections directly without going through the full wizard so that I can make quick targeted updates.
+As a user, I want to edit individual SAR sections directly without going through the full wizard so that I can make quick targeted updates.
 
 **UPD-04 (S): Request Re-Review**
 As a user, I want to request a new AI review after making changes so that I can see updated scores and feedback.
@@ -192,7 +192,7 @@ As a user, I want the application to validate my API key when I enter it so that
 As a user, I want to select which AI provider to use (initially OpenAI, with more options in the future) so that I can choose the service that best fits my needs.
 
 **SET-05 (C): Content Length Preferences**
-As a user, I want to configure the minimum content length for each STAR section so that the AI guidance aligns with my personal standards or target use case.
+As a user, I want to configure the minimum content length for each SAR section so that the AI guidance aligns with my personal standards or target use case.
 
 **SET-06 (W): Scoring Criteria Customization**
 As a user, I want to view and potentially adjust the weighting of scoring criteria so that the evaluation reflects what matters most for my career goals.

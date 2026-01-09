@@ -29,7 +29,7 @@
 
 | Task                      | Guide(s)                                                         |
 | ------------------------- | ---------------------------------------------------------------- |
-| Define STAR domain types  | [F# Guide](fsharp-guide.md#domain-modeling)                      |
+| Define SAR domain types   | [F# Guide](fsharp-guide.md#domain-modeling)                      |
 | Create story editor UI    | [Bolero Guide](bolero-guide.md), [Blazor Guide](blazor-guide.md) |
 | Build API endpoints       | [ASP.NET Guide](aspnet-guide.md)                                 |
 | Store stories in database | [Data Access Guide](data-access-guide.md)                        |
