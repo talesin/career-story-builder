@@ -38,10 +38,20 @@ if ($isRemote) {
 
 switch ($Command) {
     'dev' {
-        if ($isRemote) {
-            docker compose -f docker-compose.yml -f docker-compose.remote.yml up
-        } else {
-            docker compose up
+        try {
+            if ($isRemote) {
+                # Remote: start detached, then follow logs (handles remote output streaming better)
+                docker compose -f docker-compose.yml -f docker-compose.remote.yml up -d --build
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Failed to start containers (exit code: $LASTEXITCODE)"
+                }
+                docker compose -f docker-compose.yml -f docker-compose.remote.yml logs -f
+            } else {
+                docker compose up
+            }
+        } finally {
+            Write-Host "`nStopping containers..."
+            docker compose down 2>&1 | Out-Null
         }
     }
     'prod' {

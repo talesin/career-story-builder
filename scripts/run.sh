@@ -17,8 +17,15 @@ else
   COMPOSE_CMD="docker compose"
 fi
 
+cleanup() {
+  echo ""
+  echo "Stopping containers..."
+  $COMPOSE_CMD down
+}
+
 case "${1:-dev}" in
   dev)
+    trap cleanup INT TERM
     echo "Starting development environment..."
     $COMPOSE_CMD up
     ;;

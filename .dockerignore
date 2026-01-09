@@ -1,7 +1,7 @@
 # Build artifacts
-bin/
-obj/
-publish/
+**/bin/
+**/obj/
+**/publish/
 
 # IDE
 .vs/
