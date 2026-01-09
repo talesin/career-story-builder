@@ -34,8 +34,7 @@ WORKDIR /src
 
 # Copy everything and build
 COPY . .
-RUN dotnet publish src/Server -c Release -o /app/publish --no-restore || \
-    (dotnet restore && dotnet publish src/Server -c Release -o /app/publish)
+RUN dotnet restore src/Server && dotnet publish src/Server -c Release -o /app/publish --no-restore
 
 # ========================================
 # Stage: runtime - Production

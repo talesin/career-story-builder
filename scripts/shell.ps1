@@ -21,7 +21,7 @@ function Test-DockerRemote {
 }
 
 if (Test-DockerRemote) {
-    docker compose -f docker-compose.yml -f docker-compose.remote.yml run --rm --no-deps -it --entrypoint bash app
+    docker compose -f docker-compose.yml -f docker-compose.remote.yml run --rm --no-deps -it --entrypoint "/usr/bin/env bash" app
 } else {
-    docker compose run --rm --no-deps -it --entrypoint bash app
+    docker compose run --rm --no-deps -it --entrypoint "/usr/bin/env bash" app
 }
