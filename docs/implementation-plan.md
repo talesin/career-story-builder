@@ -349,16 +349,23 @@ AI generates complete SAR story from conversation.
 CareerStoryBuilder/
 ├── CareerStoryBuilder.sln
 ├── global.json
+├── Directory.Build.props
 ├── Dockerfile
 ├── docker-compose.yml
 ├── docker-compose.prod.yml
+├── docker-compose.remote.yml      # Remote Docker host support
+├── .dockerignore
 ├── scripts/
-│   ├── build.sh
-│   └── run.sh
+│   ├── build.sh / build.ps1
+│   ├── run.sh / run.ps1
+│   ├── test.sh / test.ps1
+│   └── shell.sh / shell.ps1
 ├── src/
 │   ├── Shared/
 │   │   ├── Shared.fsproj
 │   │   ├── Domain/
+│   │   │   ├── Ids.fs             # StoryId, UserId, RoleId types
+│   │   │   ├── Errors.fs          # ValidationError, StoryError, ConversationError
 │   │   │   ├── Story.fs
 │   │   │   └── Conversation.fs
 │   │   └── Dto/
@@ -366,15 +373,15 @@ CareerStoryBuilder/
 │   ├── Server/
 │   │   ├── Server.fsproj
 │   │   ├── Program.fs
-│   │   └── Api/
+│   │   └── Api/                   # Added in Phase 1.4+
 │   │       ├── ClarificationApi.fs
 │   │       └── GenerationApi.fs
 │   └── Client/
 │       ├── Client.fsproj
 │       ├── Main.fs
-│       ├── Model.fs
-│       ├── Update.fs
-│       └── Views/
+│       ├── Model.fs               # Added in Phase 1.2+
+│       ├── Update.fs              # Added in Phase 1.2+
+│       └── Views/                 # Added in Phase 1.2+
 │           ├── InitialCaptureView.fs
 │           ├── ChatView.fs
 │           ├── RefinementView.fs
@@ -382,7 +389,8 @@ CareerStoryBuilder/
 ├── tests/
 │   ├── Server.Tests/
 │   │   ├── Server.Tests.fsproj
-│   │   └── ApiTests.fs
+│   │   ├── Program.fs             # Expecto test runner entry point
+│   │   └── DomainTests.fs
 │   └── Client.Tests/
 │       ├── Client.Tests.fsproj
 │       └── ComponentTests.fs

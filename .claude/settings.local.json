@@ -21,7 +21,9 @@
       "Bash(./scripts/build.sh:*)",
       "Bash(docker compose:*)",
       "Bash(lsof:*)",
-      "Bash(./scripts/test.sh:*)"
+      "Bash(./scripts/test.sh:*)",
+      "Bash(docker-compose version:*)",
+      "Bash(docker:*)"
     ]
   }
 }

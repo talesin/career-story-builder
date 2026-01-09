@@ -20,21 +20,29 @@ The application uses **asynchronous communication** between the frontend and bac
 
 This async-first approach ensures a smooth user experience even during longer operations like AI-assisted story generation.
 
+## Prerequisites
+
+- **Docker** with **Docker Compose** plugin
+  - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Compose)
+  - Or [Docker Engine](https://docs.docker.com/engine/install/) + [Compose plugin](https://docs.docker.com/compose/install/)
+
 ## Quick Start
 
+**macOS/Linux (bash):**
 ```bash
-# Start development server (with hot reload)
-./scripts/run.sh
-
-# Open in browser
-open http://localhost:8001
-
-# Run tests
-./scripts/test.sh
-
-# Stop
-./scripts/run.sh down
+./scripts/run.sh        # Start dev server (hot reload)
+./scripts/test.sh       # Run tests
+./scripts/run.sh stop   # Stop
 ```
+
+**Windows (PowerShell):**
+```powershell
+./scripts/run.ps1       # Start dev server (hot reload)
+./scripts/test.ps1      # Run tests
+./scripts/run.ps1 stop  # Stop
+```
+
+Open http://localhost:8001 in your browser.
 
 ## Documentation
 

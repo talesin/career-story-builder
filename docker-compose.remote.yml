@@ -1,0 +1,7 @@
+# Override for remote Docker hosts (no local volume mounts)
+# Used automatically when Docker daemon is not local
+services:
+  app:
+    volumes: !reset
+      # Only keep named volumes, remove local path mounts
+      - nuget-cache:/root/.nuget/packages

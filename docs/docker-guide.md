@@ -11,28 +11,38 @@ Docker provides:
 
 ```
 CareerStoryBuilder/
-├── .env                    # Port and environment config (edit this)
+├── .env or .envrc          # Port and environment config (see Configuration)
 ├── Dockerfile              # Multi-stage (dev, build, runtime)
 ├── docker-compose.yml      # Development configuration
 ├── docker-compose.prod.yml # Production configuration
+├── docker-compose.remote.yml # Override for remote Docker hosts
 ├── .dockerignore           # Exclude files from context
 └── scripts/
-    ├── build.sh            # Build Docker images
-    ├── run.sh              # Start/stop containers
-    ├── test.sh             # Build and test in container
-    └── shell.sh            # Interactive shell in container
+    ├── build.sh / build.ps1    # Build Docker images
+    ├── run.sh / run.ps1        # Start/stop containers
+    ├── test.sh / test.ps1      # Build and test in container
+    └── shell.sh / shell.ps1    # Interactive shell in container
 ```
 
 ## Configuration
 
-Edit `.env` to configure the development port:
+Configure the development port using either approach:
 
+**Option 1: `.env` file** (standard Docker Compose)
 ```bash
 # .env
 APP_PORT=8001
 ```
 
-Then access the app at `http://localhost:8001`
+**Option 2: `.envrc` with direnv** (auto-loads when entering directory)
+```bash
+# .envrc
+export APP_PORT=8001
+```
+
+If neither file exists, `APP_PORT` defaults to `8001`.
+
+Access the app at `http://localhost:8001`
 
 ## Multi-Stage Dockerfile
 
@@ -156,12 +166,33 @@ services:
       start_period: 40s
 ```
 
+## Docker Compose (Remote)
+
+When using a remote Docker host (e.g., Docker context pointing to a remote machine), local volume mounts don't work. Use the remote override file:
+
+```yaml
+# docker-compose.remote.yml
+services:
+  app:
+    volumes: !reset
+      # Only keep named volumes, remove local path mounts
+      - nuget-cache:/root/.nuget/packages
+```
+
+The `run.sh` script auto-detects remote Docker and applies this override. For manual usage:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.remote.yml up
+```
+
+Note: Without local volume mounts, changes require rebuilding the image (`docker compose build`).
+
 ## Common Commands
 
 ```bash
 # Development
 ./scripts/run.sh              # Start dev environment
-./scripts/run.sh down         # Stop all containers
+./scripts/run.sh stop         # Stop all containers
 ./scripts/run.sh logs         # Follow dev logs
 
 # Build and Test
@@ -284,10 +315,10 @@ networks:
 ## Environment Variables
 
 ```bash
-# .env (committed - safe defaults only)
+# .env or .envrc (safe defaults only)
 APP_PORT=8001
 
-# .env.local (not committed - secrets go here)
+# .env.local (not committed - secrets go here, Phase 2+)
 # DATABASE_URL=Host=db;Database=career_stories;Username=postgres;Password=devpassword
 # JWT_SECRET=dev-secret-key-change-in-production
 ```

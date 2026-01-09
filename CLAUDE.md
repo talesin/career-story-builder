@@ -33,7 +33,7 @@ Career Story Builder is an AI-assisted application for writing SAR-format career
 ./scripts/build.sh
 
 # Stop containers
-./scripts/run.sh down
+./scripts/run.sh stop
 ```
 
 ## Architecture

@@ -16,7 +16,9 @@ COPY tests/Client.Tests/*.fsproj ./tests/Client.Tests/
 # Restore dependencies
 RUN dotnet restore
 
-# Source code mounted as volume at runtime (port configured via APP_PORT in .env)
+# Copy source code (used when volume mount is not available, e.g., remote Docker)
+COPY . .
+
 EXPOSE 8001
 
 # Use dotnet watch for rebuild on changes
