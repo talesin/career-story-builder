@@ -20,6 +20,22 @@ The application uses **asynchronous communication** between the frontend and bac
 
 This async-first approach ensures a smooth user experience even during longer operations like AI-assisted story generation.
 
+## Quick Start
+
+```bash
+# Start development server (with hot reload)
+./scripts/run.sh
+
+# Open in browser
+open http://localhost:8001
+
+# Run tests
+./scripts/test.sh
+
+# Stop
+./scripts/run.sh down
+```
+
 ## Documentation
 
 See [docs/index.md](docs/index.md) for the full documentation index including:

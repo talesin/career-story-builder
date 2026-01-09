@@ -17,8 +17,10 @@ CareerStoryBuilder/
 ├── docker-compose.prod.yml # Production configuration
 ├── .dockerignore           # Exclude files from context
 └── scripts/
-    ├── build.sh            # Build helper
-    └── run.sh              # Run helper
+    ├── build.sh            # Build Docker images
+    ├── run.sh              # Start/stop containers
+    ├── test.sh             # Build and test in container
+    └── shell.sh            # Interactive shell in container
 ```
 
 ## Configuration
@@ -162,9 +164,13 @@ services:
 ./scripts/run.sh down         # Stop all containers
 ./scripts/run.sh logs         # Follow dev logs
 
-# Build
+# Build and Test
 ./scripts/build.sh            # Build dev image
 ./scripts/build.sh prod       # Build production image
+./scripts/test.sh             # Build and run all tests
+./scripts/test.sh build       # Build only
+./scripts/test.sh test        # Test only
+./scripts/shell.sh            # Interactive shell in container
 
 # Direct docker compose
 docker compose up              # Start dev services
