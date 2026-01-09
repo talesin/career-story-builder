@@ -1,0 +1,35 @@
+# Build artifacts
+bin/
+obj/
+publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Local development
+*.local
+.env.local
+
+# Documentation
+docs/
+*.md
+
+# Tests (exclude source, keep project files for restore)
+tests/**/*.fs
+tests/**/bin/
+tests/**/obj/
+
+# Temporary files
+temp_*

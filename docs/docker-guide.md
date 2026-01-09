@@ -5,77 +5,84 @@
 Docker provides:
 - **Development container**: Hot reload with `dotnet watch`
 - **Production container**: Optimized multi-stage build
-- **Compose**: Full stack with database and app
+- **Compose**: Service orchestration for app (and database in Phase 3+)
 
-## Domain Examples
+## Project Structure
 
-### Development Dockerfile
+```
+CareerStoryBuilder/
+├── .env                    # Port and environment config (edit this)
+├── Dockerfile              # Multi-stage (dev, build, runtime)
+├── docker-compose.yml      # Development configuration
+├── docker-compose.prod.yml # Production configuration
+├── .dockerignore           # Exclude files from context
+└── scripts/
+    ├── build.sh            # Build helper
+    └── run.sh              # Run helper
+```
 
-Reference: `docker#images`, `docker#containers`
+## Configuration
+
+Edit `.env` to configure the development port:
+
+```bash
+# .env
+APP_PORT=8001
+```
+
+Then access the app at `http://localhost:8001`
+
+## Multi-Stage Dockerfile
+
+The single `Dockerfile` contains three stages, selected via `target` in docker-compose:
 
 ```dockerfile
-# Development Dockerfile - enables hot reload
+# ========================================
+# Stage: dev - Hot reload development
+# ========================================
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
 
 WORKDIR /app
 
-# Install development tools
-RUN dotnet tool install -g dotnet-watch
-
-# Copy solution and project files first (layer caching)
-COPY *.sln ./
-COPY src/CareerStoryBuilder.Server/*.fsproj ./src/CareerStoryBuilder.Server/
-COPY src/CareerStoryBuilder.Client/*.fsproj ./src/CareerStoryBuilder.Client/
-COPY src/CareerStoryBuilder.Shared/*.fsproj ./src/CareerStoryBuilder.Shared/
+# Copy project files first for layer caching
+COPY *.sln global.json Directory.Build.props ./
+COPY src/Server/*.fsproj ./src/Server/
+COPY src/Client/*.fsproj ./src/Client/
+COPY src/Shared/*.fsproj ./src/Shared/
+COPY tests/Server.Tests/*.fsproj ./tests/Server.Tests/
+COPY tests/Client.Tests/*.fsproj ./tests/Client.Tests/
 
 # Restore dependencies
 RUN dotnet restore
 
-# Source code mounted as volume at runtime
-# COPY . .  (not needed - using volume mount)
+# Source code mounted as volume at runtime (port configured via APP_PORT in .env)
+EXPOSE 8001
 
-EXPOSE 5000 5001
+# Use dotnet watch for rebuild on changes
+# Note: --no-hot-reload because Blazor WASM hot reload has issues in containers
+ENTRYPOINT ["dotnet", "watch", "--project", "src/Server", "--no-hot-reload"]
 
-# Use dotnet watch for hot reload
-ENTRYPOINT ["dotnet", "watch", "--project", "src/CareerStoryBuilder.Server"]
-```
-
-### Production Dockerfile (Multi-Stage)
-
-Reference: `docker#images`, `docker#multi-stage`, `docker#production`
-
-```dockerfile
 # ========================================
-# Stage 1: Build
+# Stage: build - Compile for production
 # ========================================
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
-# Copy project files and restore
-COPY *.sln ./
-COPY src/CareerStoryBuilder.Server/*.fsproj ./src/CareerStoryBuilder.Server/
-COPY src/CareerStoryBuilder.Client/*.fsproj ./src/CareerStoryBuilder.Client/
-COPY src/CareerStoryBuilder.Shared/*.fsproj ./src/CareerStoryBuilder.Shared/
-
-RUN dotnet restore
-
-# Copy source and build
+# Copy everything and build
 COPY . .
-RUN dotnet publish src/CareerStoryBuilder.Server \
-    -c Release \
-    -o /app/publish \
-    --no-restore
+RUN dotnet publish src/Server -c Release -o /app/publish --no-restore || \
+    (dotnet restore && dotnet publish src/Server -c Release -o /app/publish)
 
 # ========================================
-# Stage 2: Production Runtime
+# Stage: runtime - Production
 # ========================================
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
 # Security: Run as non-root user
-RUN adduser --disabled-password --gecos '' appuser
+RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
 USER appuser
 
 # Copy published app
@@ -87,33 +94,154 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "CareerStoryBuilder.Server.dll"]
+ENTRYPOINT ["dotnet", "Server.dll"]
 ```
 
-### Docker Compose (Development)
-
-Reference: `docker#compose`
+## Docker Compose (Development)
 
 ```yaml
 # docker-compose.yml
-version: "3.8"
-
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      target: dev
     ports:
-      - "5000:5000"
-      - "5001:5001"
+      - "${APP_PORT:-8001}:${APP_PORT:-8001}"
     volumes:
       # Mount source for hot reload
       - .:/app
-      # Preserve nuget packages
+      # Preserve nuget packages between rebuilds
       - nuget-cache:/root/.nuget/packages
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ASPNETCORE_URLS=http://0.0.0.0:${APP_PORT:-8001}
+
+volumes:
+  nuget-cache:
+```
+
+## Docker Compose (Production)
+
+```yaml
+# docker-compose.prod.yml
+services:
+  app:
+    image: career-story-builder:${TAG:-latest}
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "80:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+```
+
+## Common Commands
+
+```bash
+# Development
+./scripts/run.sh              # Start dev environment
+./scripts/run.sh down         # Stop all containers
+./scripts/run.sh logs         # Follow dev logs
+
+# Build
+./scripts/build.sh            # Build dev image
+./scripts/build.sh prod       # Build production image
+
+# Direct docker compose
+docker compose up              # Start dev services
+docker compose up -d           # Start in background
+docker compose logs -f app     # Follow app logs
+docker compose down            # Stop all services
+docker compose down -v         # Stop and remove volumes
+
+# Production
+docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml logs -f
+
+# Debug
+docker compose exec app /bin/sh    # Shell into running container
+docker compose ps                  # List running containers
+docker compose top                 # Show running processes
+```
+
+## .dockerignore
+
+```
+# Build artifacts
+bin/
+obj/
+publish/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Local development
+*.local
+.env.local
+
+# Documentation
+docs/
+*.md
+
+# Tests (exclude source, keep project files for restore)
+tests/**/*.fs
+tests/**/bin/
+tests/**/obj/
+
+# Temporary files
+temp_*
+```
+
+## Phase 3+: Adding PostgreSQL
+
+When database support is added in Phase 3, extend docker-compose.yml:
+
+```yaml
+# docker-compose.yml (Phase 3+)
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "${APP_PORT:-8001}:${APP_PORT:-8001}"
+    volumes:
+      - .:/app
+      - nuget-cache:/root/.nuget/packages
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:${APP_PORT:-8001}
       - ConnectionStrings__Default=Host=db;Database=career_stories;Username=postgres;Password=devpassword
     depends_on:
       - db
@@ -147,156 +275,27 @@ networks:
   career-network:
 ```
 
-### Docker Compose (Production)
-
-Reference: `docker#compose`, `docker#production`
-
-```yaml
-# docker-compose.prod.yml
-version: "3.8"
-
-services:
-  app:
-    image: career-story-builder:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "80:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__Default=${DATABASE_URL}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "1.0"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      - POSTGRES_DB=career_stories
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres-data:
-```
-
-### Common Commands
-
-Reference: `docker#containers`, `docker#exploring`
+## Environment Variables
 
 ```bash
-# Development
-docker compose up              # Start all services
-docker compose up -d           # Start in background
-docker compose logs -f app     # Follow app logs
-docker compose down            # Stop all services
-docker compose down -v         # Stop and remove volumes
+# .env (committed - safe defaults only)
+APP_PORT=8001
 
-# Build
-docker compose build           # Build all images
-docker compose build --no-cache app  # Rebuild without cache
-
-# Production
-docker compose -f docker-compose.prod.yml up -d
-docker compose -f docker-compose.prod.yml logs -f
-
-# Debug
-docker compose exec app /bin/sh    # Shell into running container
-docker compose ps                  # List running containers
-docker compose top                 # Show running processes
-```
-
-### .dockerignore
-
-```
-# Build artifacts
-bin/
-obj/
-publish/
-
-# IDE
-.vs/
-.vscode/
-.idea/
-*.user
-
-# Git
-.git/
-.gitignore
-
-# Docker
-Dockerfile*
-docker-compose*
-
-# Local development
-*.local
-.env.local
-
-# Documentation
-docs/
-*.md
-
-# Tests
-tests/
-**/*Tests/
-```
-
-### Environment Variables
-
-```bash
-# .env (development - DO NOT COMMIT)
-DATABASE_URL=Host=db;Database=career_stories;Username=postgres;Password=devpassword
-JWT_SECRET=dev-secret-key-change-in-production
-ASPNETCORE_ENVIRONMENT=Development
-
-# .env.production (template - DO NOT COMMIT SECRETS)
-DATABASE_URL=Host=prod-db;Database=career_stories;Username=app;Password=${DB_PASSWORD}
-JWT_SECRET=${JWT_SECRET}
-ASPNETCORE_ENVIRONMENT=Production
+# .env.local (not committed - secrets go here)
+# DATABASE_URL=Host=db;Database=career_stories;Username=postgres;Password=devpassword
+# JWT_SECRET=dev-secret-key-change-in-production
 ```
 
 ## Production Checklist
 
-From `docker#production`:
-
-- [ ] Resource limits configured (memory, CPU)
-- [ ] Log rotation enabled (`max-size`, `max-file`)
-- [ ] Health checks defined
-- [ ] Restart policy set (`unless-stopped`)
-- [ ] Non-root user in container
-- [ ] Secrets managed securely (not in image)
-- [ ] Monitoring configured
-- [ ] Backup strategy for database volume
+- [x] Resource limits configured (memory, CPU)
+- [x] Log rotation enabled (`max-size`, `max-file`)
+- [x] Health checks defined
+- [x] Restart policy set (`unless-stopped`)
+- [x] Non-root user in container
+- [ ] Secrets managed securely (not in image) - Phase 2+
+- [ ] Monitoring configured - Future
+- [ ] Backup strategy for database volume - Phase 3+
 
 ## Anti-Patterns to Avoid
 
@@ -308,10 +307,3 @@ From `docker#production`:
 | Secrets in images    | Security risk             | Use env vars or secrets     |
 | No health checks     | Silent failures           | Add `HEALTHCHECK`           |
 | Single massive layer | Slow rebuilds             | Order for layer caching     |
-
-## See Also
-
-- `docker#introduction` - examples TBD
-- `docker#installing` - examples TBD
-- `docker#debugging` - examples TBD
-- `docker#advanced` - examples TBD
