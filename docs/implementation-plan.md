@@ -2,23 +2,32 @@
 
 ## Overview
 
-This plan details the implementation approach for the Career Story Builder application. Phase 0 and 1 are detailed with specific dot releases; subsequent phases provide high-level guidance referencing the delivery plan.
+This plan details the implementation approach for the Career Story Builder application. Phase 0, 1A, and 1B are detailed with specific dot releases; subsequent phases provide high-level guidance referencing the delivery plan.
 
 ## Progress Checklist
 
 ### Phase 0: Infrastructure Setup
-- [x] 0.1 - Project Scaffolding
+- [x] 0.1 - Project Scaffolding & Placeholder Site
 - [x] 0.2 - Docker Configuration
-- [ ] 0.3 - Static Placeholder Site
-- [ ] 0.4 - Test Infrastructure
+- [ ] 0.3 - Test Infrastructure
 
-### Phase 1: Core AI Workflow (Prototype)
-- [ ] 1.1 - Domain Types & API Contract
-- [ ] 1.2 - Start New Story (ADD-01)
-- [ ] 1.3 - Initial Story Capture (ADD-05)
-- [ ] 1.4 - AI-Guided Clarification (ADD-06)
-- [ ] 1.5 - Iterative Refinement (ADD-08)
-- [ ] 1.6 - AI-Assisted Story Generation (ADD-10)
+### Phase 1A: Core AI Workflow (Prototype)
+- [ ] 1A.1 - Domain Types & API Contract
+- [ ] 1A.2 - Start New Story (ADD-01)
+- [ ] 1A.3 - Initial Story Capture (ADD-05)
+- [ ] 1A.4 - AI-Guided Clarification (ADD-06)
+- [ ] 1A.5 - Iterative Refinement (ADD-08)
+- [ ] 1A.6 - AI-Assisted Story Generation (ADD-10)
+
+### Phase 1B: DDD/Functional Design Foundation
+- [ ] 1B.1 - Expand ValidationError Types
+- [ ] 1B.2 - Add Validation to SAR Section Value Objects
+- [ ] 1B.3 - Create Grouped Validation Error Structure
+- [ ] 1B.4 - Implement Applicative Validation for Story
+- [ ] 1B.5 - Add Workflow State Machine Validation
+- [ ] 1B.6 - Update ConversationState Module
+- [ ] 1B.7 - Update DTOs for Grouped Errors
+- [ ] 1B.8 - Update Tests
 
 ### Phase 2: Authentication & API Setup
 - [ ] LinkedIn OAuth integration
@@ -62,9 +71,9 @@ This plan details the implementation approach for the Career Story Builder appli
 
 ## Phase 0: Infrastructure Setup
 
-### 0.1 - Project Scaffolding
+### 0.1 - Project Scaffolding & Placeholder Site
 
-Create the F# solution structure with shared library pattern.
+Create the F# solution structure with shared library pattern and minimal working Bolero app.
 
 **Deliverables:**
 - `CareerStoryBuilder.sln` - Solution file
@@ -73,6 +82,9 @@ Create the F# solution structure with shared library pattern.
 - `src/Client/Client.fsproj` - Bolero/Blazor frontend
 - `tests/Server.Tests/Server.Tests.fsproj` - Expecto tests
 - `tests/Client.Tests/Client.Tests.fsproj` - bUnit tests
+- Working Bolero page with "Career Story Builder" heading
+- Server serving client assets
+- Health check endpoint (`/health`)
 
 **Tasks:**
 1. Create solution file and directory structure
@@ -81,7 +93,11 @@ Create the F# solution structure with shared library pattern.
 4. Create Client project (Bolero) referencing Shared
 5. Create test projects with Expecto and bUnit
 6. Add `global.json` to pin .NET 10 SDK
-7. Verify `dotnet build` succeeds
+7. Implement minimal Bolero `Main.fs` with static content
+8. Configure Server to serve Blazor client
+9. Add `/health` endpoint
+10. Write smoke test verifying page loads
+11. Verify `dotnet build` succeeds
 
 ### 0.2 - Docker Configuration
 
@@ -91,8 +107,10 @@ Containerized development environment with hot reload.
 - `Dockerfile` - Multi-stage build
 - `docker-compose.yml` - Development configuration
 - `docker-compose.prod.yml` - Production configuration
-- `scripts/build.sh` - Build helper
-- `scripts/run.sh` - Run helper
+- `scripts/docker-build.sh` - Docker build helper
+- `scripts/docker-run.sh` - Docker run helper
+- `scripts/build.sh` - Local build
+- `scripts/run.sh` - Local run with hot reload
 
 **Tasks:**
 1. Create Dockerfile with SDK and runtime stages
@@ -101,23 +119,7 @@ Containerized development environment with hot reload.
 4. Configure volume mounts for hot reload
 5. Verify `docker compose up` builds and runs
 
-### 0.3 - Static Placeholder Site
-
-Minimal Bolero app to verify end-to-end pipeline.
-
-**Deliverables:**
-- Working Bolero page with "Career Story Builder" heading
-- Server serving client assets
-- Health check endpoint
-
-**Tasks:**
-1. Implement minimal Bolero `Main.fs` with static content
-2. Configure Server to serve Blazor client
-3. Add `/health` endpoint
-4. Write smoke test verifying page loads
-5. Verify hot reload works in Docker
-
-### 0.4 - Test Infrastructure
+### 0.3 - Test Infrastructure
 
 Test-first setup with Expecto and bUnit.
 
@@ -132,15 +134,17 @@ Test-first setup with Expecto and bUnit.
 3. Add `dotnet test` to build scripts
 4. Verify tests run in Docker environment
 
+> **Note:** Paket migration is deferred until Paket has stable .NET 10.0 support. See reference guide at `~/Documents/Code/_references/paket/`.
+
 ---
 
-## Phase 1: Core AI Workflow (Prototype)
+## Phase 1A: Core AI Workflow (Prototype)
 
 **Goal:** Validate the core AI-assisted story creation workflow.
 
 **Technical approach:** Single-page UI, API key via environment variable, in-memory state, no database or authentication.
 
-### 1.1 - Domain Types & API Contract
+### 1A.1 - Domain Types & API Contract
 
 Implement shared types and API endpoints.
 
@@ -158,7 +162,7 @@ Implement shared types and API endpoints.
 3. Create API endpoint stubs
 4. Write unit tests for type serialization
 
-### 1.2 - Start New Story (ADD-01)
+### 1A.2 - Start New Story (ADD-01)
 
 User can begin creating a new story.
 
@@ -174,7 +178,7 @@ User can begin creating a new story.
 4. Add Bolero MVU model for conversation state
 5. Write component tests
 
-### 1.3 - Initial Story Capture (ADD-05)
+### 1A.3 - Initial Story Capture (ADD-05)
 
 Free-form text input for initial story content.
 
@@ -189,7 +193,7 @@ Free-form text input for initial story content.
 3. Update MVU model on submission
 4. Write component tests for input handling
 
-### 1.4 - AI-Guided Clarification (ADD-06)
+### 1A.4 - AI-Guided Clarification (ADD-06)
 
 AI asks follow-up questions to enhance story.
 
@@ -205,7 +209,7 @@ AI asks follow-up questions to enhance story.
 4. Handle streaming responses (optional, can batch)
 5. Write tests with mocked AI responses
 
-### 1.5 - Iterative Refinement (ADD-08)
+### 1A.5 - Iterative Refinement (ADD-08)
 
 User refines story sections based on AI feedback.
 
@@ -221,7 +225,7 @@ User refines story sections based on AI feedback.
 4. Update conversation state with edits
 5. Write component and integration tests
 
-### 1.6 - AI-Assisted Story Generation (ADD-10)
+### 1A.6 - AI-Assisted Story Generation (ADD-10)
 
 AI generates complete SAR story from conversation.
 
@@ -236,6 +240,102 @@ AI generates complete SAR story from conversation.
 3. Build `StoryPreview` component
 4. Add copy-to-clipboard functionality
 5. Write end-to-end test for full workflow
+
+---
+
+## Phase 1B: DDD/Functional Design Foundation
+
+**Goal:** Establish solid domain patterns after Phase 1A prototype validation, before Phase 2 (Authentication & API Setup).
+
+**Timing:** After Phase 1A prototype is working and assessed for tweaks/pivots.
+
+**Technical approach:** Applicative validation, proper aggregate design, and workflow state machine validation to create a solid foundation before persistence and API contracts are locked in.
+
+### 1B.1 - Expand ValidationError Types
+
+Add field-specific validation errors.
+
+**File:** `src/Shared/Domain/Errors.fs`
+
+**Tasks:**
+1. Add `SituationRequired`, `ActionRequired`, `ResultRequired` to ValidationError DU
+2. Add `TitleTooLong of maxLength: int` for future use
+
+### 1B.2 - Add Validation to SAR Section Value Objects
+
+Add `tryCreate` functions with non-empty validation.
+
+**File:** `src/Shared/Domain/Story.fs`
+
+**Tasks:**
+1. Make `StorySituation`, `StoryAction`, `StoryResult` private constructors
+2. Add `tryCreate` function to each with non-empty validation
+3. Return appropriate error type for each
+
+### 1B.3 - Create Grouped Validation Error Structure
+
+Create structure for collecting errors by field.
+
+**File:** `src/Shared/Domain/Errors.fs`
+
+**Tasks:**
+1. Add `StoryValidationErrors` record with error list per field
+2. Add `empty` and `hasErrors` helper functions
+
+### 1B.4 - Implement Applicative Validation for Story
+
+Replace monadic validation with applicative validation that collects all errors.
+
+**File:** `src/Shared/Domain/Story.fs`
+
+**Tasks:**
+1. Add `tryCreateWithValidation` function
+2. Validate all four fields independently
+3. Return grouped errors on failure
+
+### 1B.5 - Add Workflow State Machine Validation
+
+Prevent invalid workflow transitions.
+
+**File:** `src/Shared/Domain/Conversation.fs`
+
+**Tasks:**
+1. Add `WorkflowStep.canTransition` function
+2. Add `WorkflowStep.tryTransition` function
+3. Add `InvalidWorkflowTransition` to `ConversationError`
+
+### 1B.6 - Update ConversationState Module
+
+Use transition validation in state updates.
+
+**File:** `src/Shared/Domain/Conversation.fs`
+
+**Tasks:**
+1. Add `ConversationState.tryAdvanceTo` function
+2. Use `tryTransition` for state changes
+
+### 1B.7 - Update DTOs for Grouped Errors
+
+Update API response types to use grouped error format.
+
+**File:** `src/Shared/Dto/StoryDto.fs`
+
+**Tasks:**
+1. Add `StoryValidationErrorsDto` record
+2. Add `fromDomain` mapping function
+3. Add `ValidationError.toMessage` helper
+
+### 1B.8 - Update Tests
+
+Add comprehensive tests for new validation and workflow logic.
+
+**File:** `tests/Server.Tests/DomainTests.fs`
+
+**Tasks:**
+1. Add tests for each SAR section validation (empty, whitespace, valid)
+2. Add tests for applicative validation collecting multiple errors
+3. Add tests for workflow transition validation (valid and invalid)
+4. Add tests for grouped error structure
 
 ---
 
@@ -343,7 +443,7 @@ AI generates complete SAR story from conversation.
 
 ---
 
-## File Structure (Phase 0-1)
+## File Structure (Phase 0-1A)
 
 ```
 CareerStoryBuilder/
@@ -373,15 +473,15 @@ CareerStoryBuilder/
 │   ├── Server/
 │   │   ├── Server.fsproj
 │   │   ├── Program.fs
-│   │   └── Api/                   # Added in Phase 1.4+
+│   │   └── Api/                   # Added in Phase 1A.4+
 │   │       ├── ClarificationApi.fs
 │   │       └── GenerationApi.fs
 │   └── Client/
 │       ├── Client.fsproj
 │       ├── Main.fs
-│       ├── Model.fs               # Added in Phase 1.2+
-│       ├── Update.fs              # Added in Phase 1.2+
-│       └── Views/                 # Added in Phase 1.2+
+│       ├── Model.fs               # Added in Phase 1A.2+
+│       ├── Update.fs              # Added in Phase 1A.2+
+│       └── Views/                 # Added in Phase 1A.2+
 │           ├── InitialCaptureView.fs
 │           ├── ChatView.fs
 │           ├── RefinementView.fs

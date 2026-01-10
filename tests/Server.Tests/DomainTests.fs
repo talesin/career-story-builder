@@ -124,7 +124,7 @@ let conversationTests =
                 |> ConversationState.addMessage message1
                 |> ConversationState.addMessage message2
 
-            let chronological = ConversationState.messagesChronological newState
+            let chronological = ConversationState.messagesOrdered newState
 
             Expect.equal chronological[0].Content "First" "First chronologically"
             Expect.equal chronological[1].Content "Second" "Second chronologically"

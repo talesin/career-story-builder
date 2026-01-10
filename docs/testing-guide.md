@@ -63,6 +63,13 @@ let storyValidationTests = testList "Story Validation" [
 
 ### Property-Based Testing with FsCheck
 
+**Key FsCheck Features:**
+
+- **Built-in constraint types**: Use `NonEmptyString`, `PositiveInt`, `NegativeInt`, `NonNegativeInt` instead of filtering to generate valid inputs directly
+- **Automatic shrinking**: When a test fails, FsCheck reduces the failing input to a minimal counter-example for easier debugging
+- **ArbMap pattern**: Modern API for composing arbitraries - prefer `ArbMap.defaults |> ArbMap.arbitrary<'T>` over older `Arb.generate`
+- **Shrinking control**: Use `Arb.fromGen` (without shrinker) when shrinking is meaningless (e.g., GUIDs, IDs)
+
 ```fsharp
 open FsCheck
 

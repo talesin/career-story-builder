@@ -191,17 +191,17 @@ Note: Without local volume mounts, changes require rebuilding the image (`docker
 
 ```bash
 # Development
-./scripts/run.sh              # Start dev environment
-./scripts/run.sh stop         # Stop all containers
-./scripts/run.sh logs         # Follow dev logs
+./scripts/docker-run.sh              # Start dev environment
+./scripts/docker-run.sh stop         # Stop all containers
+./scripts/docker-run.sh logs         # Follow dev logs
 
 # Build and Test
-./scripts/build.sh            # Build dev image
-./scripts/build.sh prod       # Build production image
-./scripts/test.sh             # Build and run all tests
-./scripts/test.sh build       # Build only
-./scripts/test.sh test        # Test only
-./scripts/shell.sh            # Interactive shell in container
+./scripts/docker-build.sh            # Build dev image
+./scripts/docker-build.sh prod       # Build production image
+./scripts/docker-test.sh             # Build and run all tests
+./scripts/docker-test.sh build       # Build only
+./scripts/docker-test.sh test        # Test only
+./scripts/docker-shell.sh            # Interactive shell in container
 
 # Direct docker compose
 docker compose up              # Start dev services
