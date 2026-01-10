@@ -16,24 +16,24 @@ Career Story Builder is an AI-assisted application for writing SAR-format career
 
 ## Build Commands
 
+### Local Development
+
 ```bash
-# Development (with hot reload)
-./scripts/run.sh
+./scripts/run.sh          # Run with hot reload
+./scripts/build.sh        # Build solution
+./scripts/test.sh         # Build and run tests
+./scripts/test.sh test    # Run tests only
+```
 
-# Build in container
-./scripts/test.sh build
+### Docker Development
 
-# Run tests in container
-./scripts/test.sh
-
-# Interactive shell in container
-./scripts/shell.sh
-
-# Build Docker images
-./scripts/build.sh
-
-# Stop containers
-./scripts/run.sh stop
+```bash
+./scripts/docker-run.sh        # Start dev containers
+./scripts/docker-test.sh       # Build and test in container
+./scripts/docker-test.sh build # Build only in container
+./scripts/docker-shell.sh      # Interactive shell in container
+./scripts/docker-build.sh      # Build Docker images
+./scripts/docker-run.sh stop   # Stop containers
 ```
 
 ## Architecture

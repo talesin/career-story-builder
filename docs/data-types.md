@@ -93,24 +93,24 @@ type ConversationState = {
 type IStoryService =
     abstract member GetAll: unit -> Task<Story list>
     abstract member GetById: StoryId -> Task<Story option>
-    abstract member Create: CreateStoryDto -> Task<Result<Story, string>>
-    abstract member Update: StoryId -> UpdateStoryDto -> Task<Result<Story, string>>
+    abstract member Create: CreateStoryRequest -> Task<Result<Story, string>>
+    abstract member Update: StoryId -> UpdateStoryRequest -> Task<Result<Story, string>>
     abstract member Delete: StoryId -> Task<Result<unit, string>>
 ```
 
-## DTOs
+## API Request Types
 
-Data transfer objects for API communication:
+Request payloads for API communication:
 
 ```fsharp
-type CreateStoryDto = {
+type CreateStoryRequest = {
     Title: string
     Situation: string
     Action: string
     Result: string
 }
 
-type UpdateStoryDto = {
+type UpdateStoryRequest = {
     Title: string option
     Situation: string option
     Action: string option

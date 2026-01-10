@@ -26,7 +26,7 @@ type Page =
     | [<EndPoint "/stories/new">] NewStory
     | [<EndPoint "/stories/{id}/edit">] EditStory of id: Guid
 
-// Story editor form state (matches CreateStoryDto structure)
+// Story editor form state (matches CreateStoryRequest structure)
 // See data-types.md for authoritative type definitions
 type StoryEditorModel = {
     Title: string
@@ -256,8 +256,8 @@ Reference: `bolero#remoting`
 let loadStoriesCmd (service: IStoryService) =
     Cmd.OfAsync.either (fun () -> service.GetAll() |> Async.AwaitTask) () StoriesLoaded LoadStoriesFailed
 
-let saveStoryCmd (service: IStoryService) (dto: CreateStoryDto) =
-    Cmd.OfAsync.either (fun () -> service.Create(dto) |> Async.AwaitTask) () StorySaved SaveFailed
+let saveStoryCmd (service: IStoryService) (request: CreateStoryRequest) =
+    Cmd.OfAsync.either (fun () -> service.Create(request) |> Async.AwaitTask) () StorySaved SaveFailed
 ```
 
 ## Component Organization

@@ -23,7 +23,8 @@
       "Bash(lsof:*)",
       "Bash(./scripts/test.sh:*)",
       "Bash(docker-compose version:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(git mv:*)"
     ]
   }
 }

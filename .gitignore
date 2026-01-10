@@ -122,3 +122,5 @@ dist/
 .references.md
 
 .fake.claude/settings.local.json
+
+.fake
