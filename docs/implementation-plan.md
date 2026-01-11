@@ -9,7 +9,7 @@ This plan details the implementation approach for the Career Story Builder appli
 ### Phase 0: Infrastructure Setup
 - [x] 0.1 - Project Scaffolding & Placeholder Site
 - [x] 0.2 - Docker Configuration
-- [ ] 0.3 - Test Infrastructure
+- [x] 0.3 - Test Infrastructure
 
 ### Phase 1A: Core AI Workflow (Prototype)
 - [ ] 1A.1 - Domain Types & API Contract

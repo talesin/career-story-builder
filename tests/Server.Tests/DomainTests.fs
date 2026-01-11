@@ -1,6 +1,8 @@
 module CareerStoryBuilder.Tests.DomainTests
 
+open System
 open Expecto
+open FsCheck
 open CareerStoryBuilder.Domain
 
 let storyTitleTests =
@@ -145,6 +147,35 @@ let conversationTests =
         }
     ]
 
+/// Property-based tests demonstrating FsCheck patterns
+let propertyTests =
+    testList "Property-Based Tests" [
+        testProperty "StoryTitle.value returns trimmed input for valid titles" <| fun (NonEmptyString s) ->
+            let trimmed = s.Trim()
+            if String.IsNullOrWhiteSpace trimmed then
+                // Empty after trim should fail
+                StoryTitle.tryCreate trimmed |> Result.isError
+            else
+                // Non-empty after trim should succeed and preserve content
+                match StoryTitle.tryCreate trimmed with
+                | Ok title -> title.Value = trimmed
+                | Error _ -> false
+
+        testProperty "StoryId.create always produces valid UUIDv7" <| fun () ->
+            let id = StoryId.create()
+            id.Value.Version = 7
+
+        testProperty "ConversationState.addMessage increases message count" <| fun (messages: string list) ->
+            let validMessages = messages |> List.filter (not << String.IsNullOrEmpty) |> List.truncate 10
+            let state =
+                validMessages
+                |> List.fold (fun s content ->
+                    ConversationState.addMessage (ChatMessage.create User content) s
+                ) ConversationState.initial
+
+            state.Messages.Length = validMessages.Length
+    ]
+
 [<Tests>]
 let allTests =
     testList "Domain" [
@@ -152,4 +183,5 @@ let allTests =
         storyTests
         idTests
         conversationTests
+        propertyTests
     ]
