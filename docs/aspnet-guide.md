@@ -39,8 +39,8 @@ let configureStoryEndpoints (app: WebApplication) =
     }) |> ignore
 
     // POST /api/stories
-    stories.MapPost("/", fun (dto: CreateStoryDto) (service: IStoryService) -> task {
-        let! result = service.Create(dto)
+    stories.MapPost("/", fun (request: CreateStoryRequest) (service: IStoryService) -> task {
+        let! result = service.Create(request)
         return
             match result with
             | Ok story -> Results.Created($"/api/stories/{story.Id}", story)
@@ -48,8 +48,8 @@ let configureStoryEndpoints (app: WebApplication) =
     }) |> ignore
 
     // PUT /api/stories/{id}
-    stories.MapPut("/{id:guid}", fun (id: Guid) (dto: UpdateStoryDto) (service: IStoryService) -> task {
-        let! result = service.Update(StoryId id, dto)
+    stories.MapPut("/{id:guid}", fun (id: Guid) (request: UpdateStoryRequest) (service: IStoryService) -> task {
+        let! result = service.Update(StoryId id, request)
         return
             match result with
             | Ok story -> Results.Ok(story)

@@ -23,7 +23,14 @@
       "Bash(lsof:*)",
       "Bash(./scripts/test.sh:*)",
       "Bash(docker-compose version:*)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(git mv:*)",
+      "Bash(git diff:*)",
+      "Bash(dotnet tool restore:*)",
+      "Bash(dotnet paket:*)",
+      "Bash(dotnet tool search:*)",
+      "Bash(ls:*)",
+      "Bash(./scripts/docker-test.sh:*)"
     ]
   }
 }

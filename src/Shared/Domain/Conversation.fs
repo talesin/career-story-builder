@@ -57,7 +57,7 @@ module ConversationState =
     }
 
     /// Get messages in chronological order for display.
-    let messagesChronological state = state.Messages |> List.rev
+    let messagesOrdered state = state.Messages |> List.rev
 
     let setStep step state = { state with CurrentStep = step }
 
