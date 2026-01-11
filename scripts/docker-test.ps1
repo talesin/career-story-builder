@@ -6,10 +6,10 @@
 .PARAMETER Command
     The command to run: build, test, or all.
 .EXAMPLE
-    ./test.ps1
+    ./docker-test.ps1
     Runs build and test (default).
 .EXAMPLE
-    ./test.ps1 build
+    ./docker-test.ps1 build
     Runs only dotnet build.
 #>
 [CmdletBinding()]

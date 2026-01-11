@@ -7,13 +7,13 @@
 .PARAMETER Command
     The command to run: dev, prod, stop, or logs.
 .EXAMPLE
-    ./run.ps1
+    ./docker-run.ps1
     Starts development environment (default).
 .EXAMPLE
-    ./run.ps1 prod
+    ./docker-run.ps1 prod
     Starts production environment in detached mode.
 .EXAMPLE
-    ./run.ps1 stop
+    ./docker-run.ps1 stop
     Stops all containers.
 #>
 [CmdletBinding()]
@@ -56,7 +56,7 @@ switch ($Command) {
     }
     'prod' {
         docker compose -f docker-compose.prod.yml up -d
-        Write-Host 'Production started. Use "./run.ps1 logs" to view logs.'
+        Write-Host 'Production started. Use "./docker-run.ps1 logs" to view logs.'
     }
     'stop' {
         docker compose down 2>&1 | Out-Null

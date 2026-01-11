@@ -6,10 +6,10 @@
 .PARAMETER Target
     The build target: dev or prod.
 .EXAMPLE
-    ./build.ps1
+    ./docker-build.ps1
     Builds development image (default).
 .EXAMPLE
-    ./build.ps1 prod
+    ./docker-build.ps1 prod
     Builds production image.
 #>
 [CmdletBinding()]
