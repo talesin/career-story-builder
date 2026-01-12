@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <Compile Include="Api/ConversationApi.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

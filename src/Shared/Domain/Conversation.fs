@@ -16,12 +16,17 @@ type ChatMessage = {
 }
 
 module ChatMessage =
-    let create role content = {
+    /// Creates a message with explicit timestamp (for testing).
+    let createWithTimestamp role content timestamp = {
         Role = role
         Content = content
-        Timestamp = DateTimeOffset.UtcNow
+        Timestamp = timestamp
         Error = None
     }
+
+    /// Creates a message with current UTC time (convenience).
+    let create role content =
+        createWithTimestamp role content DateTimeOffset.UtcNow
 
     let withError error message = { message with Error = Some error }
 

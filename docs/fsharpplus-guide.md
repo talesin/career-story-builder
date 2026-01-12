@@ -19,6 +19,7 @@ This project uses FSharpPlus for advanced functional patterns. Consider FSharpPl
 ## Key Patterns for Career Story Builder
 
 FSharpPlus provides advanced functional patterns:
+
 - **Validation**: Accumulate ALL validation errors (vs Result which short-circuits)
 - **Operators**: Generic `map`, `bind`, `apply` work across types
 - **Lenses**: Update deeply nested story structures
@@ -193,13 +194,13 @@ open FSharpPlus.Lens     // Optics (only when needed for nested updates)
 
 ### When FSharpPlus is Required vs Optional
 
-| Feature | FSharpPlus Required? | Alternative |
-| ------- | -------------------- | ----------- |
-| Error accumulation (Validation) | **Required** | Custom implementation is complex and error-prone |
-| `Option.toResultWith` | **Required** | No built-in F# equivalent |
-| Generic operators (`map`, `bind`) | Optional | Use type-specific functions (`List.map`, `Option.bind`) |
-| Lenses | Optional | Use standard F# copy-and-update (`{ record with Field = ... }`) |
-| Reader monad | Optional | Pass dependencies as function parameters |
+| Feature                           | FSharpPlus Required? | Alternative                                                     |
+| --------------------------------- | -------------------- | --------------------------------------------------------------- |
+| Error accumulation (Validation)   | **Required**         | Custom implementation is complex and error-prone                |
+| `Option.toResultWith`             | **Required**         | No built-in F# equivalent                                       |
+| Generic operators (`map`, `bind`) | Optional             | Use type-specific functions (`List.map`, `Option.bind`)         |
+| Lenses                            | Optional             | Use standard F# copy-and-update (`{ record with Field = ... }`) |
+| Reader monad                      | Optional             | Pass dependencies as function parameters                        |
 
 **Recommendation for this project:**
 

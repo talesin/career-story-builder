@@ -2,11 +2,15 @@ module CareerStoryBuilder.Server.Program
 
 open System
 open Microsoft.AspNetCore.Builder
+open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Bolero.Server
 open Bolero.Html
 open Bolero.Server.Html
+open CareerStoryBuilder.Json
+open CareerStoryBuilder.Dto
+open CareerStoryBuilder.Server.Api
 
 /// Static HTML page that hosts the Blazor client.
 let indexPage =
@@ -40,6 +44,11 @@ let main args =
     builder.Services.AddBoleroHost(prerendered = true, devToggle = true) |> ignore
     builder.Services.AddServerSideBlazor() |> ignore
 
+    // Configure JSON serialization for F# types (discriminated unions, options, etc.)
+    builder.Services.ConfigureHttpJsonOptions(fun opts ->
+        configureOptions opts.SerializerOptions |> ignore
+    ) |> ignore
+
     let app = builder.Build()
 
     if app.Environment.IsDevelopment() then
@@ -51,6 +60,10 @@ let main args =
 
     // Health check endpoint
     app.MapGet("/health", Func<string>(fun () -> "OK")) |> ignore
+
+    // Conversation API endpoints
+    app.MapPost("/api/conversation/clarify", Func<ClarifyRequest, ClarifyResponse>(ConversationApi.clarify)) |> ignore
+    app.MapPost("/api/conversation/generate", Func<GenerateRequest, GenerateResponse>(ConversationApi.generate)) |> ignore
 
     // Blazor Hub for server-side interactivity
     app.MapBlazorHub() |> ignore

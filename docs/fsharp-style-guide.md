@@ -7,6 +7,7 @@ This guide establishes consistent coding patterns for F# applications. The goal 
 **Pragmatic FP over dogmatic purity.** We have a clear preference for functional programming—pipelines, immutability, pure functions, and algebraic data types. However, F# is a multi-paradigm language, and we embrace that when it improves clarity.
 
 If a functional approach becomes verbose or unwieldy, consider light OO techniques:
+
 - Adding `.Value` members to single-case DUs for convenient extraction
 - Using instance methods when they read more naturally than module functions
 - Defining classes when integrating with .NET frameworks that expect them
@@ -323,6 +324,115 @@ let workflow input =
 ### See Also
 
 For **error accumulation** (collecting all validation errors rather than failing on the first), see the [FSharpPlus Guide](fsharpplus-guide.md#validation-with-error-accumulation) which covers the `Validation` type and applicative patterns.
+
+---
+
+## 3.5. IO Dependencies in Domain Logic
+
+### Avoid direct IO in domain functions
+
+Direct IO operations (time, GUIDs, randomness, network, database, file system) make testing difficult and violate functional purity.
+
+```fsharp
+// Avoid - hard to test, couples to system time
+let create role content = {
+    Role = role
+    Content = content
+    Timestamp = DateTimeOffset.UtcNow  // ❌ Direct IO
+    Error = None
+}
+
+// Avoid - hard to test, couples to database
+let getActiveUsers () =
+    use conn = new SqlConnection(connString)
+    conn.Query<User>("SELECT * FROM Users WHERE IsActive = 1")  // ❌ Direct IO
+    |> Seq.toList
+```
+
+### Use testable + convenience function pattern
+
+Provide two versions: one that takes dependencies, one that injects defaults.
+
+```fsharp
+// Testable version - takes all dependencies
+let createWithTimestamp role content timestamp = {
+    Role = role
+    Content = content
+    Timestamp = timestamp
+    Error = None
+}
+
+// Convenience version - injects default IO
+let create role content =
+    createWithTimestamp role content DateTimeOffset.UtcNow
+
+// Testable version - database operation as parameter
+let processUsers (getUsers: unit -> User list) =
+    getUsers()
+    |> List.filter _.IsActive
+    |> List.map _.Email
+
+// Convenience version - injects real database call
+let processUsersFromDb conn =
+    let getUsers () =
+        use conn = new SqlConnection(conn)
+        conn.Query<User>("SELECT * FROM Users") |> Seq.toList
+    processUsers getUsers
+```
+
+**Benefits:**
+- Tests inject controlled values (`createWithTimestamp role content fixedTime`)
+- Production code uses convenient default (`create role content`)
+- Dependencies explicit in testable version (functional purity)
+- Can test business logic without database, network, or file system
+
+### Common IO dependency patterns
+
+| IO Operation | Testable Parameter | Convenience Default |
+|--------------|-------------------|---------------------|
+| Current time | `timestamp: DateTimeOffset` | `DateTimeOffset.UtcNow` |
+| GUID generation | `id: Guid` or `timestamp: DateTimeOffset` | `Guid.CreateVersion7()` |
+| Random numbers | `rng: Random` or `seed: int` | `Random()` |
+| Database query | `query: 'Params -> 'Result` | Dapper/repository call |
+| HTTP request | `httpGet: string -> Async<string>` | `HttpClient.GetStringAsync` |
+| File read | `readFile: string -> string` | `File.ReadAllText` |
+
+### Examples in codebase
+
+**Story/User/Role IDs** (`src/Shared/Domain/Ids.fs`):
+```fsharp
+module StoryId =
+    let createWithTimestamp ts = StoryId(Guid.CreateVersion7(ts))
+    let create () = StoryId(Guid.CreateVersion7())
+```
+
+**Chat messages** (`src/Shared/Domain/Conversation.fs`):
+```fsharp
+module ChatMessage =
+    let createWithTimestamp role content timestamp = { ... }
+    let create role content = createWithTimestamp role content DateTimeOffset.UtcNow
+```
+
+### Naming convention
+
+- Testable version: `functionNameWith<Dependency>` (e.g., `createWithTimestamp`) or just `functionName` if it takes IO as parameters
+- Convenience version: `functionName` (e.g., `create`) or `functionNameFromDb`/`functionNameFromFile` to indicate the IO source
+
+### When to apply this pattern
+
+**Always apply** for:
+- Time/date operations (`DateTimeOffset.UtcNow`, `DateTime.Now`)
+- GUID generation (`Guid.NewGuid()`, `Guid.CreateVersion7()`)
+- Random number generation
+- Network calls (HTTP, gRPC, WebSocket)
+- Database operations (queries, commands)
+- File system access (read, write, exists checks)
+- Environment variables
+
+**Consider skipping** for:
+- Top-level application entry points (Program.fs, controllers)
+- Infrastructure layer code that's inherently about IO
+- Thin wrappers around framework APIs
 
 ---
 
@@ -650,12 +760,14 @@ customers |> List.map _.Id.Value
 ```
 
 **Why `.Value` over module functions or static `Extract`:**
+
 - **Discoverable**: IntelliSense shows it immediately
 - **Concise**: `x.Value` vs `EmailAddress.value x` or `extract x`
 - **Chainable**: `customer.Email.Value.ToLower()`
 - **Familiar**: Consistent with .NET conventions
 
 **Keep module functions for:**
+
 - Factory methods with validation (`EmailAddress.tryCreate`)
 - Pipeline-friendly extraction when needed (`|> List.map EmailAddress.value`)
 - Additional domain operations (`EmailAddress.domain`)
@@ -960,12 +1072,12 @@ type BillingService(deps: Billing.BillingDeps) =
 
 #### Guidelines
 
-| Guideline | Rationale |
-|-----------|-----------|
-| Dependencies as first parameters | Enables partial application at composition root |
-| Wrapper methods are one-liners | If you're writing logic in the class, it belongs in the module |
-| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing |
-| Create wrapper only at framework boundary | Not every module needs a wrapper class |
+| Guideline                                 | Rationale                                                      |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| Dependencies as first parameters          | Enables partial application at composition root                |
+| Wrapper methods are one-liners            | If you're writing logic in the class, it belongs in the module |
+| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing             |
+| Create wrapper only at framework boundary | Not every module needs a wrapper class                         |
 
 #### When to Apply
 

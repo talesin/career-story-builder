@@ -3,6 +3,7 @@
 ## Key Patterns for Career Story Builder
 
 Docker provides:
+
 - **Development container**: Hot reload with `dotnet watch`
 - **Production container**: Optimized multi-stage build
 - **Compose**: Service orchestration for app (and database in Phase 3+)
@@ -29,12 +30,14 @@ CareerStoryBuilder/
 Configure the development port using either approach:
 
 **Option 1: `.env` file** (standard Docker Compose)
+
 ```bash
 # .env
 APP_PORT=8001
 ```
 
 **Option 2: `.envrc` with direnv** (auto-loads when entering directory)
+
 ```bash
 # .envrc
 export APP_PORT=8001

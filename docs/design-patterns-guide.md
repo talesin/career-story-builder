@@ -184,6 +184,7 @@ let notifyUser = UserWorkflow.notifyUser deps
 - Bind dependencies once in the composition root using partial application
 - Keep dependency records small per module; avoid one mega-record for the whole app
 - Prefer "capabilities" naming over "Service" naming
+- **For IO operations (time, GUIDs, randomness, database, network, file system), provide both a testable version (takes dependency) and a convenience version (injects default)** - see [F# Style Guide](fsharp-style-guide.md#35-io-dependencies-in-domain-logic)
 
 > *For advanced functional DI using the Reader monad pattern, see [FSharpPlus Guide](fsharpplus-guide.md#reader-monad-for-dependency-injection).*
 
@@ -252,15 +253,15 @@ let undo user history =
 
 ## Pattern Selection Guide
 
-| Problem               | Pattern                      | Reference                |
-| --------------------- | ---------------------------- | ------------------------ |
-| Validate input        | Railway-Oriented Programming | design#data-flow         |
-| Transform data        | Pipeline/Composition         | design#data-flow         |
-| Manage state          | State Machine                | design#state-management  |
-| Undo/redo             | Command                      | design#gof-behavioral    |
-| Extend behavior       | Strategy (functions)         | design#gof-behavioral    |
-| Build complex objects | Builder                      | design#gof-creational    |
-| Notify changes        | Observer (events)            | design#gof-behavioral    |
+| Problem               | Pattern                      | Reference               |
+| --------------------- | ---------------------------- | ----------------------- |
+| Validate input        | Railway-Oriented Programming | design#data-flow        |
+| Transform data        | Pipeline/Composition         | design#data-flow        |
+| Manage state          | State Machine                | design#state-management |
+| Undo/redo             | Command                      | design#gof-behavioral   |
+| Extend behavior       | Strategy (functions)         | design#gof-behavioral   |
+| Build complex objects | Builder                      | design#gof-creational   |
+| Notify changes        | Observer (events)            | design#gof-behavioral   |
 
 ## See Also
 
