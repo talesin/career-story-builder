@@ -1,29 +1,22 @@
 module CareerStoryBuilder.Server.Api.ConversationApi
 
-open System
 open CareerStoryBuilder.Domain
 open CareerStoryBuilder.Dto
 
 /// Stub implementation for clarification endpoint.
 /// Returns mock clarifying questions (AI integration in Phase 1A.4).
 let clarify (request: ClarifyRequest) : ClarifyResponse =
-    let userMsg: Message = {
-        Role = User
-        Content = request.UserMessage
-        Timestamp = DateTimeOffset.UtcNow
-        Error = None
-    }
+    let userMsg =
+        ChatMessage.create User request.UserMessage
+        |> Message.fromDomain
 
-    let assistantMsg: Message = {
-        Role = Assistant
-        Content =
-            "Thanks for sharing! To help craft your SAR story:\n\n" +
-            "1. What was the specific challenge or problem you faced?\n" +
-            "2. What actions did you personally take?\n" +
-            "3. What measurable results did you achieve?"
-        Timestamp = DateTimeOffset.UtcNow
-        Error = None
-    }
+    let assistantMsg =
+        ChatMessage.create Assistant
+            ("Thanks for sharing! To help craft your SAR story:\n\n" +
+             "1. What was the specific challenge or problem you faced?\n" +
+             "2. What actions did you personally take?\n" +
+             "3. What measurable results did you achieve?")
+        |> Message.fromDomain
 
     let updatedConversation = {
         request.Conversation with

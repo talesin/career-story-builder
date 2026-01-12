@@ -327,6 +327,115 @@ For **error accumulation** (collecting all validation errors rather than failing
 
 ---
 
+## 3.5. IO Dependencies in Domain Logic
+
+### Avoid direct IO in domain functions
+
+Direct IO operations (time, GUIDs, randomness, network, database, file system) make testing difficult and violate functional purity.
+
+```fsharp
+// Avoid - hard to test, couples to system time
+let create role content = {
+    Role = role
+    Content = content
+    Timestamp = DateTimeOffset.UtcNow  // ❌ Direct IO
+    Error = None
+}
+
+// Avoid - hard to test, couples to database
+let getActiveUsers () =
+    use conn = new SqlConnection(connString)
+    conn.Query<User>("SELECT * FROM Users WHERE IsActive = 1")  // ❌ Direct IO
+    |> Seq.toList
+```
+
+### Use testable + convenience function pattern
+
+Provide two versions: one that takes dependencies, one that injects defaults.
+
+```fsharp
+// Testable version - takes all dependencies
+let createWithTimestamp role content timestamp = {
+    Role = role
+    Content = content
+    Timestamp = timestamp
+    Error = None
+}
+
+// Convenience version - injects default IO
+let create role content =
+    createWithTimestamp role content DateTimeOffset.UtcNow
+
+// Testable version - database operation as parameter
+let processUsers (getUsers: unit -> User list) =
+    getUsers()
+    |> List.filter _.IsActive
+    |> List.map _.Email
+
+// Convenience version - injects real database call
+let processUsersFromDb conn =
+    let getUsers () =
+        use conn = new SqlConnection(conn)
+        conn.Query<User>("SELECT * FROM Users") |> Seq.toList
+    processUsers getUsers
+```
+
+**Benefits:**
+- Tests inject controlled values (`createWithTimestamp role content fixedTime`)
+- Production code uses convenient default (`create role content`)
+- Dependencies explicit in testable version (functional purity)
+- Can test business logic without database, network, or file system
+
+### Common IO dependency patterns
+
+| IO Operation | Testable Parameter | Convenience Default |
+|--------------|-------------------|---------------------|
+| Current time | `timestamp: DateTimeOffset` | `DateTimeOffset.UtcNow` |
+| GUID generation | `id: Guid` or `timestamp: DateTimeOffset` | `Guid.CreateVersion7()` |
+| Random numbers | `rng: Random` or `seed: int` | `Random()` |
+| Database query | `query: 'Params -> 'Result` | Dapper/repository call |
+| HTTP request | `httpGet: string -> Async<string>` | `HttpClient.GetStringAsync` |
+| File read | `readFile: string -> string` | `File.ReadAllText` |
+
+### Examples in codebase
+
+**Story/User/Role IDs** (`src/Shared/Domain/Ids.fs`):
+```fsharp
+module StoryId =
+    let createWithTimestamp ts = StoryId(Guid.CreateVersion7(ts))
+    let create () = StoryId(Guid.CreateVersion7())
+```
+
+**Chat messages** (`src/Shared/Domain/Conversation.fs`):
+```fsharp
+module ChatMessage =
+    let createWithTimestamp role content timestamp = { ... }
+    let create role content = createWithTimestamp role content DateTimeOffset.UtcNow
+```
+
+### Naming convention
+
+- Testable version: `functionNameWith<Dependency>` (e.g., `createWithTimestamp`) or just `functionName` if it takes IO as parameters
+- Convenience version: `functionName` (e.g., `create`) or `functionNameFromDb`/`functionNameFromFile` to indicate the IO source
+
+### When to apply this pattern
+
+**Always apply** for:
+- Time/date operations (`DateTimeOffset.UtcNow`, `DateTime.Now`)
+- GUID generation (`Guid.NewGuid()`, `Guid.CreateVersion7()`)
+- Random number generation
+- Network calls (HTTP, gRPC, WebSocket)
+- Database operations (queries, commands)
+- File system access (read, write, exists checks)
+- Environment variables
+
+**Consider skipping** for:
+- Top-level application entry points (Program.fs, controllers)
+- Infrastructure layer code that's inherently about IO
+- Thin wrappers around framework APIs
+
+---
+
 ## 4. Type Annotations
 
 ### Omit when inference is clear

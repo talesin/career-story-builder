@@ -98,6 +98,105 @@ type StoryGenerators =
             }
         } |> Arb.fromGen
 
+### Testing Functions with IO Dependencies
+
+Use the testable versions that accept dependencies as parameters. This applies to time, GUIDs, randomness, database, network, and file system operations.
+
+**Testing with controlled timestamps:**
+
+```fsharp
+test "messages are ordered by timestamp" {
+    let ts1 = DateTimeOffset(2024, 1, 1, 10, 0, 0, TimeSpan.Zero)
+    let ts2 = DateTimeOffset(2024, 1, 1, 10, 5, 0, TimeSpan.Zero)
+
+    let msg1 = ChatMessage.createWithTimestamp User "First" ts1
+    let msg2 = ChatMessage.createWithTimestamp User "Second" ts2
+
+    let state =
+        ConversationState.initial
+        |> ConversationState.addMessage msg2
+        |> ConversationState.addMessage msg1
+
+    let ordered = ConversationState.messagesOrdered state
+    Expect.equal ordered[0].Timestamp ts1 "First message should be first"
+    Expect.equal ordered[1].Timestamp ts2 "Second message should be second"
+}
+```
+
+**Testing with controlled IDs:**
+
+```fsharp
+test "story can be retrieved by its ID" {
+    let ts = DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
+    let storyId = StoryId.createWithTimestamp ts
+
+    let story = {
+        Id = storyId
+        Title = "Test Story"
+        // ... other fields
+    }
+
+    // Test retrieval logic with known ID
+    let retrieved = findStoryById storyId stories
+    Expect.equal retrieved (Some story) "Should find story by ID"
+}
+```
+
+**Testing with database dependencies:**
+
+```fsharp
+test "processes users from injected data source" {
+    // Mock data source - no database needed
+    let mockGetUsers () = [
+        { Id = 1; Name = "Alice"; IsActive = true; Email = "alice@example.com" }
+        { Id = 2; Name = "Bob"; IsActive = false; Email = "bob@example.com" }
+    ]
+
+    let result = processUsers mockGetUsers
+
+    Expect.hasLength result 2 "Should process all users"
+    Expect.contains result "alice@example.com" "Should include Alice"
+}
+```
+
+**Testing with HTTP dependencies:**
+
+```fsharp
+test "handles API response correctly" {
+    // Mock HTTP call - no network needed
+    let mockHttpGet url =
+        async { return """{"status": "success", "data": [1,2,3]}""" }
+
+    let! result = fetchAndProcessData mockHttpGet "http://api.example.com/data"
+
+    match result with
+    | Ok data -> Expect.hasLength data 3 "Should parse response data"
+    | Error e -> failtest $"Expected success, got error: {e}"
+}
+```
+
+**Testing with file system dependencies:**
+
+```fsharp
+test "parses config from injected reader" {
+    // Mock file reader - no file system needed
+    let mockReadFile path =
+        """{"setting1": "value1", "setting2": 42}"""
+
+    let config = loadConfig mockReadFile "/path/to/config.json"
+
+    Expect.equal config.Setting1 "value1" "Should parse setting1"
+    Expect.equal config.Setting2 42 "Should parse setting2"
+}
+```
+
+**When to use convenience vs testable versions:**
+
+- **Tests**: Always use testable versions (`createWithTimestamp`, `processUsers getUsers`)
+- **Production**: Use convenience versions (`create`, `processUsersFromDb`)
+- **Test fixtures**: Use testable versions for predictable, reusable test data
+- **Integration tests**: May use real IO (database, files) but consider test containers
+
 let propertyTests = testList "Story Properties" [
     testProperty "validated stories can be serialized and deserialized" <| fun (story: Story) ->
         match StoryValidator.validate story with
