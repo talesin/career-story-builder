@@ -25,3 +25,4 @@ let configureOptions (opts: JsonSerializerOptions) =
         .AddToJsonSerializerOptions(opts)
     opts.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
     opts.DefaultIgnoreCondition <- JsonIgnoreCondition.WhenWritingNull
+    opts
