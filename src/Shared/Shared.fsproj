@@ -9,10 +9,13 @@
     <Compile Include="Domain/Errors.fs" />
     <Compile Include="Domain/Story.fs" />
     <Compile Include="Domain/Conversation.fs" />
+    <Compile Include="Json.fs" />
     <Compile Include="Dto/Api.fs" />
+    <Compile Include="Dto/Conversation.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FSharp.SystemTextJson" Version="1.*" />
     <PackageReference Include="FSharpPlus" Version="1.*" />
   </ItemGroup>
 

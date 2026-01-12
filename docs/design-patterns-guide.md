@@ -252,15 +252,15 @@ let undo user history =
 
 ## Pattern Selection Guide
 
-| Problem               | Pattern                      | Reference                |
-| --------------------- | ---------------------------- | ------------------------ |
-| Validate input        | Railway-Oriented Programming | design#data-flow         |
-| Transform data        | Pipeline/Composition         | design#data-flow         |
-| Manage state          | State Machine                | design#state-management  |
-| Undo/redo             | Command                      | design#gof-behavioral    |
-| Extend behavior       | Strategy (functions)         | design#gof-behavioral    |
-| Build complex objects | Builder                      | design#gof-creational    |
-| Notify changes        | Observer (events)            | design#gof-behavioral    |
+| Problem               | Pattern                      | Reference               |
+| --------------------- | ---------------------------- | ----------------------- |
+| Validate input        | Railway-Oriented Programming | design#data-flow        |
+| Transform data        | Pipeline/Composition         | design#data-flow        |
+| Manage state          | State Machine                | design#state-management |
+| Undo/redo             | Command                      | design#gof-behavioral   |
+| Extend behavior       | Strategy (functions)         | design#gof-behavioral   |
+| Build complex objects | Builder                      | design#gof-creational   |
+| Notify changes        | Observer (events)            | design#gof-behavioral   |
 
 ## See Also
 

@@ -3,6 +3,7 @@
 ## Key Patterns for Career Story Builder
 
 F# is the primary language for this project. The SAR story domain benefits from:
+
 - **Discriminated unions** for modeling story components
 - **Records** for immutable data structures
 - **Result type** for validation and error handling
@@ -119,6 +120,7 @@ let saveStory (story: Story) : Task<Result<Story, ValidationError list>> = task 
 Reference: `fsharp#style-guide`
 
 Key conventions:
+
 - Use `camelCase` for values and functions
 - Use `PascalCase` for types, modules, and DU cases
 - Prefer `|>` pipeline over nested function calls

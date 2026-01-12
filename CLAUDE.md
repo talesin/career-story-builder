@@ -39,11 +39,13 @@ Career Story Builder is an AI-assisted application for writing SAR-format career
 ## Architecture
 
 ### Communication Model
+
 - Async-first: All API calls and database operations are non-blocking
 - Frontend uses HTTP APIs (JSON) with shared F# DTOs between client/server
 - SignalR available for real-time updates
 
 ### Project Structure (Planned)
+
 - **Shared library**: Domain types, DTOs, validation logic (compiles to both server and WASM)
 - **Server**: ASP.NET Core APIs, authentication, database access
 - **Client**: Bolero MVU components
@@ -79,6 +81,7 @@ All guides reference materials in `~/Documents/Code/_references/`. See `docs/` f
 ## Domain Model
 
 Core domain is SAR stories with:
+
 - Stories linked to Roles and Projects in employment history
 - AI-assisted iterative refinement workflow
 - Per-section and overall quality scoring

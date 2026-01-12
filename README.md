@@ -29,6 +29,7 @@ This async-first approach ensures a smooth user experience even during longer op
 ## Quick Start
 
 **macOS/Linux (bash):**
+
 ```bash
 ./scripts/run.sh        # Start dev server (hot reload)
 ./scripts/test.sh       # Run tests
@@ -36,13 +37,14 @@ This async-first approach ensures a smooth user experience even during longer op
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 ./scripts/run.ps1       # Start dev server (hot reload)
 ./scripts/test.ps1      # Run tests
 ./scripts/run.ps1 stop  # Stop
 ```
 
-Open http://localhost:8001 in your browser.
+Open <http://localhost:8001> in your browser.
 
 ## Documentation
 

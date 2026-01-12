@@ -75,8 +75,10 @@ We will use docker and containers for both local development (running a local se
 - Shared F# Class Library
   Domain types, DTOs, validation logic, and contracts shared between server and client (WASM).
 
-- System.Text.Json
-  Built-in JSON serializer with good WebAssembly support and predictable performance.
+- System.Text.Json + FSharp.SystemTextJson
+  Built-in JSON serializer extended with native F# type support. Discriminated unions
+  serialize as camelCase strings (e.g., `WorkflowStep.Clarification` → `"clarification"`).
+  Configuration in `src/Shared/Json.fs`. See [FSharp.SystemTextJson docs](fsharp-json#union-formats).
 
 ### State and effects
 

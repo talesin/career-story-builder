@@ -7,6 +7,7 @@ This guide establishes consistent coding patterns for F# applications. The goal 
 **Pragmatic FP over dogmatic purity.** We have a clear preference for functional programming—pipelines, immutability, pure functions, and algebraic data types. However, F# is a multi-paradigm language, and we embrace that when it improves clarity.
 
 If a functional approach becomes verbose or unwieldy, consider light OO techniques:
+
 - Adding `.Value` members to single-case DUs for convenient extraction
 - Using instance methods when they read more naturally than module functions
 - Defining classes when integrating with .NET frameworks that expect them
@@ -650,12 +651,14 @@ customers |> List.map _.Id.Value
 ```
 
 **Why `.Value` over module functions or static `Extract`:**
+
 - **Discoverable**: IntelliSense shows it immediately
 - **Concise**: `x.Value` vs `EmailAddress.value x` or `extract x`
 - **Chainable**: `customer.Email.Value.ToLower()`
 - **Familiar**: Consistent with .NET conventions
 
 **Keep module functions for:**
+
 - Factory methods with validation (`EmailAddress.tryCreate`)
 - Pipeline-friendly extraction when needed (`|> List.map EmailAddress.value`)
 - Additional domain operations (`EmailAddress.domain`)
@@ -960,12 +963,12 @@ type BillingService(deps: Billing.BillingDeps) =
 
 #### Guidelines
 
-| Guideline | Rationale |
-|-----------|-----------|
-| Dependencies as first parameters | Enables partial application at composition root |
-| Wrapper methods are one-liners | If you're writing logic in the class, it belongs in the module |
-| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing |
-| Create wrapper only at framework boundary | Not every module needs a wrapper class |
+| Guideline                                 | Rationale                                                      |
+| ----------------------------------------- | -------------------------------------------------------------- |
+| Dependencies as first parameters          | Enables partial application at composition root                |
+| Wrapper methods are one-liners            | If you're writing logic in the class, it belongs in the module |
+| Prefer capability records over interfaces | More F#-idiomatic, easier to construct for testing             |
+| Create wrapper only at framework boundary | Not every module needs a wrapper class                         |
 
 #### When to Apply
 
