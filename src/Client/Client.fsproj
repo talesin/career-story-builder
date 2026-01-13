@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <ItemGroup>
+    <Compile Include="Model.fs" />
+    <Compile Include="Update.fs" />
+    <Compile Include="Views/Home.fs" />
     <Compile Include="Main.fs" />
+    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
