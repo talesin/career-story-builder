@@ -2,7 +2,6 @@ module CareerStoryBuilder.Client.Views.Wizard.InitialCapture
 
 open System
 open Bolero.Html
-open Microsoft.AspNetCore.Components
 open CareerStoryBuilder.Client
 
 /// Minimum recommended character count for guidance (not blocking).
@@ -20,9 +19,6 @@ let charCount (text: string) =
 /// Validate content is not empty/whitespace only.
 let isValidContent (content: string) =
     not (String.IsNullOrWhiteSpace content)
-
-/// Extract string value from change event.
-let inline inputValue (e: ChangeEventArgs) = unbox<string> e.Value
 
 /// Initial capture view - textarea for free-form story description.
 let view (content: string) (isProcessing: bool) dispatch =
