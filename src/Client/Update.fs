@@ -1,5 +1,6 @@
 module CareerStoryBuilder.Client.Update
 
+open System
 open Elmish
 open CareerStoryBuilder.Domain
 
@@ -7,8 +8,8 @@ open CareerStoryBuilder.Domain
 let update message model =
     match message with
     | SetPage Home ->
-        // Clear conversation when returning home
-        { model with Page = Home; Conversation = None }, Cmd.none
+        // Clear conversation and capture content when returning home
+        { model with Page = Home; Conversation = None; InitialCaptureContent = "" }, Cmd.none
 
     | SetPage StoryWizard ->
         // Preserve existing conversation or initialize new one
@@ -16,5 +17,28 @@ let update message model =
         { model with Page = StoryWizard; Conversation = Some conv }, Cmd.none
 
     | StartNewStory ->
-        // Always start fresh conversation
-        { model with Page = StoryWizard; Conversation = Some ConversationState.initial }, Cmd.none
+        // Always start fresh conversation and clear capture content
+        { model with
+            Page = StoryWizard
+            Conversation = Some ConversationState.initial
+            InitialCaptureContent = "" }, Cmd.none
+
+    | SetInitialCaptureContent content ->
+        // Update textarea content
+        { model with InitialCaptureContent = content }, Cmd.none
+
+    | SubmitInitialCapture ->
+        // Validate content - do nothing if empty/whitespace
+        if String.IsNullOrWhiteSpace model.InitialCaptureContent then
+            model, Cmd.none
+        else
+            // Add user message to conversation and advance to Clarification
+            let userMessage = ChatMessage.create User model.InitialCaptureContent
+            let updatedConv =
+                model.Conversation
+                |> Option.defaultValue ConversationState.initial
+                |> ConversationState.addMessage userMessage
+                |> ConversationState.setStep Clarification
+            { model with
+                Conversation = Some updatedConv
+                InitialCaptureContent = "" }, Cmd.none

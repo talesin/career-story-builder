@@ -5,6 +5,7 @@ open Bolero
 open Bolero.Html
 open CareerStoryBuilder.Client
 open CareerStoryBuilder.Client.Views
+open CareerStoryBuilder.Client.Views.Wizard
 open CareerStoryBuilder.Domain
 
 /// Router for client-side navigation.
@@ -20,8 +21,26 @@ let workflowStepName = function
 /// All workflow steps in order.
 let allWorkflowSteps = [ InitialCapture; Clarification; Refinement; Generation ]
 
+/// Render the appropriate wizard step content based on current step.
+let wizardStepContent model dispatch =
+    match model.Conversation |> Option.map _.CurrentStep with
+    | Some InitialCapture ->
+        let isProcessing =
+            model.Conversation
+            |> Option.map _.IsProcessing
+            |> Option.defaultValue false
+        InitialCapture.view model.InitialCaptureContent isProcessing dispatch
+    | Some Clarification ->
+        p { "AI clarification coming in Phase 1A.4..." }
+    | Some Refinement ->
+        p { "Story refinement coming in Phase 1A.5..." }
+    | Some Generation ->
+        p { "Story generation coming in Phase 1A.6..." }
+    | None ->
+        p { "No conversation state." }
+
 /// Story wizard shell view with workflow step indicator.
-let wizardShellView model _dispatch =
+let wizardShellView model dispatch =
     div {
         attr.``class`` "container wizard-shell"
 
@@ -50,10 +69,10 @@ let wizardShellView model _dispatch =
                 }
         }
 
-        // Placeholder for wizard content (Phase 1A.3+)
+        // Wizard step content
         div {
             attr.``class`` "wizard-content"
-            p { "Story creation wizard coming in Phase 1A.3..." }
+            wizardStepContent model dispatch
         }
     }
 

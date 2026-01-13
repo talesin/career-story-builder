@@ -62,3 +62,77 @@ module UpdateBehaviorTests =
     let ``Conversation has no error initially``() =
         let model, _ = Update.update StartNewStory Model.initial
         Assert.True(model.Conversation.Value.LastError.IsNone)
+
+/// Tests for InitialCapture helper functions
+module InitialCaptureViewTests =
+    open CareerStoryBuilder.Client.Views.Wizard.InitialCapture
+
+    [<Fact>]
+    let ``wordCount returns 0 for empty string``() =
+        Assert.Equal(0, wordCount "")
+
+    [<Fact>]
+    let ``wordCount returns 0 for whitespace only``() =
+        Assert.Equal(0, wordCount "   \n\t  ")
+
+    [<Fact>]
+    let ``wordCount counts words correctly``() =
+        Assert.Equal(4, wordCount "one two three four")
+
+    [<Fact>]
+    let ``wordCount handles multiple spaces``() =
+        Assert.Equal(3, wordCount "one   two   three")
+
+    [<Fact>]
+    let ``wordCount handles newlines``() =
+        Assert.Equal(3, wordCount "one\ntwo\nthree")
+
+    [<Fact>]
+    let ``charCount returns 0 for empty string``() =
+        Assert.Equal(0, charCount "")
+
+    [<Fact>]
+    let ``charCount returns correct count``() =
+        Assert.Equal(5, charCount "hello")
+
+    [<Fact>]
+    let ``charCount includes spaces``() =
+        Assert.Equal(11, charCount "hello world")
+
+    [<Fact>]
+    let ``isValidContent returns false for empty string``() =
+        Assert.False(isValidContent "")
+
+    [<Fact>]
+    let ``isValidContent returns false for whitespace only``() =
+        Assert.False(isValidContent "   \n\t  ")
+
+    [<Fact>]
+    let ``isValidContent returns true for non-empty content``() =
+        Assert.True(isValidContent "My story")
+
+    [<Fact>]
+    let ``isValidContent returns true for content with leading whitespace``() =
+        Assert.True(isValidContent "  My story")
+
+    [<Fact>]
+    let ``InitialCapture view can be called with empty content``() =
+        let dispatch _ = ()
+        let result = view "" false dispatch
+        Assert.NotNull(box result)
+
+    [<Fact>]
+    let ``InitialCapture view can be called with content``() =
+        let dispatch _ = ()
+        let result = view "My story content" false dispatch
+        Assert.NotNull(box result)
+
+    [<Fact>]
+    let ``InitialCapture view can be called when processing``() =
+        let dispatch _ = ()
+        let result = view "content" true dispatch
+        Assert.NotNull(box result)
+
+    [<Fact>]
+    let ``recommendedMinLength is 100``() =
+        Assert.Equal(100, recommendedMinLength)

@@ -16,7 +16,7 @@ This plan details the implementation approach for the Career Story Builder appli
 
 - [x] 1A.1 - Domain Types & API Contract
 - [x] 1A.2 - Start New Story (ADD-01)
-- [ ] 1A.3 - Initial Story Capture (ADD-05)
+- [x] 1A.3 - Initial Story Capture (ADD-05)
 - [ ] 1A.4 - AI-Guided Clarification (ADD-06)
 - [ ] 1A.5 - Iterative Refinement (ADD-08)
 - [ ] 1A.6 - AI-Assisted Story Generation (ADD-10)
