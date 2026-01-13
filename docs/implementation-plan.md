@@ -15,7 +15,7 @@ This plan details the implementation approach for the Career Story Builder appli
 ### Phase 1A: Core AI Workflow (Prototype)
 
 - [x] 1A.1 - Domain Types & API Contract
-- [ ] 1A.2 - Start New Story (ADD-01)
+- [x] 1A.2 - Start New Story (ADD-01)
 - [ ] 1A.3 - Initial Story Capture (ADD-05)
 - [ ] 1A.4 - AI-Guided Clarification (ADD-06)
 - [ ] 1A.5 - Iterative Refinement (ADD-08)
