@@ -12,12 +12,15 @@ type Page =
 type Model = {
     Page: Page
     Conversation: ConversationState option
+    InitialCaptureContent: string
 }
 
 /// Application messages.
 type Message =
     | SetPage of Page
     | StartNewStory
+    | SetInitialCaptureContent of string
+    | SubmitInitialCapture
 
 module Model =
-    let initial = { Page = Home; Conversation = None }
+    let initial = { Page = Home; Conversation = None; InitialCaptureContent = "" }
